@@ -12,6 +12,7 @@
 
 
 # specific to the given folder structure
+<<<<<<< HEAD
 .Outputs/
 .Outputs/Data/
 Outputs/Data/
@@ -35,3 +36,7 @@ Outputs/Data/
 **/tmp/
 **/spam.log
 
+=======
+.Data/
+.Output/
+>>>>>>> fixed .gitignore to remove Output/ and add Example/
