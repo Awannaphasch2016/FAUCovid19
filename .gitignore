@@ -11,7 +11,5 @@
 **/.idea/workspace.xml
 
 # specific to the given folder structure
-Data
-Examples
-
-#
+.Data/
+.Output/
