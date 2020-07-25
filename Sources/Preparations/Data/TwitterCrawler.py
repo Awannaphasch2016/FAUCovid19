@@ -177,6 +177,7 @@ class TwitterCrawler(object):
 
         except Exception as e:
             if str(e) != 'responds are empty':
+                print(e)
                 raise NotImplementedError(
                     f"exception occur in {self.run.__name__}")
             else:
