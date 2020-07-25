@@ -1,11 +1,13 @@
 import sys
 
-from Utilities.declared_typing import Crawler_type
 
 sys.path.append("C:/Users/Anak/PycharmProjects/Covid19CookieCutter")
 sys.path.append("C:/Users/Anak/PycharmProjects/Covid19CookieCutter/Sources")
 
+from global_parameters import ALL_TWITTER_KEYWORDS
+
 import datetime
+from Utilities.declared_typing import Crawler_type
 from typing import Callable
 from typing import List
 from typing import Optional
@@ -31,7 +33,7 @@ from Utilities.declared_typing import Tags
 from Utilities.declared_typing import TwitterCollection
 from global_parameters import ALL_REDDIT_COLLETION_NAMES
 from global_parameters import ALL_REDDIT_TAGS
-from global_parameters import ALL_SEARCH_TYPES
+from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import KNOWN_ERROR
 
 
@@ -105,7 +107,9 @@ def get_keywords_collections(crawler_type: str):
         hashtags = ['#coronavirus', '#coronavirusoutbreak',
                     '#coronavirusPandemic', '#covid19', '#covid_19',
                     '#epitwitter', '#ihavecorona']
-        corona_keywords = ['corona', 'covid']
+        # corona_keywords = ['corona', 'covid']
+        # corona_keywords = ALL_TWITTER_KEYWORDS
+        corona_keywords = ['Covid']
         state_keywords = ['alabama', 'alaska', 'arizona', 'arkansas',
                           'california',
                           'colorado', 'connecticut', 'delaware', 'florida',
@@ -135,7 +139,7 @@ def twitter_crawler_condition(
     hashtags, corona_keywords, state_keywords = get_keywords_collections(
         'twitter')
 
-    day_interval: int = 10
+    day_interval: int = 1
     frequency: Frequency = 'day'
 
     if running_conditions['collection_name'] == 'twitter_tweet':
@@ -313,9 +317,9 @@ def select_crawler_condition(
             f'selected crawler_class == {running_conditions["crawler_option"]} is not supported')
 
 
-def get_reddit_running_conditions(tags: Tags) -> Union[
+def get_reddit_running_conditions(tags: Tags, crawler_option: Crawler_type) -> Union[
     List, List[RunningConditionsKeyValue]]:
-    crawler_option = 'reddit'
+
     from itertools import product
 
     def _get_tag_value(tags: Tags):
@@ -333,7 +337,7 @@ def get_reddit_running_conditions(tags: Tags) -> Union[
     all_collection_name = ALL_REDDIT_COLLETION_NAMES if tags is None else [
         'corona_general', 'corona_countries',
         'corona_regions', 'corona_states_with_tag']
-    all_search_type = ALL_SEARCH_TYPES
+    all_search_type = ALL_REDDIT_SEARCH_TYPES
 
     all_running_conditions_key_value: RunningConditionsKeyValue = []
 
@@ -351,7 +355,7 @@ def get_reddit_running_conditions(tags: Tags) -> Union[
             (condition_keys, running_condition))
 
     # all_running_conditions_key_value = [all_running_conditions_key_value[8]]
-    #TMP
+    #TMP why do I have the below paragraph here?
     selected_running_conditions = []
     for i in all_running_conditions_key_value:
         if i[0][1] == 'corona_states_with_tag':
@@ -361,43 +365,52 @@ def get_reddit_running_conditions(tags: Tags) -> Union[
     return all_running_conditions_key_value
 
 
-def get_twitter_running_conditions() -> Union[List, List[RunningConditions]]:
-    cralwer_option = 'twitter'
+def get_twitter_running_conditions(tags: Tags,crawler_option: Crawler_type) -> Union[List, List[RunningConditions]]:
 
     one_running_conditions: RunningConditions = {
-        'crawler_option': cralwer_option,
+        'crawler_option': crawler_option,
         'collection_name': 'twitter_tweet',
         'respond_type': 'data_tweet',
         'search_type': 'data_tweet',
-        'sort': 'asc'
+        'sort': 'asc',
+        'tag': tags,
     }
     two_running_conditions: RunningConditions = {
-        'crawler_option': cralwer_option,
+        'crawler_option': crawler_option,
         'collection_name': 'twitter_geo',
         'respond_type': 'data_geo',
         'search_type': 'data_geo',
-        'sort': 'asc'
+        'sort': 'asc',
+        'tag': tags
     }
+
     all_running_conditions = []
     all_running_conditions.append(one_running_conditions)
     # all_running_conditions.append(two_running_conditions)
 
+    tmp = []
+    for i in all_running_conditions:
+        tag = i['tag']
+        collection_name = i['collection_name']
+        search_type = i['search_type']
+        tmp.append(([tag, collection_name, search_type], i))
+    all_running_conditions = tmp
+
     return all_running_conditions
 
 
-def get_crawler_running_conditions(tags: Tags, cralwer_type: Crawler_type):
-    if cralwer_type == 'reddit':
-        return get_reddit_running_conditions(tags)
-    elif cralwer_type == 'twitter':
-        raise NotImplementedError()
-        return get_twitter_running_conditions()
+def get_crawler_running_conditions(tags: Tags, crawler_type: Crawler_type):
+
+    if crawler_type == 'reddit':
+        return get_reddit_running_conditions(tags, crawler_type)
+    elif crawler_type == 'twitter':
+        return get_twitter_running_conditions(tags, crawler_type)
     else:
         raise ValueError('you must select between reddit or twitter crawler ')
 
 
 
 def run_all_reddit_conditions(tags: Tags, timestamp: datetime.datetime, crawler_type: Crawler_type):
-    print('>>> start running all reddit conditions... <<<')
 
     total_returned_data, total_missing_data = 0, 0
 
@@ -442,12 +455,48 @@ def run_all_reddit_conditions(tags: Tags, timestamp: datetime.datetime, crawler_
         f" || total_returned_data = {total_returned_data} || total_missing_data = {total_missing_data}")
 
 
+def run_all_twitter_conditions(tags: Tags, timestamp: datetime.datetime,
+                                  crawler_type: Crawler_type):
+
+    total_returned_data, _ = 0, 0
+
+    all_running_conditions = get_crawler_running_conditions(tags,
+                                                            crawler_type)
+
+    for (i, (condition_keys, running_conditions)) in enumerate(
+            all_running_conditions):
+        check_running_conditions(running_conditions)
+
+        run_crawler_func, crawler_condition = select_crawler_condition(
+            running_conditions=running_conditions, timestamp=timestamp)
+        try:
+
+            total_returned_data_per_run = run_crawler(
+                run_crawler_func, crawler_condition)
+            total_returned_data += total_returned_data_per_run
+            print()
+        except Exception as e:
+            if str(e) not in KNOWN_ERROR:
+
+                raise NotImplementedError(
+                    f"unknown error occur in {run_all_conditions.__name__} ")
+
+            else:
+                print(f'!!!! The following error occurs = {str(e)} in {run_all_conditions.__name__}!!!')
+
+    print(
+        f" || total_returned_data = {total_returned_data}")
 
 
 def run_all_conditions(tags: Tags, crawler_type: Crawler_type):
     timestamp = datetime.datetime.now()
-    run_all_reddit_conditions(tags, timestamp, crawler_type)
-    # run_all_twitter_conditions(tags)
+    print(f'>>> start running all {crawler_type} conditions... <<<')
+    if crawler_type == 'reddit':
+        run_all_reddit_conditions(tags, timestamp, crawler_type)
+    elif crawler_type == 'twitter':
+        run_all_twitter_conditions(tags, timestamp, crawler_type)
+    else:
+        raise ValueError('your selected crawler_type is not implementd')
 
 
 @click.command()

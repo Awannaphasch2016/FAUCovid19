@@ -146,6 +146,14 @@ class RedditCrawler:
     def get_responds(self,
                      running_constraints: RedditRunningConstraints) -> Json:
 
+        def only_full_day_of_data_will_be_loaded(before: int,
+                                                            after: int):
+            '''exclude data from today aka datetime.datetime.now().day'''
+            raise NotImplementedError
+
+        only_full_day_of_data_will_be_loaded(
+            running_constraints['before'], running_constraints['after'])
+
         endpoint_url = self.get_url(running_constraints)
 
         # HERE try to catch json error
@@ -363,12 +371,11 @@ class RedditCrawler:
         # HERE
         #  >this only works for day ( don't use max_after, use max_after of the same frequency
 
-        next_before: int = max_after_with_specified_frequency if after + 1 >=max_after_with_specified_frequency else after + 1
+        next_before: int = max_after_with_specified_frequency if after + 1 >= max_after_with_specified_frequency else after + 1
         next_after: int = max_after_with_specified_frequency if next_before + next_interval >= max_after_with_specified_frequency else next_before + next_interval  # type: ignore
 
         # next_interval: int = next_before - next_after
         next_interval: int = next_after - next_before
-
 
         return next_before, next_after, next_interval
 
@@ -496,11 +503,13 @@ def run_reddit_crawler(
 
     request_timestamp_str = get_full_datetime_str(request_timestamp)
 
-    max_after_delta = _get_epoch_datetime_subtract_timedelta(datetime.datetime.now(), 'day', max_after )
+    max_after_delta = _get_epoch_datetime_subtract_timedelta(
+        datetime.datetime.now(), 'day', max_after)
     # max_after_delta = _get_epoch_datetime_subtract_timedelta(datetime.datetime.now(), frequency, max_after )
     time_diff = datetime.datetime.now() - max_after_delta
 
-    max_after_with_specified_frequency = _convert_timedelta_to_specified_frequency(time_diff, frequency)
+    max_after_with_specified_frequency = _convert_timedelta_to_specified_frequency(
+        time_diff, frequency)
 
     # optimize can I optimize while with do-while?
     # while after <= max_after:

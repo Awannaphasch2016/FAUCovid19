@@ -11,13 +11,15 @@ def get_full_datetime_str(timestamp: datetime.datetime)-> str:
 
     return  timestamp
 
-def get_saved_file_path(timestamp: datetime.datetime,
+def get_saved_file_path(date_since: datetime.datetime,
+                        date_until: datetime.datetime,
                         path_name: pathlib.Path) -> pathlib.Path:
 
-    timestamp = get_full_datetime_str(timestamp)
+    date_since = get_full_datetime_str(date_since)
+    date_until = get_full_datetime_str(date_until)
 
     saved_file = pathlib.Path(
-        path_name) / f'after_date={str(timestamp)}.pickle'
+        path_name) / f'after_date={date_since}_to_{date_until}.pickle'
     return saved_file
 
 def save_to_file(content: Any,
