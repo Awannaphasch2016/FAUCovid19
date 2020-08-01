@@ -12,8 +12,16 @@
 
 
 # specific to the given folder structure
-.Data/
 .Outputs/
+.Outputs/Data/
+Outputs/Data/
+/Outputs/Data/
+.Outputs/TwitterCrawler/
+.Outputs/ZipFiles/
+.Outputs/Report/
+.Outputs/Log
+
+.Data/
 .history/
 .vscode/
 .history/
@@ -21,4 +29,5 @@
 .mypy_cache
 .idea/
 .__pycache__
+
 

@@ -37,3 +37,5 @@ ALL_TWITTER_KEYWORDS: List = ['Coronavirus', 'Corona',
 # ALL_TWITTER_HASHTAGS = None
 ALL_TWITTER_COLLETION_NAMES: List = ['twitter_tweet', 'twitter_geo']
 ALL_TWITTER_SEARCH_TYPES = ['data_tweet', 'data_geo']
+
+# reference: https://github.com/daiquocnguyen/ConvKB
