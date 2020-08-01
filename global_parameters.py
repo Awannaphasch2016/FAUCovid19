@@ -3,7 +3,7 @@ import pathlib
 from typing import List
 
 BASE_DIR: pathlib.Path = pathlib.Path(
-    os.path.dirname(os.path.realpath(__file__)))
+os.path.dirname(os.path.realpath(__file__)))
 # General
 ERROR_1 = 'responds are empty'
 ERROR_2 = 'Expecting value: line 1 column 1 (char 0)'

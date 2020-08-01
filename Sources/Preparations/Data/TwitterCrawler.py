@@ -283,7 +283,7 @@ def run_twitter_crawler(
     frequency = twitter_crawler_condition['frequency']
 
     # max_after = 100
-    max_after = 3
+    max_after = 5
     if frequency == 'day':
         interval_collection: List[int] = [days_to_subtract for days_to_subtract
                                           in list(range(max_after))[::interval]]
@@ -313,7 +313,7 @@ def run_twitter_crawler(
                 break
             else:
                 responds_content, num_returned_data= returned_data_from_twitter_run
-                saved_file = get_saved_file_path(twitter_crawler.time_since,
+                saved_file = get_saved_file_path(twitter_crawler.time_since, twitter_crawler.time_until,
                                                  path_name=BASE_DIR / f'Outputs/Data/{twitter_crawler.crawler_name}/{twitter_crawler.collection_name}/{twitter_crawler.search_type}/{twitter_crawler.respond_type}')
                 save_to_file(responds_content,
                              saved_file)

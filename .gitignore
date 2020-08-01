@@ -10,6 +10,8 @@
 **/.idea/tasks.xml
 **/.idea/workspace.xml
 
+
 # specific to the given folder structure
 .Data/
 .Output/
+.history/

@@ -1,0 +1,11 @@
+git commit
+
+create 2 branches
+Goal: make changes in imaging_labetop and pull/merge (don't knwo the riht verbs to use) to labtop
+    imaging_labtop
+    labtop
+    
+git clone
+==============
+
+first change in branch=laptop

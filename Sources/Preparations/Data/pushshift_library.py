@@ -1,8 +1,4 @@
-import sys
-
-
-sys.path.append("C:/Users/Anak/PycharmProjects/Covid19CookieCutter")
-sys.path.append("C:/Users/Anak/PycharmProjects/Covid19CookieCutter/Sources")
+from global_parameters import BASE_DIR
 
 from global_parameters import ALL_TWITTER_KEYWORDS
 
@@ -35,7 +31,6 @@ from global_parameters import ALL_REDDIT_COLLETION_NAMES
 from global_parameters import ALL_REDDIT_TAGS
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import KNOWN_ERROR
-
 
 def _get_running_conditions(crawler_option: str,
                             collection_name: str,
@@ -405,9 +400,9 @@ def get_crawler_running_conditions(tags: Tags, crawler_type: Crawler_type):
         return get_reddit_running_conditions(tags, crawler_type)
     elif crawler_type == 'twitter':
         return get_twitter_running_conditions(tags, crawler_type)
+
     else:
         raise ValueError('you must select between reddit or twitter crawler ')
-
 
 
 def run_all_reddit_conditions(tags: Tags, timestamp: datetime.datetime, crawler_type: Crawler_type):
