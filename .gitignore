@@ -13,5 +13,12 @@
 
 # specific to the given folder structure
 .Data/
-.Output/
+.Outputs/
 .history/
+.vscode/
+.history/
+.pytest_cache
+.mypy_cache
+.idea/
+.__pycache__
+
