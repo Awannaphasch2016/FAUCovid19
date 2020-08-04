@@ -19,10 +19,9 @@ ALL_REDDIT_SEARCH_TYPES = ['submission', 'comment']
 # MAX_AFTER = 166
 MAX_AFTER = 30
 
-# Twitter
-# Note:
-#  >Keywords are copied from 'Tracking Social Media Discourse About the COVID-19 Pandemic: Developement of a Public Coronavirus  Twitter Dataset'
-#  >github:  https://github.com/echen102/COVID-19-TweetIDs/blob/master/keywords.txt
+# Twitter Note:
+#  >Keywords are copied from 'Tracking Social Media Discourse About the COVID-19 Pandemic: Developement of a Public Coronavirus  Twitter Dataset' github:
+#  >https://github.com/echen102/COVID-19-TweetIDs/blob/master/keywords.txt
 
 ALL_TWITTER_KEYWORDS: List = ['Coronavirus', 'Corona',
                               'Covid-19', 'Corona virus', 'Covid19',
@@ -38,4 +37,19 @@ ALL_TWITTER_KEYWORDS: List = ['Coronavirus', 'Corona',
 ALL_TWITTER_COLLETION_NAMES: List = ['twitter_tweet', 'twitter_geo']
 ALL_TWITTER_SEARCH_TYPES = ['data_tweet', 'data_geo']
 
-# reference: https://github.com/daiquocnguyen/ConvKB
+
+# this is new checkpoint Anak 'Wannaphaschaiyong'
+# this is not in checkpoint 
+
+
+
+
+
+
+
+
+
+
+
+
+

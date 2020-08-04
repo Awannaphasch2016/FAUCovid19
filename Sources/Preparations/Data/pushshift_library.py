@@ -104,7 +104,27 @@ def get_keywords_collections(crawler_type: str):
                     '#epitwitter', '#ihavecorona']
         # corona_keywords = ['corona', 'covid']
         # corona_keywords = ALL_TWITTER_KEYWORDS
-        corona_keywords = ['Covid']
+        # corona_keywords = ['Covid', 'corona']
+
+        # Note: quick fixed => to fixed i need to add option to accepts tags (currently I only accept keyword) then I need to create folder name that matches tag
+
+        # # covid keywords
+        # corona_keywords = ['covid', 'corona', 'sarscowv2']
+
+        # work from home keyword
+        # corona_keywords = ['remote work', 'workonline', 'remote work', 'online learning', 'distance learning']
+
+        # social distance keyword
+        # corona_keywords = ['social distance', 'social distancing']
+        # corona_keywords = ['social distance']
+        #
+        # lockdown keyword
+        corona_keywords = [ 'quarantine', 'isolation', 'quarantining', 'lockdown', 'isolate']
+        #
+        # # reopen keyword
+        # corona_keywords = ['reopening', 'reopen']
+
+
         state_keywords = ['alabama', 'alaska', 'arizona', 'arkansas',
                           'california',
                           'colorado', 'connecticut', 'delaware', 'florida',
@@ -445,7 +465,7 @@ def run_all_reddit_conditions(tags: Tags, timestamp: datetime.datetime, crawler_
                     print(
                         f' || skip the the current condition = ({condition_keys_str}) ==> start next running condition = {next_condition_keys_str} ')
                     print()
-
+    #
     print(
         f" || total_returned_data = {total_returned_data} || total_missing_data = {total_missing_data}")
 

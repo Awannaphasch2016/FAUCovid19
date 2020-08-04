@@ -124,7 +124,11 @@ class TwitterCrawler(object):
 
         else:
             raise NotImplementedError
-        query = ' Or '.join(self.collection) if len(
+        # query = ' Or '.join(self.collection) if len(
+        #     self.collection) > 0 else self.collection
+
+        # NOTE: My fix
+        query = ' OR '.join(self.collection) if len(
             self.collection) > 0 else self.collection
 
         if size is None:
@@ -283,7 +287,8 @@ def run_twitter_crawler(
     frequency = twitter_crawler_condition['frequency']
 
     # max_after = 100
-    max_after = 5
+    # max_after = 5
+    max_after = 10
     if frequency == 'day':
         interval_collection: List[int] = [days_to_subtract for days_to_subtract
                                           in list(range(max_after))[::interval]]
@@ -295,7 +300,7 @@ def run_twitter_crawler(
     # interval_range = list(
     #     zip(interval_collection[:-1], interval_collection[1:]))
 
-    for ind, (before, after) in enumerate(interval_range):
+    for ind, (before, after) in enumerate(interval_range[:3]):
         twitter_crawler = crawler_class(
             twitter_collection_class=twitter_collection_class,
             respond_type=respond_type,
