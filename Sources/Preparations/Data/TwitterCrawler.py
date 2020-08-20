@@ -9,6 +9,7 @@ from typing import Type
 
 import GetOldTweets3 as got  # type: ignore
 from typing_extensions import TypedDict
+from Sources.Preparations.Features.sentiment_analysis import get_sentiment
 
 from Test_dir.test_conditions import check_response_keys
 from Utilities import get_saved_file_path
@@ -22,10 +23,14 @@ from Utilities.declared_typing import TwitterData
 from Utilities.declared_typing import TwitterMetadata
 from Utilities.declared_typing import TwitterRunningConstraints
 from Utilities.declared_typing import Url
+from Utilities.declared_typing import Tags
+from Utilities.declared_typing import Query
 from Utilities.declared_typing import epoch_datetime
 from Utilities.ensure_type import ensure_epoch_datetime
+from Utilities.ensure_type import only_download_full_day
 # from Utilities.ensure_type import ensure_json
 from global_parameters import BASE_DIR
+from global_parameters import MAX_AFTER
 
 
 # Json = Dict
@@ -37,23 +42,36 @@ class TwitterCrawler(object):
                  respond_type: str,
                  search_type: str,
                  frequency: Frequency,
-                 verbose: int):
+                #  aspect: str,
+                 verbose: int,
+                 ):
 
         self.crawler_name = 'TwitterCrawler'
         self.verbose = verbose
-        self.prepare_crawler(twitter_collection_class, respond_type,
-                             search_type, frequency)
+        self.prepare_crawler(twitter_collection_class,
+                             respond_type,
+                             search_type,
+                             frequency,
+                            #  aspect,
+                             )
 
     def prepare_crawler(self,
                         twitter_collection_class: TwitterCollection,
                         respond_type: str,
                         search_type: str,
-                        frequency: Frequency):
+                        frequency: Frequency,
+                        # aspect: str,
+                        ):
         self.respond_type = respond_type
         self.search_type = search_type
         self.frequency = frequency
         self.collection_name = twitter_collection_class['name']
         self.collection = twitter_collection_class['collection']
+
+        # self.aspect = aspect 
+        self.aspect = self.collection['aspect'] 
+        self.query = self.collection['query']
+
 
     def get_geo_data(self,
                      running_constraints: TwitterRunningConstraints,
@@ -66,7 +84,7 @@ class TwitterCrawler(object):
 
         res = _get_twitter_data(res, running_constraints, self)
         res = _get_twitter_aggs(res, running_constraints, self)
-        res = _get_twitter_metadata(res, running_constraints, self)
+        res = _get_twitter_metadata(res, running_constraints, self, self.aspect, self.query)
 
         check_response_keys(res)
 
@@ -105,29 +123,14 @@ class TwitterCrawler(object):
         fields = running_constraints['fields']
         sort = running_constraints['sort']
 
-        if self.frequency == 'day':
-            def only_full_day_of_data_will_be_loaded(before: int,
-                                                     after: int):
-                '''exclude data from today aka datetime.datetime.now().day'''
-                if before == 0:
-                    print(
-                        '!!! exclude data from today aka datetime.datetime.now().day => to make sure that only full day of data will be loaded !!!')
-                    return False
-                else:
-                    return True
+        only_download_full_day(self.frequency, before, after)
 
-            if not only_full_day_of_data_will_be_loaded(before, after):
-                return
-
-            date_since = str(self.time_since)
-            date_until = str(self.time_until)
-
-        else:
-            raise NotImplementedError
-        # query = ' Or '.join(self.collection) if len(
-        #     self.collection) > 0 else self.collection
+        date_since = str(self.time_since) 
+        date_until = str(self.time_until)
 
         # NOTE: My fix
+        # query = ' AND '.join(self.collection) if len(
+        #     self.collection) > 0 else self.collection
         query = ' OR '.join(self.collection) if len(
             self.collection) > 0 else self.collection
 
@@ -237,8 +240,8 @@ class TwitterCrawler(object):
         else:
             raise NotImplementedError
 
-        self.current_condition_str = f'collection_name = {self.collection_name} || search_type = {self.search_type} ||' \
-                                     f' respond_type = {self.respond_type}|| {after} <= x < {before} || {str(self.time_since)} to {str(self.time_until)}'
+        self.current_condition_str = f'aspect = {self.aspect} -> query = {self.query} || collection_name = {self.collection_name} || search_type = {self.search_type} || respond_type = {self.respond_type}' \
+                                     f'|| frequency = {self.frequency} || {after} <= x < {before} || {str(self.time_since)} to {str(self.time_until)}'
 
         if self.verbose:
             print(
@@ -250,6 +253,7 @@ class TwitterCrawler(object):
         raise NotImplementedError
 
 
+# note: In constrast to TwitterCrawlerCondition, RedditCrawlerCondition need aspect because aspect is used to group 'subreddit' into collection to reflect aspect sentiment
 class TwitterCrawlerCondition(TypedDict):
     crawler_class: Type[TwitterCrawler]
     collection_class: TwitterCollection
@@ -258,6 +262,8 @@ class TwitterCrawlerCondition(TypedDict):
     respond_type: str
     search_type: str
     frequency: str
+    aspect: Optional[str]
+    max_after: int
 
 
 def run_twitter_crawler(
@@ -270,7 +276,7 @@ def run_twitter_crawler(
 
     def print_twitter_cralwer_condition():
         print('twitter_crawler_condition = ')
-        for i,j in twitter_crawler_condition.items():
+        for i, j in twitter_crawler_condition.items():
             print(f'    {i}: {j}')
 
     print_twitter_cralwer_condition()
@@ -285,10 +291,9 @@ def run_twitter_crawler(
     respond_type = twitter_crawler_condition['respond_type']
     search_type = twitter_crawler_condition['search_type']
     frequency = twitter_crawler_condition['frequency']
+    max_after = twitter_crawler_condition['max_after']
+    # aspect = twitter_crawler_condition['collection_class']['collection']['aspect']
 
-    # max_after = 100
-    # max_after = 5
-    max_after = 10
     if frequency == 'day':
         interval_collection: List[int] = [days_to_subtract for days_to_subtract
                                           in list(range(max_after))[::interval]]
@@ -306,6 +311,7 @@ def run_twitter_crawler(
             respond_type=respond_type,
             search_type=search_type,
             frequency=frequency,
+            # aspect=aspect,
             verbose=True)
 
         print(f" || day interval = {interval}")
@@ -317,9 +323,9 @@ def run_twitter_crawler(
             if returned_data_from_twitter_run is None:
                 break
             else:
-                responds_content, num_returned_data= returned_data_from_twitter_run
+                responds_content, num_returned_data = returned_data_from_twitter_run
                 saved_file = get_saved_file_path(twitter_crawler.time_since, twitter_crawler.time_until,
-                                                 path_name=BASE_DIR / f'Outputs/Data/{twitter_crawler.crawler_name}/{twitter_crawler.collection_name}/{twitter_crawler.search_type}/{twitter_crawler.respond_type}')
+                                                 path_name=BASE_DIR / f'Outputs/Data/{twitter_crawler.crawler_name}/{twitter_crawler.aspect}/{twitter_crawler.collection_name}/{twitter_crawler.search_type}/{twitter_crawler.respond_type}')
                 save_to_file(responds_content,
                              saved_file)
                 print('')
@@ -352,7 +358,7 @@ class aggs_dict(TypedDict):
 def _get_twitter_data(res: Json,
                       running_constraints: TwitterRunningConstraints,
                       crawler_instance: TwitterCrawler) -> Json:
-    convert_tweets_to_dict = lambda x: vars(x)
+    def convert_tweets_to_dict(x): return vars(x)
 
     def ensure_json(res: Dict) -> Json:
         r = json.dumps(res)
@@ -393,8 +399,32 @@ def _get_twitter_data(res: Json,
                 #     crawler_instance.verbose)
         else:
             raise Warning('responds are empty')
+    
+    @my_timer
+    def _get_sentiment(x) -> float:
+
+        text: Optional[str]
+
+        text = x['text']
+        if text is None or len(text) == 0:
+            return 0.0
+        else:
+            sentiment_polarity = get_sentiment(text)
+            return sentiment_polarity
 
     check_responses_consistency(res_data_dict)
+
+    from tqdm import tqdm
+    all_data_with_sentiment = []
+    for data in tqdm(res_data_dict['data']):
+        data_with_sentiment = data
+        data_with_sentiment['sentiment'] = _get_sentiment(data)
+        all_data_with_sentiment.append(data_with_sentiment)
+        # data['sentiment'] = _get_sentiment(data)
+
+    res_data_dict['data'] = all_data_with_sentiment
+
+
 
     return res_data_dict
 
@@ -412,8 +442,9 @@ def _get_twitter_aggs(res: Json,
             counter = {}
             doc_count_dict = {}
             get_date_datetime_from_epoch_datetime = lambda \
-                    x: datetime.datetime.fromtimestamp(x).date()
-            convert_datetime_to_epoch_datetime = lambda x: \
+                x: datetime.datetime.fromtimestamp(x).date()
+
+            def convert_datetime_to_epoch_datetime(x): return \
                 str(datetime.datetime(x.year, x.month,
                                       x.day).timestamp()).split(
                     '.')[0]
@@ -445,15 +476,25 @@ def _get_twitter_aggs(res: Json,
 def _get_twitter_metadata(res: Json,
                           running_constraints: TwitterRunningConstraints,
                           crawler_instance: TwitterCrawler,
+                          aspect: Tags,
+                          query: Query,
                           ) -> Json:
+
     after = running_constraints['after']
+    before = running_constraints['before']
     size = running_constraints['size']
     sort = running_constraints['sort']
     fields = running_constraints['fields']
 
+    keys = ['running_constraints', 'after', 'aggs', 'before',
+            'execution_time_milliseconds', 'frequency', 'index',
+            'results_returned', 'size', 'sort', 'timed_out',
+            'search_words', 'total_results', 'fields', 'aspect',  'query']
+
     def create_metadata() -> TwitterMetadata:
         x = {'running_constraints': running_constraints,
              'after': after,
+             'before': before,
              'aggs': list(res['aggs'].keys()),
              'execution_time_milliseconds': crawler_instance.total_request_time_in_milli_second,
              'frequency': crawler_instance.frequency,
@@ -461,7 +502,15 @@ def _get_twitter_metadata(res: Json,
              'sort': sort,
              'search_words': crawler_instance.collection,
              'total_results': len(res['data']),
-             'fields': fields}
+             'fields': fields,
+             'aspect': aspect,
+             'query': query,
+             'results_returned': None,
+             'timed_out': None,
+             'index': None,
+             }
+
+        assert len(set(list(x.keys())) ^ set(keys)) == 0
 
         return x
 
@@ -471,11 +520,7 @@ def _get_twitter_metadata(res: Json,
 
         return res
     else:
-        keys = ['running_constraints', 'after', 'aggs', 'before',
-                'execution_time_milliseconds', 'frequency', 'index',
-                'results_returned', 'size', 'sort', 'timed_out',
-                'search_words', 'total_results', 'fields']
-
+        # NOTE: why do I need else section here? can't I just add metadata to the data? 
         assert len(res['metadata']) == len(keys), ''
 
         for i in keys:

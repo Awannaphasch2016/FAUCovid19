@@ -5,7 +5,6 @@
     "version": "0.2.0",
     "configurations": [
 
-
         {
             "name": "Python: Current File",
             "type": "python",
@@ -15,6 +14,57 @@
             "justMyCode":true,
             "cwd": "${fileDirname}",
             // "args": ["--feature"]
+        },
+        {
+            // TODO: create launch configuration for flask application
+            "name": "Python: Flask",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+
+            "console": "integratedTerminal",
+            "justMyCode":true,
+            "cwd": "${fileDirname}",
+            "module": "flask",
+
+            "args": [
+                "run",
+                "--no-debugger",
+                "--no-reload"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "Python: TwitterDataCrawler",
+            "type": "python",
+            "request": "launch",
+            "program": "C:\\Users\\Anak\\PycharmProjects\\Covid19CookieCutter\\Sources\\Preparations\\Data\\pushshift_library.py",
+            "console": "integratedTerminal",
+            "justMyCode":true,
+            "cwd": "${fileDirname}",
+            "args": ["--select_all_conditions",
+                "--crawler_type","twitter",
+                // "--tags", "work_from_home",
+                "--tags", "social_distance",
+                // "--tags", "all",
+            ]
+        },
+        {
+            "name": "Python: RedditDataCrawler",
+            "type": "python",
+            "request": "launch",
+            "program": "C:\\Users\\Anak\\PycharmProjects\\Covid19CookieCutter\\Sources\\Preparations\\Data\\pushshift_library.py",
+            "console": "integratedTerminal",
+            "justMyCode":true,
+            "cwd": "${fileDirname}",
+            // "args": ["--help"]
+            "args": ["--select_all_conditions",
+                // "--crawler_type","reddit",
+                // "--tags", "all",
+                // "--tags", "work_from_home",
+                // "--tags", "lockdown",
+            ]
+
         }
     ]
 }

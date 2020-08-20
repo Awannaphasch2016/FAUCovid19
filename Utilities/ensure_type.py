@@ -2,11 +2,30 @@ import datetime
 import json
 from typing import Dict
 from typing import Tuple
+from typing import Optional
 
 from Utilities.declared_typing import Frequency
 from Utilities.declared_typing import Json
 from Utilities.time_utility import _convert_timedelta_to_specified_frequency
 from Utilities.time_utility import _get_epoch_datetime_subtract_timedelta
+
+def only_download_full_day(frequency: str, before: Optional[int], after:int) -> Optional[Tuple[str, str]]:
+    if frequency == 'day':
+        def is_full_day(before: int,
+                                                    after: int):
+            '''exclude data from today aka datetime.datetime.now().day'''
+            if before == 0:
+                print(
+                    '!!! exclude data from today aka datetime.datetime.now().day => to make sure that only full day of data will be loaded !!!')
+                return False
+            else:
+                return True
+
+        if not is_full_day(before, after):
+            return
+
+    else:
+        raise NotImplementedError
 
 
 def ensure_epoch_datetime(date: datetime.datetime) -> int:

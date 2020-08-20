@@ -9,12 +9,10 @@
         "activityBarBadge.background": "#00bfbf",
         "activityBarBadge.foreground": "#15202b",
         "statusBar.background": "#ffff00",
-        "statusBar.border": "#ffff00",
         "statusBar.foreground": "#15202b",
         "statusBarItem.hoverBackground": "#cccc00",
         "titleBar.activeBackground": "#ffff00",
         "titleBar.activeForeground": "#15202b",
-        "titleBar.border": "#ffff00",
         "titleBar.inactiveBackground": "#ffff0099",
         "titleBar.inactiveForeground": "#15202b99"
     },
@@ -32,4 +30,5 @@
         "**/.DS_Store": false
     },
     "explorerExclude.backup": null,
+    "git.ignoreLimitWarning": true,
 }

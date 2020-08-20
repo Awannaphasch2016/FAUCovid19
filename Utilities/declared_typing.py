@@ -16,6 +16,7 @@ TwitterAggs = Dict
 
 Json = Dict
 Tags = Optional[Tuple[str]]
+Query = Optional[List[str]]
 Crawler_type = str
 
 # res = {'a': 1}
@@ -27,14 +28,17 @@ Frequency = Literal['day']
 Sort = Literal['asc', 'desc']
 epoch_datetime = int
 
+class TwitterCollectionkey(TypedDict):
+    aspect: List[str]
+    query: Query
 
 class TwitterCollection(TypedDict):
-    collection: List[str]
+    collection: TwitterCollectionkey
     name: str
 
 class SubredditCollectionKey(TypedDict):
     subreddit: List[str]
-    query: Optional[List[str]]
+    query: Query
 
 class SubredditCollection(TypedDict):
     collection: SubredditCollectionKey
@@ -68,6 +72,7 @@ class RunningConditions(TypedDict):
     search_type: str
     sort: Sort
     tag: Optional[str]
+    max_after: int
 
 RunningConditionsKeyValue = List[Tuple[List[str], RunningConditions]]
 

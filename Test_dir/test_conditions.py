@@ -9,19 +9,28 @@ from Utilities.declared_typing import RunningConditions
 # from Utilities.declared_typing import RunningConstraints
 from Utilities.declared_typing import Tags
 from Utilities.declared_typing import TwitterRunningConstraints
-from global_parameters import ALL_REDDIT_TAGS
+from global_parameters import ALL_REDDIT_TAGS, ALL_TWITTER_COLLETION_NAMES, ALL_TWITTER_SEARCH_TYPES, ALL_REDDIT_COLLECTION_NAMES, ALL_REDDIT_SEARCH_TYPES
+
+from collections.abc import Iterable
 
 
-def _check_reddit_tags_value(tags: Tags):
-    for i in tags:
-        if i == 'all':
-            assert len(
-                tags) == 1, 'when use all, no other tags have to be specified'
+def _check_reddit_tags_value(tags: Tags) -> None:
 
-        elif i not in ALL_REDDIT_TAGS:
-            all_tags_str = ','.join(ALL_REDDIT_TAGS)
-            raise ValueError(
-                f'tags with value of all, {all_tags_str}are supported')
+    if isinstance(tags, Iterable):
+
+        if len(tags) == 1 and tags[0] == 'all':
+            return
+        elif len(tags) == 1 and tags[0] is None:
+            return
+
+        for i in tags:
+            if i not in ALL_REDDIT_TAGS or i in 'all':
+                all_tags = ','.join(tags)
+                raise ValueError(
+                    f'one of the following tags are not supported {all_tags}')
+        return
+    else:
+        raise NotImplementedError('')
 
 
 def check_response_keys(res: Json):
@@ -39,29 +48,23 @@ def check_running_conditions(running_conditions: RunningConditions) -> None:
         if running_conditions['crawler_option'] not in ['reddit', 'twitter']:
             raise ValueError('crawler_option are not availble')
         else:
+
             if running_conditions['crawler_option'] == 'reddit':
-                if running_conditions['collection_name'] not in [
-                    'corona_general',
-                    'corona_regions',
-                    'corona_countries',
-                    'work_from_home',
-                    'corona_states_with_tag']:
+                if running_conditions['collection_name'] not in ALL_REDDIT_COLLECTION_NAMES:
                     raise ValueError('collection_name are not availble')
 
-                if running_conditions['search_type'] not in ['comment',
-                                                             'submission']:
+                if running_conditions['search_type'] not in ALL_REDDIT_SEARCH_TYPES:
                     raise ValueError('search_type are not abailble')
 
                 if running_conditions['respond_type'] not in ['data']:
                     raise ValueError('respond_type are not availble')
 
             elif running_conditions['crawler_option'] == 'twitter':
-                if running_conditions['collection_name'] not in [
-                    'twitter_tweet', 'twitter_geo']:
+                if running_conditions['collection_name'] not in ALL_TWITTER_COLLETION_NAMES:
                     raise ValueError('collection_name are not availble')
 
-                if running_conditions['search_type'] not in ['data_geo',
-                                                             'data_tweet']:
+                if running_conditions['search_type'] not in ALL_TWITTER_SEARCH_TYPES:
+
                     raise ValueError('search_type are not abailble')
 
                 if running_conditions['respond_type'] not in ['data_geo',
@@ -81,7 +84,8 @@ def _check_that_all_selected_fields_are_returns(
     after = running_constraints['after']
     fields = running_constraints['fields']
 
-    current_condition_str_with_ind = current_condition_str + f" || ind = {ind} ||"
+    current_condition_str_with_ind = current_condition_str + \
+        f" || ind = {ind} ||"
     res_data = res['data'][ind]
     len_res_data_key = len(list(res_data.keys()))
     num_fields = len(fields.split(','))
