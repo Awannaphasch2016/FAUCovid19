@@ -20,9 +20,11 @@ Outputs/Data/
 .Outputs/ZipFiles/
 .Outputs/Report/
 .Outputs/Log
+/.env
+.env
 
 .Data/
-.vscode/
+# .vscode/
 .history/
 .idea/
 .__pycache__

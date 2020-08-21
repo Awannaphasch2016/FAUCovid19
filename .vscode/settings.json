@@ -16,7 +16,6 @@
         "titleBar.inactiveBackground": "#ffff0099",
         "titleBar.inactiveForeground": "#15202b99"
     },
-    "python.pythonPath": "C:\\Users\\Anak\\Anaconda3\\envs\\py36\\python.exe",
     "liveServer.settings.port": 5501,
     "python.dataScience.jupyterCommandLineArguments": [
         "something"
