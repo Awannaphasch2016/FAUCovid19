@@ -24,7 +24,6 @@ from Utilities.declared_typing import RedditResponse
 from Utilities.declared_typing import RedditRunningConstraints
 from Utilities.declared_typing import SubredditCollection
 from Utilities.declared_typing import Url
-<<<<<<< HEAD
 from Utilities.declared_typing import Tags
 from Utilities.declared_typing import Query
 from Utilities.time_utility import _convert_timedelta_to_specified_frequency
@@ -34,14 +33,6 @@ from Utilities.ensure_type import only_download_full_day
 from global_parameters import ALL_REDDIT_TAGS
 from global_parameters import BASE_DIR
 from global_parameters import KNOWN_ERROR
-=======
-from Utilities.time_utility import _convert_timedelta_to_specified_frequency
-from Utilities.time_utility import _get_epoch_datetime_subtract_timedelta
-from global_parameters import ALL_REDDIT_TAGS
-from global_parameters import BASE_DIR
-from global_parameters import KNOWN_ERROR
-from global_parameters import MAX_AFTER
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
 
 class RedditCrawler:
@@ -51,37 +42,24 @@ class RedditCrawler:
                  search_type: str,
                  frequency: Frequency,
                  verbose: int,
-<<<<<<< HEAD
                  aspect: str,
-=======
-                 tag: str,
->>>>>>> fixed .gitignore to remove Output/ and add Example/
                  max_after: int):
 
         self.crawler_name = 'RedditCrawler'
         self.verbose = verbose
-<<<<<<< HEAD
         self.prepare_crawler(subreddits_collection_class,
                              respond_type,
                              search_type,
                              frequency,
                              aspect,
                              max_after)
-=======
-        self.prepare_crawler(subreddits_collection_class, respond_type,
-                             search_type, frequency, tag, max_after)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
     def prepare_crawler(self,
                         subreddits_collection_class: SubredditCollection,
                         respond_type: str,
                         search_type: str,
                         frequency: Frequency,
-<<<<<<< HEAD
                         aspect: str,
-=======
-                        tag: str,
->>>>>>> fixed .gitignore to remove Output/ and add Example/
                         max_after: int) -> None:
 
         self.respond_type = respond_type
@@ -89,12 +67,8 @@ class RedditCrawler:
         self.frequency = frequency
         self.collection_name = subreddits_collection_class['name']
         self.collection = subreddits_collection_class['collection']
-<<<<<<< HEAD
         self.aspect = aspect
         self.query = self.collection['query']
-=======
-        self.tag = tag if tag is not None else "no_tag"
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         self.max_after = max_after
 
     def prepare_running_crawler(self,
@@ -110,7 +84,6 @@ class RedditCrawler:
 
         comment_fields = 'body,parent_id,link_id'
 
-<<<<<<< HEAD
         now = datetime.datetime.now()
         self.timestamp_utc = _get_epoch_datetime_subtract_timedelta(
             now, self.frequency, after)
@@ -122,18 +95,6 @@ class RedditCrawler:
         assert self.timestamp_utc >= max_after_timestamp_utc, f'{self.timestamp_utc}, {max_after_timestamp_utc}, {after}'
 
         def replace_and_split(x): return x.replace(' ', '').split(',')
-=======
-        self.timestamp_utc = _get_epoch_datetime_subtract_timedelta(
-            datetime.datetime.now(), self.frequency, after)
-
-        max_after_timestamp_utc = _get_epoch_datetime_subtract_timedelta(
-            datetime.datetime.now(), 'day', max_after)
-
-        # HERE fix this error
-        assert self.timestamp_utc >= max_after_timestamp_utc, f'{self.timestamp_utc} {max_after_timestamp_utc}'
-
-        replace_and_split = lambda x: x.replace(' ', '').split(',')
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         fields = replace_and_split(common_fields) + replace_and_split(
             subreddit_fields) + replace_and_split(comment_fields)
         fields = ','.join(fields)
@@ -148,7 +109,6 @@ class RedditCrawler:
             'sort': 'asc',
             'fields': fields,
         }
-<<<<<<< HEAD
 
         if self.frequency == 'day':
             self.time_since = datetime.datetime.now().date() - datetime.timedelta(
@@ -170,10 +130,6 @@ class RedditCrawler:
             print(
                 f" {self.current_condition_str}")
 
-=======
-        self.current_condition_str = f' tag = {self.tag} -> query = {self.collection["query"]}||collection_name = {self.collection_name} || search_type = {self.search_type} ||' \
-                                     f' respond_type = {self.respond_type}|| frequency = {self.frequency} || {after} <= x < {before} '
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         return running_constraints
 
@@ -196,17 +152,10 @@ class RedditCrawler:
 
         after_frequency = _get_after_frequency()
 
-<<<<<<< HEAD
         if self.aspect is None:
             endpoint_url = self._get_url_endpoint_without_query_param(
                 running_constraints, after_frequency)
         elif self.aspect in ALL_REDDIT_TAGS:
-=======
-        if self.tag == 'no_tag':
-            endpoint_url = self._get_url_endpoint_without_query_param(
-                running_constraints, after_frequency)
-        elif self.tag in ALL_REDDIT_TAGS:
->>>>>>> fixed .gitignore to remove Output/ and add Example/
             endpoint_url = self._get_url_endpoint_with_query_param(
                 running_constraints, after_frequency)
         else:
@@ -215,12 +164,6 @@ class RedditCrawler:
         if before is not None:
             endpoint_url += f'&before={before}{after_frequency}'
 
-<<<<<<< HEAD
-=======
-        # if self.collection_name != 'corona_states_with_tag':
-        #     endpoint_url += f'&q=corona|covid|sarscov2'
-
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         return endpoint_url
 
     @my_timer
@@ -228,14 +171,11 @@ class RedditCrawler:
     def get_responds(self,
                      running_constraints: RedditRunningConstraints) -> Json:
 
-<<<<<<< HEAD
         before = running_constraints['before']
         after = running_constraints['after']
 
         only_download_full_day(self.frequency, before, after)
 
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         endpoint_url = self.get_url(running_constraints)
 
         # HERE try to catch json error
@@ -345,11 +285,7 @@ class RedditCrawler:
         try:
             res = _get_reddit_data(res, running_constraints, self)
             # _get_reddit_aggs(res)
-<<<<<<< HEAD
             res = _get_reddit_metadata(res, running_constraints,self.aspect ,self.query)
-=======
-            res = _get_reddit_metadata(res, running_constraints)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
             check_response_keys(res)
         except Exception as e:
@@ -398,10 +334,7 @@ class RedditCrawler:
                                                     max_responds_size=1000)
 
         # next_before, next_after, next_interval = self._update_interval_before_after(after, max_after, next_interval)
-<<<<<<< HEAD
         next_interval = max_after if next_interval > max_after else next_interval
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         return next_interval, per_interval_average
         # return next_interval, per_interval_average, next_before, next_after
@@ -461,23 +394,14 @@ class RedditCrawler:
         # HERE
         #  >this only works for day ( don't use max_after, use max_after of the same frequency
 
-<<<<<<< HEAD
         next_before: int = max_after_with_specified_frequency if after + \
             1 >= max_after_with_specified_frequency else after + 1
         next_after: int = max_after_with_specified_frequency if next_before + \
             next_interval >= max_after_with_specified_frequency else next_before + next_interval  # type: ignore
-=======
-        next_before: int = max_after_with_specified_frequency if after + 1 >=max_after_with_specified_frequency else after + 1
-        next_after: int = max_after_with_specified_frequency if next_before + next_interval >= max_after_with_specified_frequency else next_before + next_interval  # type: ignore
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         # next_interval: int = next_before - next_after
         next_interval: int = next_after - next_before
 
-<<<<<<< HEAD
-=======
-
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         return next_before, next_after, next_interval
 
 
@@ -490,12 +414,8 @@ class RedditCrawlerCondition(TypedDict):
     search_type: str
     frequency: str
     verbose: bool
-<<<<<<< HEAD
     aspect: Optional[str]
     max_after: int
-=======
-    tag: Optional[str]
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
 
 def run_reddit_crawler(
@@ -510,7 +430,6 @@ def run_reddit_crawler(
     search_type = reddit_crawler_condition['search_type']
     frequency = reddit_crawler_condition['frequency']
     verbose = reddit_crawler_condition['verbose']
-<<<<<<< HEAD
     max_after = reddit_crawler_condition['max_after']
     aspect = reddit_crawler_condition['collection_class']['collection']['aspect']
 
@@ -518,15 +437,6 @@ def run_reddit_crawler(
     before = None
     next_interval = None
     frequency = frequency  # , 'second', 'minute', 'day'
-=======
-    tag = reddit_crawler_condition['tag']
-
-    max_after = MAX_AFTER
-    after = initial_interval
-    before = None
-    next_interval = None
-    frequency = 'day'  # , 'second', 'minute', 'day'
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     assert after <= max_after, 'after have to be less than max_after'
     saved_path = None
 
@@ -556,18 +466,10 @@ def run_reddit_crawler(
                 search_type=search_type,
                 frequency=frequency,
                 verbose=verbose,
-<<<<<<< HEAD
                 aspect=aspect,
                 max_after=max_after
             )
 
-=======
-                tag=tag,
-                max_after=max_after
-            )
-
-            # HERE condition = no_tag, corona_counties,submissions -> error = json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
             responds_content, _, _ = reddit_crawler.run(before, after,
                                                         max_after)
 
@@ -589,22 +491,16 @@ def run_reddit_crawler(
                     else:
                         # after = max_after if next_interval > max_after else next_interval
                         after = next_interval  # assigned predicted interval
-<<<<<<< HEAD
 
                         assert after <= max_after, ''
                     
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
                         print(
                             f' Given frequency = {frequency} || adjust initial_interval(after) from {reddit_crawler_condition["initial_interval"]} to {after}')
                         print()
 
                         reddit_crawler_condition['initial_interval'] = after
-<<<<<<< HEAD
 
                     return after, frequency
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
                 else:
                     after_timestamp_utc = _get_epoch_datetime_subtract_timedelta(
                         datetime.datetime.now(), frequency, after)
@@ -631,17 +527,13 @@ def run_reddit_crawler(
 
     # VALIDATE I validated it, but it may missed something, so this is left here for future debugging
     after, frequency = _select_optimize_frequency(after=max_after)
-<<<<<<< HEAD
     assert after <= max_after, ''
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
     total_returned_data = 0
     total_missing_data = 0
 
     request_timestamp_str = get_full_datetime_str(request_timestamp)
 
-<<<<<<< HEAD
     max_after_delta = _get_epoch_datetime_subtract_timedelta(
         datetime.datetime.now(), 'day', max_after)
     # max_after_delta = _get_epoch_datetime_subtract_timedelta(datetime.datetime.now(), frequency, max_after )
@@ -649,13 +541,6 @@ def run_reddit_crawler(
 
     max_after_with_specified_frequency = _convert_timedelta_to_specified_frequency(
         time_diff, frequency)
-=======
-    max_after_delta = _get_epoch_datetime_subtract_timedelta(datetime.datetime.now(), 'day', max_after )
-    # max_after_delta = _get_epoch_datetime_subtract_timedelta(datetime.datetime.now(), frequency, max_after )
-    time_diff = datetime.datetime.now() - max_after_delta
-
-    max_after_with_specified_frequency = _convert_timedelta_to_specified_frequency(time_diff, frequency)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
     # optimize can I optimize while with do-while?
     # while after <= max_after:
@@ -668,16 +553,11 @@ def run_reddit_crawler(
             search_type=search_type,
             frequency=frequency,
             verbose=verbose,
-<<<<<<< HEAD
             aspect=aspect,
-=======
-            tag=tag,
->>>>>>> fixed .gitignore to remove Output/ and add Example/
             max_after=max_after)
 
         interval = next_interval if next_interval is not None else after
 
-<<<<<<< HEAD
         # print(
         #     f' interval = {interval} >>> aspect = {aspect} ||collection_name = {subreddits_collection_class["collection"]} || search_type = {search_type} ||'
         #     f' respond_type = {respond_type}|| frequency = {frequency} || {after} <= x < {before} ')
@@ -690,18 +570,6 @@ def run_reddit_crawler(
             with_aspects_folder = 'with_aspects'
             saved_path = BASE_DIR / \
                 f'Outputs/Data/{reddit_crawler.crawler_name}/{with_aspects_folder}/{reddit_crawler.aspect}/{reddit_crawler.collection_name}/{reddit_crawler.search_type}/{reddit_crawler.respond_type}/{request_timestamp_str}/'
-=======
-        print(
-            f' interval = {interval} >>> tag = {tag} ||collection_name = {subreddits_collection_class["collection"]} || search_type = {search_type} ||' \
-            f' respond_type = {respond_type}|| frequency = {frequency} || {after} <= x < {before} ')
-
-        if tag is None:
-            with_tags_folder = 'without_tags'
-            saved_path = BASE_DIR / f'Outputs/Data/{reddit_crawler.crawler_name}/{with_tags_folder}/{reddit_crawler.tag}/{reddit_crawler.collection_name}/{reddit_crawler.search_type}/{reddit_crawler.respond_type}/{request_timestamp_str}/'
-        elif isinstance(tag, str):
-            with_tags_folder = 'with_tags'
-            saved_path = BASE_DIR / f'Outputs/Data/{reddit_crawler.crawler_name}/{with_tags_folder}/{reddit_crawler.tag}/{reddit_crawler.collection_name}/{reddit_crawler.search_type}/{reddit_crawler.respond_type}/{request_timestamp_str}/'
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         else:
             raise ValueError('')
 
@@ -715,17 +583,10 @@ def run_reddit_crawler(
             next_interval, per_day_average = reddit_crawler.after_run(
                 responds_content, after, max_after)
 
-<<<<<<< HEAD
             saved_file = get_saved_file_path(reddit_crawler.time_since, reddit_crawler.time_until,
                                                 path_name=BASE_DIR / f'Outputs/Data/{reddit_crawler.crawler_name}/{reddit_crawler.aspect}/{reddit_crawler.collection_name}/{reddit_crawler.search_type}/{reddit_crawler.respond_type}')
             save_to_file(responds_content,
                             saved_file)
-=======
-            saved_file = get_saved_file_path(reddit_crawler.timestamp_utc,
-                                             path_name=saved_path)
-            save_to_file(responds_content,
-                         saved_file)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         except Exception as e:
 
             if str(e) not in KNOWN_ERROR:
@@ -765,37 +626,26 @@ def run_reddit_crawler(
 # ==Reddit Test
 # =====================
 def _get_reddit_metadata(res: Json,
-<<<<<<< HEAD
                          running_constraints: RedditRunningConstraints,
                          aspect: str,
                          query: Query) -> Json:
-=======
-                         running_constraints: RedditRunningConstraints) -> Json:
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     metadata = {}
     metadata['running_constraints'] = running_constraints
 
     keys = ['total_results', 'before', 'after', 'frequency',
             'execution_time_milliseconds', 'sort', 'fields',
             'subreddit']
-<<<<<<< HEAD
 
     # filter out fields that we don't want
-=======
-    # optimize : can't I just assigned metaata to res['metadata']?
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     for key in keys:
         metadata[key] = res['metadata'][key]
 
     res['metadata'] = metadata
 
-<<<<<<< HEAD
     # add fields that are not provided by pushshift api
     res['metadata']['aspect'] = aspect
     res['metadata']['query'] = query
 
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     return res
 
 
@@ -803,10 +653,6 @@ def _get_reddit_metadata(res: Json,
 def _get_reddit_data(res: Json,
                      running_constraints: RedditRunningConstraints,
                      crawler_class: RedditCrawler) -> Json:
-<<<<<<< HEAD
-
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     def _check_responds_consistency():
         if len(res['data']) > 0:
             for i in range(len(res['data'])):
@@ -820,11 +666,7 @@ def _get_reddit_data(res: Json,
             # print('response are empty')
             raise Warning('responds are empty')
 
-<<<<<<< HEAD
     # @my_timer
-=======
-    @my_timer
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     def _get_sentiment(x) -> float:
 
         text: Optional[str]
@@ -832,11 +674,7 @@ def _get_reddit_data(res: Json,
         if crawler_class.search_type == 'comment':
             text = x['body']
         elif crawler_class.search_type == 'submission':
-<<<<<<< HEAD
             text = x['title']
-=======
-            text = x['selftext']
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         else:
             raise NotImplementedError
 
@@ -855,7 +693,6 @@ def _get_reddit_data(res: Json,
         else:
             raise ValueError(str(e))
 
-<<<<<<< HEAD
     from tqdm import tqdm
     all_data_with_sentiment = []
     for data in tqdm(res['data']):
@@ -865,10 +702,6 @@ def _get_reddit_data(res: Json,
         # data['sentiment'] = _get_sentiment(data)
 
     res['data'] = all_data_with_sentiment
-=======
-    # for data in tqdm(res['data']):
-    #     data['sentiment'] = _get_sentiment(data)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
     return res
 

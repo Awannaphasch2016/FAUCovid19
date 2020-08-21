@@ -4,28 +4,17 @@ import time
 from typing import Dict
 from typing import List
 from typing import Optional
-<<<<<<< HEAD
 from typing import Tuple
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 from typing import Type
 
 import GetOldTweets3 as got  # type: ignore
 from typing_extensions import TypedDict
-<<<<<<< HEAD
 from Sources.Preparations.Features.sentiment_analysis import get_sentiment
 
 from Test_dir.test_conditions import check_response_keys
 from Utilities import get_saved_file_path
 from Utilities import my_timer
 from Utilities import save_to_file
-=======
-
-from Utilities import get_saved_file_path
-from Utilities import my_timer
-from Utilities import save_to_file
-from Test_dir.test_conditions import check_response_keys
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 from Utilities.declared_typing import Frequency
 from Utilities.declared_typing import Json
 from Utilities.declared_typing import TwitterAggs
@@ -34,7 +23,6 @@ from Utilities.declared_typing import TwitterData
 from Utilities.declared_typing import TwitterMetadata
 from Utilities.declared_typing import TwitterRunningConstraints
 from Utilities.declared_typing import Url
-<<<<<<< HEAD
 from Utilities.declared_typing import Tags
 from Utilities.declared_typing import Query
 from Utilities.declared_typing import epoch_datetime
@@ -43,12 +31,6 @@ from Utilities.ensure_type import only_download_full_day
 # from Utilities.ensure_type import ensure_json
 from global_parameters import BASE_DIR
 from global_parameters import MAX_AFTER
-=======
-from Utilities.declared_typing import epoch_datetime
-from Utilities.ensure_type import ensure_epoch_datetime
-# from Utilities.ensure_type import ensure_json
-from global_parameters import BASE_DIR
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
 
 # Json = Dict
@@ -60,7 +42,6 @@ class TwitterCrawler(object):
                  respond_type: str,
                  search_type: str,
                  frequency: Frequency,
-<<<<<<< HEAD
                 #  aspect: str,
                  verbose: int,
                  ):
@@ -73,40 +54,25 @@ class TwitterCrawler(object):
                              frequency,
                             #  aspect,
                              )
-=======
-                 verbose: int):
-
-        self.crawler_name = 'TwitterCrawler'
-        self.verbose = verbose
-        self.prepare_crawler(twitter_collection_class, respond_type,
-                             search_type, frequency)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
     def prepare_crawler(self,
                         twitter_collection_class: TwitterCollection,
                         respond_type: str,
                         search_type: str,
-<<<<<<< HEAD
                         frequency: Frequency,
                         # aspect: str,
                         ):
-=======
-                        frequency: Frequency):
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         self.respond_type = respond_type
         self.search_type = search_type
         self.frequency = frequency
         self.collection_name = twitter_collection_class['name']
         self.collection = twitter_collection_class['collection']
 
-<<<<<<< HEAD
         # self.aspect = aspect 
         self.aspect = self.collection['aspect'] 
         self.query = self.collection['query']
 
 
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     def get_geo_data(self,
                      running_constraints: TwitterRunningConstraints,
                      res: Json) -> Dict:
@@ -118,11 +84,7 @@ class TwitterCrawler(object):
 
         res = _get_twitter_data(res, running_constraints, self)
         res = _get_twitter_aggs(res, running_constraints, self)
-<<<<<<< HEAD
         res = _get_twitter_metadata(res, running_constraints, self, self.aspect, self.query)
-=======
-        res = _get_twitter_metadata(res, running_constraints, self)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         check_response_keys(res)
 
@@ -130,11 +92,7 @@ class TwitterCrawler(object):
 
     def apply_crawling_strategy(self,
                                 running_constraints: TwitterRunningConstraints,
-<<<<<<< HEAD
                                 res: Optional[Json]) -> Dict:
-=======
-                                res: Json) -> Dict:
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         if self.respond_type == 'data_geo':
             return self.get_geo_data(running_constraints,
@@ -155,25 +113,16 @@ class TwitterCrawler(object):
     @my_timer
     # @signature_logger
     def get_responds(self,
-<<<<<<< HEAD
                      running_constraints: TwitterRunningConstraints) -> Optional[Json]:
 
         after = running_constraints['after']
         before = running_constraints['before']
         # after = 3
         # before = 2
-=======
-                     running_constraints: TwitterRunningConstraints) -> List[
-        Dict]:
-
-        after = running_constraints['after']
-        before = running_constraints['before']
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         size = running_constraints['size']
         fields = running_constraints['fields']
         sort = running_constraints['sort']
 
-<<<<<<< HEAD
         only_download_full_day(self.frequency, before, after)
 
         date_since = str(self.time_since) 
@@ -189,18 +138,6 @@ class TwitterCrawler(object):
             tweetCriteria = got.manager.TweetCriteria().setQuerySearch(query) \
                 .setSince(date_since) \
                 .setUntil(date_until) \
-=======
-        if self.frequency == 'day':
-            date_since = str((datetime.datetime.now() - datetime.timedelta(days=after)).date())
-            date_until = str((datetime.datetime.now() - datetime.timedelta(days=before)).date())
-        else:
-            raise NotImplementedError
-        query = ' Or '.join(self.collection)
-        if size is None:
-            tweetCriteria = got.manager.TweetCriteria().setQuerySearch(query) \
-                .setSince(date_since) \
-                .setUntil(date_until)\
->>>>>>> fixed .gitignore to remove Output/ and add Example/
                 .setLang('en')
 
         else:
@@ -211,13 +148,9 @@ class TwitterCrawler(object):
                 .setLang('en')
 
         s = time.time()
-<<<<<<< HEAD
         # res = got.manager.TweetManager.getTweets(tweetCriteria,debug=True)
         res = got.manager.TweetManager.getTweets(tweetCriteria)
         # print(res)
-=======
-        res = got.manager.TweetManager.getTweets(tweetCriteria)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         f = time.time()
         self.total_request_time_in_milli_second = (f - s) * 1000
 
@@ -226,7 +159,6 @@ class TwitterCrawler(object):
     def run(self,
             before: Optional[int],
             after: int
-<<<<<<< HEAD
             ) -> Optional[Tuple[Dict[str, Dict], int]]:
 
         try:
@@ -253,59 +185,27 @@ class TwitterCrawler(object):
         except Exception as e:
             if str(e) != 'responds are empty':
                 print(e)
-=======
-            ) -> Dict[str, Dict]:
-
-        try:
-            responds_content = self.run_once(before, after)
-
-            total_result = responds_content['metadata']['total_results']
-            # missing_results = responds_content['metadata']['size'] - total_result # next fix argument before I fie this
-            # missing_results = 0 if np.sign(
-            #     missing_results) > 0 else missing_results
-            # if self.verbose:
-            #     print(
-            #         f" {self.current_condition_str} || total_results = {total_result} || missing_result = {missing_results}")
-            # else:
-            #     print(f'missing_reulst = {missing_results}')
-
-        except Exception as e:
-            if str(e) != 'responds are empty':
->>>>>>> fixed .gitignore to remove Output/ and add Example/
                 raise NotImplementedError(
                     f"exception occur in {self.run.__name__}")
             else:
                 raise Warning(str(e))
 
-<<<<<<< HEAD
         return responds_content, total_result
-=======
-        return responds_content
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
     @my_timer
     def run_once(self,
                  before: int,
                  after: int
-<<<<<<< HEAD
                  ) -> Optional[Dict]:
-=======
-                 ) -> Dict:
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         running_constraints = self.prepare_running_crawler(before, after)
 
         res = self.get_responds(running_constraints)
-<<<<<<< HEAD
         if res is None:
             return
         else:
             reponds_content = self.apply_crawling_strategy(running_constraints,
                                                            res)
-=======
-        reponds_content = self.apply_crawling_strategy(running_constraints,
-                                                       res)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         return reponds_content
 
     def get_submission_avg_per_day(self, responds_content):
@@ -333,7 +233,6 @@ class TwitterCrawler(object):
         }
 
         if self.frequency == 'day':
-<<<<<<< HEAD
             self.time_since = datetime.datetime.now().date() - datetime.timedelta(
                 days=after)
             self.time_until = datetime.datetime.now().date() - datetime.timedelta(
@@ -347,15 +246,6 @@ class TwitterCrawler(object):
         if self.verbose:
             print(
                 f" {self.current_condition_str}")
-=======
-            self.timestamp_utc = datetime.datetime.now() - datetime.timedelta(
-                days=after)
-        else:
-            raise NotImplementedError
-
-        self.current_condition_str = f'collection_name = {self.collection_name} || search_type = {self.search_type} ||' \
-                                     f' respond_type = {self.respond_type}|| {after} <= x < {before} '
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         return running_constraints
 
@@ -363,10 +253,7 @@ class TwitterCrawler(object):
         raise NotImplementedError
 
 
-<<<<<<< HEAD
 # note: In constrast to TwitterCrawlerCondition, RedditCrawlerCondition need aspect because aspect is used to group 'subreddit' into collection to reflect aspect sentiment
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 class TwitterCrawlerCondition(TypedDict):
     crawler_class: Type[TwitterCrawler]
     collection_class: TwitterCollection
@@ -375,7 +262,6 @@ class TwitterCrawlerCondition(TypedDict):
     respond_type: str
     search_type: str
     frequency: str
-<<<<<<< HEAD
     aspect: Optional[str]
     max_after: int
 
@@ -383,18 +269,11 @@ class TwitterCrawlerCondition(TypedDict):
 def run_twitter_crawler(
         twitter_crawler_condition: TwitterCrawlerCondition) -> List[int]:
 
-=======
-
-
-def run_twitter_crawler(
-        twitter_crawler_condition: TwitterCrawlerCondition) -> None:
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     # TODO
     #   > add fields to _check_that_all_selceted_fields_are_returns # disable option fields = None imply all; its useless
     #   > test and check that all types are assigned appropriately
     #   > finished implement just so that program can be runed (for Twitter), so I can test it by running the program
 
-<<<<<<< HEAD
     def print_twitter_cralwer_condition():
         print('twitter_crawler_condition = ')
         for i, j in twitter_crawler_condition.items():
@@ -404,8 +283,6 @@ def run_twitter_crawler(
 
     total_returned_data = 0
 
-=======
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     crawler_class: Type[TwitterCrawler] = twitter_crawler_condition[
         'crawler_class']
     twitter_collection_class = twitter_crawler_condition['collection_class']
@@ -414,14 +291,9 @@ def run_twitter_crawler(
     respond_type = twitter_crawler_condition['respond_type']
     search_type = twitter_crawler_condition['search_type']
     frequency = twitter_crawler_condition['frequency']
-<<<<<<< HEAD
     max_after = twitter_crawler_condition['max_after']
     # aspect = twitter_crawler_condition['collection_class']['collection']['aspect']
 
-=======
-
-    max_after = 100
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     if frequency == 'day':
         interval_collection: List[int] = [days_to_subtract for days_to_subtract
                                           in list(range(max_after))[::interval]]
@@ -429,33 +301,22 @@ def run_twitter_crawler(
         raise NotImplementedError('')
 
     interval_range = list(
-<<<<<<< HEAD
         zip(interval_collection[:-1], interval_collection[1:]))[::-1]
     # interval_range = list(
     #     zip(interval_collection[:-1], interval_collection[1:]))
 
     for ind, (before, after) in enumerate(interval_range[:3]):
-=======
-        zip(interval_collection[:-1], interval_collection[1:]))
-
-    for before, after in interval_range:
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         twitter_crawler = crawler_class(
             twitter_collection_class=twitter_collection_class,
             respond_type=respond_type,
             search_type=search_type,
             frequency=frequency,
-<<<<<<< HEAD
             # aspect=aspect,
             verbose=True)
-=======
-            verbose=False)
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         print(f" || day interval = {interval}")
 
         try:
-<<<<<<< HEAD
 
             returned_data_from_twitter_run = twitter_crawler.run(before, after)
 
@@ -468,30 +329,16 @@ def run_twitter_crawler(
                 save_to_file(responds_content,
                              saved_file)
                 print('')
-=======
-            responds_content = twitter_crawler.run(before, after)
-
-            saved_file = get_saved_file_path(twitter_crawler.timestamp_utc,
-                                             path_name=BASE_DIR /  f'Outputs/Data/{twitter_crawler.crawler_name}/{twitter_crawler.collection_name}/{twitter_crawler.search_type}/{twitter_crawler.respond_type}')
-            save_to_file(responds_content,
-                         saved_file)
-            print('')
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         except Exception as e:
             if str(e) != 'responds are empty':
                 print(e)
                 raise NotImplementedError(
                     f"unknown error occur in {run_twitter_crawler.__name__} ")
-<<<<<<< HEAD
     print(
         f'|| total returned data = {total_returned_data}')
     print(' >>>> finished crawling data <<<<')
     print()
     return total_returned_data
-=======
-
-    print(' >>>> finished crawling data <<<<')
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
 
 # =====================
@@ -511,15 +358,9 @@ class aggs_dict(TypedDict):
 def _get_twitter_data(res: Json,
                       running_constraints: TwitterRunningConstraints,
                       crawler_instance: TwitterCrawler) -> Json:
-<<<<<<< HEAD
     def convert_tweets_to_dict(x): return vars(x)
 
     def ensure_json(res: Dict) -> Json:
-=======
-    convert_tweets_to_dict = lambda x: vars(x)
-
-    def ensure_json(res: Dict)-> Json:
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         r = json.dumps(res)
         loaded_r = json.loads(r)
         return loaded_r
@@ -558,7 +399,6 @@ def _get_twitter_data(res: Json,
                 #     crawler_instance.verbose)
         else:
             raise Warning('responds are empty')
-<<<<<<< HEAD
     
     @my_timer
     def _get_sentiment(x) -> float:
@@ -586,11 +426,6 @@ def _get_twitter_data(res: Json,
 
 
 
-=======
-
-    check_responses_consistency(res_data_dict)
-
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     return res_data_dict
 
 
@@ -606,7 +441,6 @@ def _get_twitter_aggs(res: Json,
             x = {}
             counter = {}
             doc_count_dict = {}
-<<<<<<< HEAD
             get_date_datetime_from_epoch_datetime = lambda \
                 x: datetime.datetime.fromtimestamp(x).date()
 
@@ -614,10 +448,6 @@ def _get_twitter_aggs(res: Json,
                 str(datetime.datetime(x.year, x.month,
                                       x.day).timestamp()).split(
                     '.')[0]
-=======
-            get_date_datetime_from_epoch_datetime = lambda x: datetime.datetime.fromtimestamp(x).date()
-            convert_datetime_to_epoch_datetime = lambda x: str(datetime.datetime(x.year, x.month, x.day).timestamp()).split('.')[0]
->>>>>>> fixed .gitignore to remove Output/ and add Example/
             for i in res['data']:
                 date_from_datetime = get_date_datetime_from_epoch_datetime(
                     i['date'])
@@ -646,22 +476,16 @@ def _get_twitter_aggs(res: Json,
 def _get_twitter_metadata(res: Json,
                           running_constraints: TwitterRunningConstraints,
                           crawler_instance: TwitterCrawler,
-<<<<<<< HEAD
                           aspect: Tags,
                           query: Query,
                           ) -> Json:
 
     after = running_constraints['after']
     before = running_constraints['before']
-=======
-                          ) -> Json:
-    after = running_constraints['after']
->>>>>>> fixed .gitignore to remove Output/ and add Example/
     size = running_constraints['size']
     sort = running_constraints['sort']
     fields = running_constraints['fields']
 
-<<<<<<< HEAD
     keys = ['running_constraints', 'after', 'aggs', 'before',
             'execution_time_milliseconds', 'frequency', 'index',
             'results_returned', 'size', 'sort', 'timed_out',
@@ -671,11 +495,6 @@ def _get_twitter_metadata(res: Json,
         x = {'running_constraints': running_constraints,
              'after': after,
              'before': before,
-=======
-    def create_metadata() -> TwitterMetadata:
-        x = {'running_constraints': running_constraints,
-             'after': after,
->>>>>>> fixed .gitignore to remove Output/ and add Example/
              'aggs': list(res['aggs'].keys()),
              'execution_time_milliseconds': crawler_instance.total_request_time_in_milli_second,
              'frequency': crawler_instance.frequency,
@@ -683,7 +502,6 @@ def _get_twitter_metadata(res: Json,
              'sort': sort,
              'search_words': crawler_instance.collection,
              'total_results': len(res['data']),
-<<<<<<< HEAD
              'fields': fields,
              'aspect': aspect,
              'query': query,
@@ -693,9 +511,6 @@ def _get_twitter_metadata(res: Json,
              }
 
         assert len(set(list(x.keys())) ^ set(keys)) == 0
-=======
-             'fields': fields}
->>>>>>> fixed .gitignore to remove Output/ and add Example/
 
         return x
 
@@ -705,15 +520,7 @@ def _get_twitter_metadata(res: Json,
 
         return res
     else:
-<<<<<<< HEAD
         # NOTE: why do I need else section here? can't I just add metadata to the data? 
-=======
-        keys = ['running_constraints', 'after', 'aggs', 'before',
-                'execution_time_milliseconds', 'frequency', 'index',
-                'results_returned', 'size', 'sort', 'timed_out',
-                'search_words', 'total_results', 'fields']
-
->>>>>>> fixed .gitignore to remove Output/ and add Example/
         assert len(res['metadata']) == len(keys), ''
 
         for i in keys:

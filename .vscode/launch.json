@@ -59,7 +59,7 @@
             "cwd": "${fileDirname}",
             // "args": ["--help"]
             "args": ["--select_all_conditions",
-                // "--crawler_type","reddit",
+                "--crawler_type","reddit",
                 // "--tags", "all",
                 // "--tags", "work_from_home",
                 // "--tags", "lockdown",
