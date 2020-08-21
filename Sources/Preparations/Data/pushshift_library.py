@@ -446,7 +446,10 @@ def get_crawler_running_conditions(max_after: int, tags: Tags, crawler_type: Cra
         raise ValueError('you must select between reddit or twitter crawler ')
 
 
-def run_all_reddit_conditions(max_after: int, tags: Tags, timestamp: datetime.datetime, crawler_type: Crawler_type):
+def run_all_reddit_conditions(before_date: datetime.datetime, after_date: datetime.datetime, max_after: int, tags: Tags, timestamp: datetime.datetime, crawler_type: Crawler_type):
+
+
+    # FIXME: before_date and after_date is not implemented because it is not compatible with the current convention that use Max_after
 
     total_returned_data, total_missing_data = 0, 0
 
@@ -475,7 +478,7 @@ def run_all_reddit_conditions(max_after: int, tags: Tags, timestamp: datetime.da
 
             else:
                 print(f'!!!! The following error occurs = {str(e)} !!!')
-                condition_keys_str: str = ','.join(condition_keys)
+                condition_keys_str: str = ','.join(map(str,condition_keys))
 
                 if i == len(all_running_conditions) - 1:
                     print(
@@ -484,7 +487,7 @@ def run_all_reddit_conditions(max_after: int, tags: Tags, timestamp: datetime.da
                 else:
                     next_condition_keys = all_running_conditions[i + 1][0]
                     next_condition_keys_str: str = ','.join(
-                        next_condition_keys)
+                        map(str,next_condition_keys))
                     print(
                         f' || skip the the current condition = ({condition_keys_str}) ==> start next running condition = {next_condition_keys_str} ')
                     print()
@@ -493,8 +496,10 @@ def run_all_reddit_conditions(max_after: int, tags: Tags, timestamp: datetime.da
         f" || total_returned_data = {total_returned_data} || total_missing_data = {total_missing_data}")
 
 
-def run_all_twitter_conditions(max_after: int, tags: Tags, timestamp: datetime.datetime,
+def run_all_twitter_conditions(before_date: datetime.datetime, after_date: datetime.datetime, max_after: int, tags: Tags, timestamp: datetime.datetime,
                                crawler_type: Crawler_type):
+
+    # FIXME: before_date and after_date is not implemented because it is not compatible with the current convention that use Max_after
 
     total_returned_data, _ = 0, 0
 
@@ -528,14 +533,16 @@ def run_all_twitter_conditions(max_after: int, tags: Tags, timestamp: datetime.d
     print(
         f" || total_returned_data = {total_returned_data}")
 
-
-def run_all_conditions(max_after: int, tags: Tags, crawler_type: Crawler_type):
+def run_all_conditions(before_date: datetime.datetime, after_date: datetime.datetime, max_after: int, tags: Tags, crawler_type: Crawler_type):
     timestamp = datetime.datetime.now()
     print(f'>>> start running all {crawler_type} conditions... <<<')
     if crawler_type == 'reddit':
-        run_all_reddit_conditions(max_after, tags, timestamp, crawler_type)
+        run_all_reddit_conditions(before_date, after_date, max_after, tags, timestamp, crawler_type)
     elif crawler_type == 'twitter':
-        run_all_twitter_conditions(max_after, tags, timestamp, crawler_type)
+        run_all_twitter_conditions(before_date, after_date, max_after, tags, timestamp, crawler_type)
+    elif crawler_type == 'all':
+        run_all_reddit_conditions(before_date, after_date, max_after, tags, timestamp, 'reddit')
+        run_all_twitter_conditions(before_date, after_date, max_after, tags, timestamp, 'twitter')
     else:
         raise ValueError('your selected crawler_type is not implementd')
 
@@ -545,13 +552,16 @@ def run_all_conditions(max_after: int, tags: Tags, crawler_type: Crawler_type):
 # NOTE: default is set to tuple() when multiple=True, regardless of default set to None
 @click.option('--tags', multiple=True, type=click.STRING)
 @click.option('--max_after', type=int, default=MAX_AFTER)
-@click.option('--crawler_type',  type=click.Choice(['reddit', 'twitter']))
+@click.option('--before_date', type=click.DateTime(formats=["%Y-%m-%d"]),
+              default=str(datetime.date.today()))
+@click.option('--after_date', type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option('--crawler_type',  type=click.Choice(['reddit', 'twitter', 'all']))
 # @click.argument('tags', nargs=-1)
 @my_timer
-def main(select_all_conditions: bool, tags: Tags, max_after: int, crawler_type: str) -> None:
+def main(select_all_conditions: bool, tags: Tags, max_after: int, crawler_type: str, before_date: datetime.datetime, after_date: datetime.datetime ) -> None:
     tags = None if len(tags) == 0 else tags
     if select_all_conditions:
-        run_all_conditions(max_after, tags, crawler_type)
+        run_all_conditions(before_date, after_date, max_after, tags, crawler_type)
     else:
         raise NotImplementedError
         # run_selected_condition() # TODO can click command activate when I call the function only? click.invoke?

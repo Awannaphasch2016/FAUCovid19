@@ -61,7 +61,27 @@
             // "args": ["--help"]
             "args": ["--select_all_conditions",
                 "--crawler_type","reddit",
+                "--before_date", "20/08/18",
+                "--after_date", "20/08/20",
                 // "--tags", "all",
+                // "--tags", "work_from_home",
+                // "--tags", "lockdown",
+            ]
+
+        },
+        {
+            "name": "Python: ALL Crawler",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}\\Sources\\Preparations\\Data\\pushshift_library.py",
+            "console": "integratedTerminal",
+            "justMyCode":true,
+            "cwd": "${fileDirname}",
+            // "args": ["--help"]
+            "args": ["--select_all_conditions",
+                "--crawler_type","all",
+                "--tags", "all",
+                "--max_after", "3",
                 // "--tags", "work_from_home",
                 // "--tags", "lockdown",
             ]

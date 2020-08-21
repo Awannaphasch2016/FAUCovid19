@@ -28,6 +28,7 @@ Frequency = Literal['day']
 Sort = Literal['asc', 'desc']
 epoch_datetime = int
 
+
 class TwitterCollectionkey(TypedDict):
     aspect: List[str]
     query: Query
