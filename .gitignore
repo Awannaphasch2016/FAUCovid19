@@ -28,11 +28,10 @@ Outputs/Data/
 .__pycache__
 
 # ad_hoc .github. This is to make push to github very clean
-DemoData
-database.db.dat
-spam.bak
-spam.dir
-tmp
-spam.log
-dataset_demo.pickle
+**/DemoData/dataset_demo.pickle
+**/database.db.dat
+**/spam.bak
+**/spam.dir
+**/tmp/
+**/spam.log
 
