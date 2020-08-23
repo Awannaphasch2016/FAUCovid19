@@ -16,25 +16,6 @@
             // "args": ["--feature"]
         },
         {
-            // TODO: create launch configuration for flask application
-            "name": "Python: Flask",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-
-            "console": "integratedTerminal",
-            "justMyCode":true,
-            "cwd": "${fileDirname}",
-            "module": "flask",
-
-            "args": [
-                "run",
-                "--no-debugger",
-                "--no-reload"
-            ],
-            "jinja": true
-        },
-        {
             "name": "Python: TwitterDataCrawler",
             "type": "python",
             "request": "launch",
