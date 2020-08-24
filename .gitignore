@@ -22,6 +22,7 @@ Outputs/Data/
 .Outputs/Log
 /.env
 .env
+.db
 
 .Data/
 # .vscode/
