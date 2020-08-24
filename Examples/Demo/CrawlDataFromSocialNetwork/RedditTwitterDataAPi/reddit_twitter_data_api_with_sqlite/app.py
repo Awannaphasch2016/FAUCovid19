@@ -13,6 +13,8 @@ from flask import request
 from flask_restful import Api
 
 # Create an instance of Flask
+from global_parameters import BASE_DIR
+
 app = Flask(__name__)
 
 # Create the API
@@ -166,7 +168,9 @@ class APIManager:
 
             if crawler == 'reddit':
 
-                path_to_reddit_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\reddit_database'
+                # path_to_reddit_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\reddit_database'
+                path_to_reddit_database = pathlib.Path(BASE_DIR) / r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\reddit_database'
+                path_to_reddit_database = str(path_to_reddit_database)
 
                 query = _get_query(crawler, ALL_REDDIT_SEARCH_TYPE, ALL_REDDIT_FEILDS)
                 all_reddit_data =  self._get_all_data_from_sqlite(crawler, path_to_reddit_database, query)
@@ -174,7 +178,9 @@ class APIManager:
 
             if crawler == 'twitter':
 
-                path_to_twitter_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\twitter_database'
+                # path_to_twitter_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\twitter_database'
+                path_to_twitter_database = pathlib.Path(BASE_DIR)/ r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\twitter_database'
+                path_to_twitter_database = str(path_to_twitter_database)
 
                 query = _get_query(crawler, ALL_TWITTER_SEARCH_TYPE, ALL_TWITTER_FEILDS)
                 all_reddit_data =  self._get_all_data_from_sqlite(crawler, path_to_twitter_database, query)
@@ -405,5 +411,5 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
     # app.run(host='127.0.0.1', port=5501, debug=True)
