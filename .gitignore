@@ -22,6 +22,9 @@ Outputs/Data/
 .Outputs/Log
 /.env
 .env
+**/work_env
+**/venv
+
 .db
 
 .Data/
