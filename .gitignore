@@ -9,7 +9,10 @@
 .idea/
 **/.idea/tasks.xml
 **/.idea/workspace.xml
-
+*.pyc
+.ipynb_checkpoints/
+build/
+dist/
 
 # specific to the given folder structure
 .Outputs/
@@ -24,6 +27,7 @@ Outputs/Data/
 .env
 **/work_env
 **/venv
+**/Data/
 
 .db
 

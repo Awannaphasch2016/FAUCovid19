@@ -3,7 +3,6 @@ import os
 import sqlite3
 from itertools import product
 from os import walk
-
 # Import the framework
 from typing import Dict
 from typing import List
@@ -13,7 +12,7 @@ from flask import request
 from flask_restful import Api
 
 # Create an instance of Flask
-from global_parameters import BASE_DIR
+# from global_parameters import BASE_DIR
 
 app = Flask(__name__)
 
@@ -24,7 +23,7 @@ api = Api(app)
 DATEFORMAT = "%Y-%m-%d"
 
 ALL_ASPECTS = ['work_from_home', 'social_distance',
-               'corona', 'reopen',  'lockdown']
+               'corona', 'reopen', 'lockdown']
 ALL_CRALWERS = ['twitter', 'reddit']
 ALL_FREQUENCY = ['day']
 ALL_REDDIT_SEARCH_TYPE = ['comment', 'submission']
@@ -34,7 +33,8 @@ ALL_REDDIT_FEILDS = ['aspect', 'created_utc', 'search_types', 'crawler',
                      'frequency',
                      'subreddit', 'link_id', 'parent_id', 'title', 'body', 'id'
                      ]
-ALL_TWITTER_FEILDS = ['crawler', 'text', 'date', 'search_type', 'aspect', 'frequency', 'sentiment', 'id']
+ALL_TWITTER_FEILDS = ['crawler', 'text', 'date', 'search_type', 'aspect',
+                      'frequency', 'sentiment', 'id']
 
 
 def is_reddit_fields(s):
@@ -46,9 +46,6 @@ def is_twitter_fields(s):
 
 
 import pathlib
-
-PATH_TO_DATA = pathlib.Path(
-    r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Outputs\Data')
 
 
 class APIManager:
@@ -68,18 +65,6 @@ class APIManager:
         self.search_types = search_types
         self.fields = fields
 
-
-    def get_all_data_path(self, crawler_folder, asp, search_types):
-        # asp = [ asp ] if not isinstance( asp ,list) else asp
-        all_data_path = {}
-        data_path = PATH_TO_DATA / crawler_folder
-        return [data_path]
-        # for i, j in product(asp, search_types):
-        #     data_path = PATH_TO_DATA / crawler_folder / i / j / 'data' 
-        #     all_data_path['reddit'] = []
-        #     all_data_path['reddit'].append(data_path)
-        # return all_data_path
-
     def get_all_retrived_data(self):
 
         returned_data = {}
@@ -93,7 +78,7 @@ class APIManager:
                 before_date_query = ''
             else:
                 if crawler == 'reddit':
-                    date_key  =  ' created_utc'
+                    date_key = ' created_utc'
                 elif crawler == 'twitter':
                     date_key = ' date '
                 else:
@@ -130,7 +115,7 @@ class APIManager:
             else:
                 tmp = []
                 for t in search_types:
-                    tmp.append( f" search_type = '{t}' ")
+                    tmp.append(f" search_type = '{t}' ")
                 tmp = ' or '.join(tmp)
                 tmp = " ( " + tmp + " ) "
                 all_query = [aspect_query, tmp]
@@ -167,40 +152,62 @@ class APIManager:
                 raise ValueError()
 
             if crawler == 'reddit':
-
                 # path_to_reddit_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\reddit_database'
-                path_to_reddit_database = pathlib.Path(BASE_DIR) / r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\reddit_database'
+                # path_to_reddit_database = pathlib.Path(BASE_DIR) / r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\reddit_database'
+                path_to_reddit_database = r'reddit_database'
                 path_to_reddit_database = str(path_to_reddit_database)
 
-                query = _get_query(crawler, ALL_REDDIT_SEARCH_TYPE, ALL_REDDIT_FEILDS)
-                all_reddit_data =  self._get_all_data_from_sqlite(crawler, path_to_reddit_database, query)
-                returned_data.setdefault('all_retrived_data', []).extend(all_reddit_data)
+                query = _get_query(crawler, ALL_REDDIT_SEARCH_TYPE,
+                                   ALL_REDDIT_FEILDS)
+                all_reddit_data = self._get_all_data_from_sqlite(crawler,
+                                                                 path_to_reddit_database,
+                                                                 query)
+                returned_data.setdefault('all_retrived_data', []).extend(
+                    all_reddit_data)
 
             if crawler == 'twitter':
-
                 # path_to_twitter_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\twitter_database'
-                path_to_twitter_database = pathlib.Path(BASE_DIR)/ r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\twitter_database'
+                # path_to_twitter_database = pathlib.Path(BASE_DIR)/ r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPi\reddit_twitter_data_api_with_sqlite\twitter_database'
+                path_to_twitter_database = r'twitter_database'
                 path_to_twitter_database = str(path_to_twitter_database)
 
-                query = _get_query(crawler, ALL_TWITTER_SEARCH_TYPE, ALL_TWITTER_FEILDS)
-                all_reddit_data =  self._get_all_data_from_sqlite(crawler, path_to_twitter_database, query)
-                returned_data.setdefault('all_retrived_data', []).extend(all_reddit_data)
+                query = _get_query(crawler, ALL_TWITTER_SEARCH_TYPE,
+                                   ALL_TWITTER_FEILDS)
+                all_reddit_data = self._get_all_data_from_sqlite(crawler,
+                                                                 path_to_twitter_database,
+                                                                 query)
+                returned_data.setdefault('all_retrived_data', []).extend(
+                    all_reddit_data)
 
         return returned_data
 
-    def _get_all_data_from_sqlite(self, crawler: str, path_to_database: str, query: str) -> List[Dict]:
+    def _get_all_data_from_sqlite(self, crawler: str, path_to_database: str,
+                                  query: str) -> List[Dict]:
         assert crawler == path_to_database.split('\\')[-1].split('_')[0]
-
+        # print(path_to_database)
         conn = sqlite3.connect(path_to_database)
         cur = conn.cursor()
         # cur.execute("select * from reddit")
+        print(query)
         cur.execute(query)
-        if crawler in self.fields:
+
+        def unroll_all_variable_in_fields():
+            if self.fields[0] == 'all' and crawler == 'reddit':
+                return ALL_REDDIT_FEILDS
+            if self.fields[0] == 'all' and crawler == 'twitter':
+                return ALL_TWITTER_FEILDS
+            return self.fields
+
+        fields = unroll_all_variable_in_fields()
+
+        if 'crawler' in fields:
             r = [{**dict((cur.description[i][0], value) \
-                      for i, value in enumerate(row)), **{"crawler": crawler}} for row in cur.fetchall()]
+                         for i, value in enumerate(row)),
+                  **{"crawler": crawler}} for row in cur.fetchall()]
         else:
             r = [{**dict((cur.description[i][0], value) \
-                      for i, value in enumerate(row))} for row in cur.fetchall()]
+                         for i, value in enumerate(row))} for row in
+                 cur.fetchall()]
         # self.conn.commit()
         conn.close()
         return r
@@ -240,6 +247,7 @@ class APIManager:
                             all_files.append(os.path.join(dirpath1, file))
         return all_files
 
+
 def is_date(date_string):
     '''is_date 
     example of accpected date is 12-25-2018 
@@ -263,8 +271,10 @@ def is_supported_frequency(freq):
 def is_aspect(asp):
     return asp in ALL_ASPECTS
 
+
 def is_supported_aspect(asp):
     return asp in ALL_ASPECTS or asp is None
+
 
 def is_supported_crawler(cr):
     return cr in ALL_CRALWERS or cr is None
@@ -284,7 +294,10 @@ def get_respond_type_when_crawler_is_all(cr):
 
 @app.route("/", methods=['GET'])
 def index():
-    """Present some documentation"""
+    """Present some documentation
+
+
+    """
 
     crawlers = request.args.get('crawlers')
     since = request.args.get('since')
@@ -312,7 +325,6 @@ def index():
 
     def is_twitter_search_type(s):
         return s in ALL_TWITTER_SEARCH_TYPE or s == 'all'
-
 
     def ensure_compatiblity_of_search_types_and_crawlers(c, st, f):
         if st is None:
@@ -355,9 +367,9 @@ def index():
         fields = ['all']
     else:
         raise ValueError
+
     # def ensure_compatibility_of_fields_and_crawler(cr, f):
     #     if cr[0] == 'all'
-
 
     def convert_to_common_type(args, all_keywords=None, accept_all=True):
         if accept_all:
@@ -392,7 +404,6 @@ def index():
     else:
         since_datetime = since
 
-
     if until[0] is not None or until[0] == 'all':
         assert is_date(until[0]) and len(until) == 1
 
@@ -400,14 +411,12 @@ def index():
     else:
         until_datetime = until
 
-
     assert is_supported_frequency(frequency[0])
 
     api_manager = APIManager(aspects, crawlers, since_datetime, until_datetime,
                              frequency, search_types, fields)
 
     return api_manager.get_all_retrived_data()
-
 
 
 if __name__ == '__main__':

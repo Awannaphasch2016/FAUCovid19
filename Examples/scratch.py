@@ -1,70 +1,85 @@
-import sqlite3
-x = """
-            CREATE TABLE IF NOT EXISTS {table} (
-                PRIMARY KEY {table}
-            );
+# == Twitter
+import datetime
+import pandas
+
+x = []
+for i in range(len(all_retrieved_data)):
+    # for i i n range(10):
+    tt = all_retrieved_data[i]['data_from_a_file']['metadata']['aspect']
+    dd = pandas.DataFrame(all_retrieved_data[i]['data_from_a_file']['data'])
+    tmp = []
+    for i in dd['id'].tolist():
+        tmp.append(tt + str(i))
+    # print(tmp)
+    # x.append(dd['id'])
+    # print(dd.keys())
+    # print(dd['date'])
+    # print(datetime.datetime.fromtimestamp(dd['date'].max()), datetime.datetime.fromtimestamp(dd['date'].min()))
+    # print(len(dd['id'].unique().tolist()), dd['id'].shape)
+    # x.append(dd['id'].unique().tolist())
+    # x.extend(dd['id'].unique().tolist())
+    x.extend(tmp)
+print(len(x))
+print(len(set(x)))
+
+
+def intersection(a, b):
+    return set(x[a]).intersection(set(x[b]))
+
+
+# == Reddit
+tmp = {}
+ALL_ASPECTS = ['work_from_home', 'social_distance', 'lockdown', 'reopen',
+               'corona']
+for i in all_reddit_retrieved_data:
+    if i['aspect'] in ALL_ASPECTS:
+        # if i['id'] == 'ibxs9m':
+        # print(i['aspect'])
+        # tmp.setdefault(i['aspect'], []).append(i['id'])
+        tmp.setdefault(i['aspect'], []).append(i)
+        # tmp.append(i)
+        # tmp.append(i['id'])
+
+
+# print(len(tmp))
+
+def has_no_duplicate(aspect, tmp):
+    return len(tmp[aspect]) == len(set(tmp[aspect]))
+
+
+import pandas as pd
+
+
+def check_if_aspect_has_no_duplicate(tmp):
+    def has_no_duplicate(aspect, tmp):
+        tmp_df = pd.DataFrame(tmp[aspect])
+        return tmp_df['id'].unique().shape[0] == tmp_df['id'].shape[0]
+
+    for i in ALL_ASPECTS:
+        # print(i)
+        # if not has_no_duplicate(i, tmp):
+        if not has_no_duplicate(i, tmp):
+            tmp_df = pd.DataFrame(tmp[i])
+            tmp_df = tmp_df.drop_duplicates(subset=['id'])
+            tmp[i] = tmp_df.to_dict('record')
+    return tmp
+
+
+# == query
+query = """create table if not exists TEST (
+    id string
+    ,name string
+    ,unique (id, name)
+    );
     """
+c = self.conn.cursor()
+c.execute(query)
 
-sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS projects (
-                                    {table} integer PRIMARY KEY
-                                      , sentiment double
-                                    , text STRING
-                                    , date DATE
-                                ); """
-sql_add_data = """INSERT INTO projects (sentiment, text, date)
-VALUES( 	0.100 , 'billionair', '2020-089-19');
-"""
+insert = "insert into TEST (id, name) values(2, 'Anak')"
+c = self.conn.cursor()
+c.execute(insert)
 
-# sql_create_projects_table = """ CREATE TABLE projects (
-#                                     {table} integer PRIMARY KEY
-#                                       , sentiment double
-#                                     , text STRING
-#                                 ); """
-# sql_add_data = """INSERT INTO projects (sentiment, text)
-# VALUES( 	0.100 , 'billionair');"""
+self.conn.cursor().execute("drop table if exists TEST")
 
-
-def create_connection(db_file):
-    """ create a database connection to the SQLite database
-        specified by db_file
-    :param db_file: database file
-    :return: Connection object or None
-    """
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except ValueError as e:
-        raise ValueError(e)
-
-    return conn
-
-def create_table(conn, create_table_sql):
-    """ create a table from the create_table_sql statement
-    :param conn: Connection object
-    :param create_table_sql: a CREATE TABLE statement
-    :return:
-    """
-    try:
-        c = conn.cursor()
-        c.execute(create_table_sql)
-    except ValueError as e:
-        raise ValueError(e)
-
-def add_data(conn, add_data_sql):
-    try:
-        c = conn.cursor()
-        c.execute(add_data_sql)
-    except ValueError as e:
-
-        raise ValueError(e)
-
-if __name__== '__main__':
-    conn = create_connection('test_db')
-    # create_table(conn, x.format(table = 'Anak'))
-    
-    create_table(conn, sql_create_projects_table.format(table='Anak'))
-    add_data(conn, sql_add_data )
-    conn.commit()
-    conn.close()
-
+self.conn.commit()
+self.conn.close()

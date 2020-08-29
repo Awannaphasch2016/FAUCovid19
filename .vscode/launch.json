@@ -19,7 +19,7 @@
             "name": "Python: TwitterDataCrawler",
             "type": "python",
             "request": "launch",
-            // "program": "C:\\Users\\Anak\\PycharmProjects\\Covid19CookieCutter\\Sources\\Preparations\\Data\\pushshift_library.py",
+            // "program": "C:\\Users\\Anak\\PycharmProjects\\Covid19CookieCutter\\src\\Preparations\\Data\\pushshift_library.py",
             "program": "${workspaceFolder}\\Sources\\Preparations\\Data\\pushshift_library.py",
             "console": "integratedTerminal",
             "justMyCode":true,
@@ -67,6 +67,19 @@
                 // "--tags", "lockdown",
             ]
 
-        }
+        },
+        {
+            "name": "Python Attach",
+            "type": "python",
+            "request": "attach",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/Examples/Demo/CrawlDataFromSocialNetwork/RedditTwitterDataAPi/reddit_twitter_data_api_with_sqlite",
+                    "remoteRoot": "/work"
+                }
+            ],
+            "port": 5678,
+            "host": "127.0.0.1"
+        },
     ]
 }

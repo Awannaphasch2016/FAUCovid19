@@ -30,5 +30,5 @@
     },
     "explorerExclude.backup": null,
     "git.ignoreLimitWarning": true,
-    "python.pythonPath": "work_env\\Scripts\\python.exe",
+    "python.pythonPath": "venv\\Scripts\\python.exe",
 }

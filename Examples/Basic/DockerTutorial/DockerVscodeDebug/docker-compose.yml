@@ -1,0 +1,20 @@
+version: "3.4"
+services:
+  python: #docker run -it -v ${PWD}:/work -w /work -p 5003:5000 aimvector/python:1.0.0 /bin/sh
+    container_name: python
+    image: aimvector/python:1.0.0
+    # dockerfile: dockerfile
+    build:
+      context: ./python
+      # context: .
+      target: debug
+    #working_dir: /work      #comment out for build.target:prod
+    #entrypoint: /bin/sh     #comment out for build.target:prod
+    #stdin_open: true        #comment out for build.target:prod
+    #tty: true               #comment out for build.target:prod
+    volumes:
+    - ./python/src/:/work
+    # - ./src/:/work
+    ports:
+      - 5003:5000
+      - 5678:5678

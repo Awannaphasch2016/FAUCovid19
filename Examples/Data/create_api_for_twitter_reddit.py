@@ -20,3 +20,4 @@ display_ex(pickle.load(open(lockdown_ex, 'rb')))
 
 display_ex(pickle.load(open(social_distance_ex, 'rb')))
 
+

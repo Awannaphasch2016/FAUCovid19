@@ -5,6 +5,7 @@ import sqlite3
 from typing import Dict
 from typing import List
 from typing import Optional
+import pandas as pd
 
 ALL_ASPECTS = ['work_from_home', 'social_distance',
                'corona', 'reopen', 'lockdown']
@@ -19,6 +20,7 @@ def get_all_file_path() -> List[pathlib.Path]:
         r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Outputs\Data\RedditCrawler')
     twitter_path = pathlib.Path(
         r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Outputs\Data\TwitterCrawler')
+    # raise NotImplementedError
     return [reddit_path, twitter_path]
 
 
@@ -144,14 +146,26 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                                         i[metadata] if
                                         key in selected_metadata_keys}
                 for ind in range(len(i[data])):
-                    tmp = {key: i[data][0][key] for key in i[data][0]
+                    tmp = {key: i[data][ind][key] for key in i[data][ind]
                                         if key in selected_data_keys}
                     all_reddit_retrieved_data.append({**tmp, **each_reddit_metadata, **j['data'] })
 
                 # all_reddit_retrieved_data.append(
                 #     {**each_reddit_data, **each_reddit_metadata, **j['data']})
-            returned_data: Dict = {'reddit': all_reddit_retrieved_data}
-            return returned_data
+
+            def check_if_aspect_has_no_duplicate(tmp: Dict) -> Dict:
+                tmp_df = pd.DataFrame(tmp)
+                tmp_dict: Dict = {}
+                tmp_dict = tmp_df.drop_duplicates(subset=['id', 'aspect']).to_dict('record')
+                return tmp_dict
+
+            # all_reddit_retrieved_data_df = pd.DataFrame(all_reddit_retrieved_data)
+            all_reddit_retrieved_data: Dict = check_if_aspect_has_no_duplicate(all_reddit_retrieved_data)
+            # all_reddit_retrieved_data = all_reddit_retrieved_data_df.to_dict('record')
+
+            return_data_no_dubplicate: Dict = {'reddit': all_reddit_retrieved_data}
+
+            return return_data_no_dubplicate
             # import pandas as pd
             # all_reddit_retrieved_data_pd = pd.DataFrame.from_dict(all_reddit_retrieved_data)
 
@@ -162,6 +176,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
 
             all_twitter_retrieved_data = []
 
+            acc = []
             for data_from_file_and_folder in all_retrieved_data:
                 i = data_from_file_and_folder['data_from_a_file']
                 j = data_from_file_and_folder['data_from_folder_path']
@@ -175,6 +190,9 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                 for ind in range(len(i['data'])):
                     tmp = {key: i[data][ind][key] for key in i[data][ind]
                                              if key in selected_data_keys}
+                    for  d,y in tmp.items():
+                        if d == 'id':
+                            acc.append(y) 
                     all_twitter_retrieved_data.append({**tmp, **each_twitter_metadata, **j['data']})
 
             returned_data: Dict = {'twitter': all_twitter_retrieved_data}
@@ -246,8 +264,9 @@ class SocialMediaDatabase():
                                     , sentiment double
                                     , subreddit STRING
                                     , link_id STRING 
-                                    , id STRING
+                                    , id STRING 
                                     , parent_id STRING 
+                                    , UNIQUE (id, aspect)
                                 ); 
                                 """
 
@@ -266,12 +285,14 @@ class SocialMediaDatabase():
                                     , aspect STRING
                                     , frequency STRING
                                     , sentiment double
-                                    , id STRING
+                                    , id STRING 
+                                    , UNIQUE (id , aspect)
                                 ); 
                                 """
 
         c = self.conn.cursor()
         c.execute(query)
+
 
     def _reddit_insert_query(self, **kwargs):
 
@@ -402,9 +423,9 @@ if __name__ == "__main__":
     all_data = get_all_data_from_files(all_files, 'reddit')
     SocialMediaDatabase('reddit_database', all_data)
 
-    all_data_path = get_all_file_path()
-    all_files = get_all_file(all_data_path, 'twitter')
-    all_data = get_all_data_from_files(all_files, 'twitter')
-    SocialMediaDatabase('twitter_database', all_data)
+    # all_data_path = get_all_file_path()
+    # all_files = get_all_file(all_data_path, 'twitter')
+    # all_data = get_all_data_from_files(all_files, 'twitter')
+    # SocialMediaDatabase('twitter_database', all_data)
 
     print('complete running..')
