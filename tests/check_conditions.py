@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+"""check code in """
+
+from collections.abc import Iterable
 from typing import List
 from typing import Union
 
@@ -9,13 +14,14 @@ from Utilities.declared_typing import RunningConditions
 # from Utilities.declared_typing import RunningConstraints
 from Utilities.declared_typing import Tags
 from Utilities.declared_typing import TwitterRunningConstraints
-from global_parameters import ALL_REDDIT_TAGS, ALL_TWITTER_COLLETION_NAMES, ALL_TWITTER_SEARCH_TYPES, ALL_REDDIT_COLLECTION_NAMES, ALL_REDDIT_SEARCH_TYPES
-
-from collections.abc import Iterable
+from global_parameters import ALL_REDDIT_COLLECTION_NAMES
+from global_parameters import ALL_REDDIT_SEARCH_TYPES
+from global_parameters import ALL_REDDIT_TAGS
+from global_parameters import ALL_TWITTER_COLLETION_NAMES
+from global_parameters import ALL_TWITTER_SEARCH_TYPES
 
 
 def _check_reddit_tags_value(tags: Tags) -> None:
-
     if isinstance(tags, Iterable):
 
         if len(tags) == 1 and tags[0] == 'all':
@@ -50,21 +56,24 @@ def check_running_conditions(running_conditions: RunningConditions) -> None:
         else:
 
             if running_conditions['crawler_option'] == 'reddit':
-                if running_conditions['collection_name'] not in ALL_REDDIT_COLLECTION_NAMES:
+                if running_conditions[
+                        'collection_name'] not in ALL_REDDIT_COLLECTION_NAMES:
                     raise ValueError('collection_name are not availble')
 
-                if running_conditions['search_type'] not in ALL_REDDIT_SEARCH_TYPES:
+                if running_conditions[
+                        'search_type'] not in ALL_REDDIT_SEARCH_TYPES:
                     raise ValueError('search_type are not abailble')
 
                 if running_conditions['respond_type'] not in ['data']:
                     raise ValueError('respond_type are not availble')
 
             elif running_conditions['crawler_option'] == 'twitter':
-                if running_conditions['collection_name'] not in ALL_TWITTER_COLLETION_NAMES:
+                if running_conditions[
+                        'collection_name'] not in ALL_TWITTER_COLLETION_NAMES:
                     raise ValueError('collection_name are not availble')
 
-                if running_conditions['search_type'] not in ALL_TWITTER_SEARCH_TYPES:
-
+                if running_conditions[
+                        'search_type'] not in ALL_TWITTER_SEARCH_TYPES:
                     raise ValueError('search_type are not abailble')
 
                 if running_conditions['respond_type'] not in ['data_geo',
@@ -80,11 +89,12 @@ def _check_that_all_selected_fields_are_returns(
         current_condition_str: str,
         verbose: int
 ):
-    before = running_constraints['before']
-    after = running_constraints['after']
+    # before = running_constraints['before']
+    # after = running_constraints['after']
     fields = running_constraints['fields']
 
-    current_condition_str_with_ind = current_condition_str + \
+    current_condition_str_with_ind = \
+        current_condition_str + \
         f" || ind = {ind} ||"
     res_data = res['data'][ind]
     len_res_data_key = len(list(res_data.keys()))
@@ -98,7 +108,8 @@ def _check_that_all_selected_fields_are_returns(
             all_missing_keys = "[" + ','.join(
                 list(incorrect_fields)) + "]"
             incorrect_fields_error = f'{current_condition_str_with_ind} ' \
-                                     f'the following fields are incorrect {all_missing_keys} '
+                                     f'the following fields are incorrect' \
+                                     f' {all_missing_keys} '
             return (list(incorrect_fields), all_missing_keys,
                     incorrect_fields_error)
 
@@ -107,7 +118,8 @@ def _check_that_all_selected_fields_are_returns(
                              incorrect_fields_error: str):
             if verbose:
                 print(
-                    f'{current_condition_str_with_ind}  adding keys = {all_missing_keys}')
+                    f'{current_condition_str_with_ind}  '
+                    f'adding keys = {all_missing_keys}')
 
             for missing_key in incorrect_fields:
                 if missing_key not in res['data']:
@@ -120,4 +132,5 @@ def _check_that_all_selected_fields_are_returns(
 
     else:
         print(
-            f'{current_condition_str_with_ind} || all selected fields are retuned ')
+            f'{current_condition_str_with_ind} || '
+            f'all selected fields are retuned ')

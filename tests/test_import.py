@@ -4,6 +4,7 @@
 
 import unittest
 
+
 class TestImport(unittest.TestCase):
     """A test case for import tests."""
 
@@ -11,4 +12,3 @@ class TestImport(unittest.TestCase):
         """Test that PyBEL can be imported."""
         # import Preparations.Data
         pass
-
