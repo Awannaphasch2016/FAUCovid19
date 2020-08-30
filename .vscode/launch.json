@@ -19,7 +19,7 @@
             "name": "Python: TwitterDataCrawler",
             "type": "python",
             "request": "launch",
-            // "program": "C:\\Users\\Anak\\PycharmProjects\\Covid19CookieCutter\\src\\Preparations\\Data\\pushshift_library.py",
+            // "program": "C:\\Users\\Anak\\PycharmProjects\\Covid19CookieCutter\\Sources\\Preparations\\Data\\social_media_crawler.py",
             "program": "${workspaceFolder}\\Sources\\Preparations\\Data\\pushshift_library.py",
             "console": "integratedTerminal",
             "justMyCode":true,

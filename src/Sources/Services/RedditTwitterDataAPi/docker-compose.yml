@@ -16,12 +16,12 @@ services:
     container_name: python
     image: aimvector/python:1.0.0
     build:
-      context: ./reddit_twitter_data_api_with_sqlite
+      context: reddit_twitter_data_api_with_sqlite
     #   target: debug
-    build: .
+    build: ""
     volumes:
       - ./reddit_twitter_data_api_with_sqlite:/work
-      # - ./src/:/work
+      # - ./Sources/:/work
     ports:
       - 5003:5000
       - 5678:5678

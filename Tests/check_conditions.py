@@ -6,14 +6,14 @@ from collections.abc import Iterable
 from typing import List
 from typing import Union
 
-# from src.Preparations.Data.RedditCrawler import RedditCrawler
-# from src.Preparations.Data.TwitterCrawler import TwitterCrawler
-from Utilities.declared_typing import Json
-from Utilities.declared_typing import RedditRunningConstraints
-from Utilities.declared_typing import RunningConditions
+# from Sources.Preparations.Data.RedditCrawler import RedditCrawler
+# from Sources.Preparations.Data.TwitterCrawler import TwitterCrawler
+from src.Utilities import Json
+from src.Utilities import RedditRunningConstraints
+from src.Utilities import RunningConditions
 # from Utilities.declared_typing import RunningConstraints
-from Utilities.declared_typing import Tags
-from Utilities.declared_typing import TwitterRunningConstraints
+from src.Utilities import Tags
+from src.Utilities import TwitterRunningConstraints
 from global_parameters import ALL_REDDIT_COLLECTION_NAMES
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_REDDIT_TAGS

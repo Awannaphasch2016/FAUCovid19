@@ -1,6 +1,6 @@
 import GetOldTweets3 as got
 
-from Utilities import my_timer
+from src.Utilities import my_timer
 
 
 @my_timer

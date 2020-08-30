@@ -1,7 +1,7 @@
 import click
 import os, sys
 
-from Utilities import my_timer
+from src.Utilities import my_timer
 
 
 @click.command()

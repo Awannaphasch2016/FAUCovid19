@@ -31,7 +31,7 @@ class AuthorSchema(ma.SQLAlchemySchema):
 class BookSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Book
-        include_fk = True #VALIDATE: what is this for? 
+        include_fk = True
 
 
 db.create_all()

@@ -34,7 +34,7 @@ ALL_REDDIT_RESPOND_TYPES = ['data']
 # MAX_AFTER = 166
 MAX_AFTER = 30
 
-# Twitter Note:
+# NOTE: Twitter
 #  >Keywords are copied from 'Tracking Social Media Discourse About the COVID-19 Pandemic: Developement of a Public Coronavirus  Twitter Dataset' github:
 #  >https://github.com/echen102/COVID-19-TweetIDs/blob/master/keywords.txt
 

@@ -13,8 +13,8 @@ services:
     #stdin_open: true        #comment out for build.target:prod
     #tty: true               #comment out for build.target:prod
     volumes:
-    - ./python/src/:/work
-    # - ./src/:/work
+    - ./python/Sources/:/work
+    # - ./Sources/:/work
     ports:
       - 5003:5000
       - 5678:5678

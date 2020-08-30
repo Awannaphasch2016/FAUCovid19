@@ -52,7 +52,7 @@ def profile(username):
 with app.test_request_context():
     print(url_for('index'))
     print(url_for('login'))
-    print(url_for('login', next='/')) # what is next for? 
+    print(url_for('login', next='/'))
     print(url_for('profile', username='John Doe')) # redirect useing builtin-keyword "profile" ->"/user/<username>"
     print(url_for('profile'))
 

@@ -1,6 +1,3 @@
-# TODO check the following
-#   > hwo to use .correct() so that the text are corrected
-#   >does it deal with hashtags?
 
 from textblob import TextBlob
 import nltk
