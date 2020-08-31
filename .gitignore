@@ -27,8 +27,6 @@ Outputs/Data/
 .env
 **/work_env
 **/venv
-**/Data/
-
 .db
 
 .Data/
