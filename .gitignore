@@ -27,7 +27,7 @@ Outputs/Data/
 .env
 **/work_env
 **/venv
-.db
+*.db
 
 .Data/
 # .vscode/

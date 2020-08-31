@@ -34,7 +34,7 @@ ALL_TWITTER_SEARCH_TYPE = ['data_tweet']
 
 ALL_REDDIT_FEILDS = ['aspect', 'created_utc', 'search_types', 'crawler',
                      'frequency',
-                     'subreddit', 'link_id', 'parent_id', 'title', 'body', 'id'
+                     'subreddit', 'link_id', 'parent_id', 'title', 'body', 'id', 'sentiment'
                      ]
 ALL_TWITTER_FEILDS = ['crawler', 'text', 'date', 'search_type', 'aspect',
                       'frequency', 'sentiment', 'id']

@@ -3,14 +3,18 @@
 
 """Update crawled social media data with sqlite3 database"""
 
-import datetime
 import os
-import pandas as pd
 import pathlib
 import sqlite3
+import sys
 from typing import Dict
-from typing import List
 from typing import Optional
+
+import pandas as pd
+
+sys.path.insert(0, str(pathlib.Path(os.getcwd()).parent.parent.parent.parent))
+
+from global_parameters import *
 
 ALL_ASPECTS = ['work_from_home', 'social_distance',
                'corona', 'reopen', 'lockdown']
@@ -27,10 +31,10 @@ def get_all_file_path() -> List[pathlib.Path]:
     :rtype: list of pathlib.Path
     :return: list of path to crawler output data
     """
-    reddit_path = pathlib.Path(
-        r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Outputs\Data\RedditCrawler')
-    twitter_path = pathlib.Path(
-        r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Outputs\Data\TwitterCrawler')
+    reddit_path = pathlib.Path(BASE_DIR) / pathlib.Path(
+        r'Outputs\Data\RedditCrawler')
+    twitter_path = pathlib.Path(BASE_DIR) / pathlib.Path(
+        r'Outputs\Data\TwitterCrawler')
     # raise NotImplementedError
     return [reddit_path, twitter_path]
 
@@ -160,6 +164,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
     :rtype: Dict
     :return: dict of all returned data from specified crawler's database
     """
+
     # all_data_from_a_file
 
     def _get_all_data_from_a_file(file):
@@ -292,14 +297,14 @@ class SocialMediaDatabase():
         self.conn = self._create_connection(dbfile)
         # self._get_all_data_from_sqlite()
 
-        if dbfile == 'reddit_database':
+        if dbfile == 'reddit_database.db':
             self.conn.cursor().execute("DROP table if exists reddit")
             self._create_table_reddit()
 
             for i in data['reddit']:
                 self._insert_data_to_database('reddit', **i)
 
-        elif dbfile == 'twitter_database':
+        elif dbfile == 'twitter_database.db':
             self.conn.cursor().execute("DROP table if exists twitter")
             self._create_table_twitter()
 
@@ -553,11 +558,11 @@ if __name__ == "__main__":
     all_data_path = get_all_file_path()
     all_files = get_all_file(all_data_path, 'reddit')
     all_data = get_all_data_from_files(all_files, 'reddit')
-    SocialMediaDatabase('reddit_database', all_data)
+    SocialMediaDatabase('reddit_database.db', all_data)
 
     all_data_path = get_all_file_path()
     all_files = get_all_file(all_data_path, 'twitter')
     all_data = get_all_data_from_files(all_files, 'twitter')
-    SocialMediaDatabase('twitter_database', all_data)
+    SocialMediaDatabase('twitter_database.db', all_data)
 
     print('complete running..')
