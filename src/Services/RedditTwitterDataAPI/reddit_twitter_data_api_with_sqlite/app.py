@@ -1,23 +1,27 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """Run social media data api so users can requests for social media data"""
 
 import datetime
-import os
+import pathlib
 import sqlite3
+from itertools import product
+from typing import Callable
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
+
 from flask import Flask
 from flask import request
 from flask_restful import Api
-from itertools import product
-from os import walk
-from typing import Dict
-from typing import List
 
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
 
 app = Flask(__name__)
+app.config["JSON_SORT_KEYS"] = False
 
 # Create the API
 api = Api(app)
@@ -25,19 +29,52 @@ api = Api(app)
 # /?crawlers=twitter&since=2020-08-07&until=2020-08-08&aspects=work_from_home,reopen
 DATEFORMAT = "%Y-%m-%d"
 
-ALL_ASPECTS = ['work_from_home', 'social_distance',
-               'corona', 'reopen', 'lockdown']
-ALL_CRALWERS = ['twitter', 'reddit']
-ALL_FREQUENCY = ['day']
-ALL_REDDIT_SEARCH_TYPE = ['comment', 'submission']
-ALL_TWITTER_SEARCH_TYPE = ['data_tweet']
+ALL_ASPECTS = [
+    "work_from_home",
+    "social_distance",
+    "corona",
+    "reopen",
+    "lockdown",
+]
+ALL_CRALWERS = ["twitter", "reddit"]
+ALL_FREQUENCY = ["day"]
+ALL_REDDIT_SEARCH_TYPE = ["comment", "submission"]
+ALL_TWITTER_SEARCH_TYPE = ["data_tweet"]
 
-ALL_REDDIT_FEILDS = ['aspect', 'created_utc', 'search_types', 'crawler',
-                     'frequency',
-                     'subreddit', 'link_id', 'parent_id', 'title', 'body', 'id', 'sentiment'
-                     ]
-ALL_TWITTER_FEILDS = ['crawler', 'text', 'date', 'search_type', 'aspect',
-                      'frequency', 'sentiment', 'id']
+ALL_CRAWLERS_SEARCH_TYPE = {
+    ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPE,
+    ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPE,
+}
+
+ALL_REDDIT_FEILDS = [
+    "aspect",
+    "created_utc",
+    "search_types",
+    "crawler",
+    "frequency",
+    "subreddit",
+    "link_id",
+    "parent_id",
+    "title",
+    "body",
+    "id",
+    "sentiment",
+]
+ALL_TWITTER_FEILDS = [
+    "crawler",
+    "text",
+    "date",
+    "search_type",
+    "aspect",
+    "frequency",
+    "sentiment",
+    "id",
+]
+
+all_crawler_fields = {
+    ALL_CRALWERS[0]: ALL_TWITTER_FEILDS,
+    ALL_CRALWERS[1]: ALL_REDDIT_FEILDS,
+}
 
 
 def is_reddit_fields(s):
@@ -50,7 +87,7 @@ def is_reddit_fields(s):
     :rtype: boolean
     :return: return true if arg is an accpeted reddit fields otherwise false
     """
-    return s in ALL_REDDIT_FEILDS or s == 'all'
+    return s in ALL_REDDIT_FEILDS or s == "all"
 
 
 def is_twitter_fields(s):
@@ -63,21 +100,47 @@ def is_twitter_fields(s):
     :rtype: boolean
     :return: return true if arg is an accpeted twitter fields otherwise false
     """
-    return s in ALL_TWITTER_FEILDS or s == 'all'
-
-
-import pathlib
+    return s in ALL_TWITTER_FEILDS or s == "all"
 
 
 class APIManager:
-    def __init__(self, aspects, crawlers, after_date, before_date, frequency,
-                 search_types, fields):
+    def __init__(
+        self,
+        aspects,
+        crawlers,
+        after_date,
+        before_date,
+        frequency,
+        search_types,
+        fields,
+        total_count,
+        top_amount,
+    ):
 
-        self.init_vars(aspects, crawlers, after_date, before_date, frequency,
-                       search_types, fields)
+        self.init_vars(
+            aspects,
+            crawlers,
+            after_date,
+            before_date,
+            frequency,
+            search_types,
+            fields,
+            total_count,
+            top_amount,
+        )
 
-    def init_vars(self, aspects, crawlers, after_date, before_date, frequency,
-                  search_types, fields):
+    def init_vars(
+        self,
+        aspects,
+        crawlers,
+        after_date,
+        before_date,
+        frequency,
+        search_types,
+        fields,
+        total_count,
+        top_amount,
+    ):
         """
         prepare common data that will be used among class's methods
 
@@ -88,10 +151,12 @@ class APIManager:
         :param crawlers: list of aspects
 
         :type after_date: datetime.datetime
-        :param after_date: date in which all aata AFTER this date should be retrieved
+        :param after_date: date in which all aata AFTER this date should be
+         retrieved
 
         :type before_date: datetime.datetime
-        :param before_date: date in which all aata BEFORE this date should be retrieved
+        :param before_date: date in which all aata BEFORE this date should be
+         retrieved
 
         :type frequency: Frequency
         :param frequency: interval of time to retrieved data
@@ -102,7 +167,12 @@ class APIManager:
         :type fields: list of str
         :param fields: list of desired fields by crawler
 
+        :type total_count: bool
+        :param total_count: indicate whether or not to return total count of
+            the returned output instead of output itself
+
         """
+        self.RETURNED_DATA_KEY = "all_retrived_data"
 
         self.aspects = aspects
         self.crawlers = crawlers
@@ -111,10 +181,40 @@ class APIManager:
         self.frequency = frequency
         self.search_types = search_types
         self.fields = fields
+        self.total_count = total_count
+        self.top_retrieved_data = top_amount
 
-    def get_all_retrived_data(self):
+    def select_returned_function(self) -> Callable:
+        if self.total_count:
+            return self._get_total_count
+        elif self.top_retrieved_data:
+            return self._get_top_retrieved_data
+        else:
+            return self._get_all_retrieved_data
+
+    def _get_total_count(self) -> Dict:
+        return {
+            "total_count": len(
+                self._get_all_retrieved_data()[self.RETURNED_DATA_KEY]
+            )
+        }
+
+    def _get_top_retrieved_data(self) -> Dict:
+        return {
+            "top_retrieved": self.top_retrieved_data,
+            self.RETURNED_DATA_KEY: self._get_all_retrieved_data()[
+                self.RETURNED_DATA_KEY
+            ][: self.top_retrieved_data],
+        }
+
+    def _get_all_retrieved_data(self) -> Dict:
         """
-        prepared + return all  stored crawled data of a specified crawler to browser
+        prepared + return all  stored crawled data of selected crawlers to
+         browser
+
+         :rtype: Dict
+         :return: returned all stored cralwed data of selected crawlers
+
         """
 
         returned_data = {}
@@ -124,42 +224,40 @@ class APIManager:
             before_date_query = ""
 
             if self.after_date[0] is None and self.before_date[0] is None:
-                after_date_query = ''
-                before_date_query = ''
+                after_date_query = ""
+                before_date_query = ""
             else:
-                if crawler == 'reddit':
-                    date_key = ' created_utc'
-                elif crawler == 'twitter':
-                    date_key = ' date '
+                if crawler == "reddit":
+                    date_key = " created_utc"
+                elif crawler == "twitter":
+                    date_key = " date "
                 else:
                     raise ValueError()
 
                 if self.after_date[0] is not None:
                     after_date_created_utc = int(
-                        self.after_date[0].timestamp())
+                        self.after_date[0].timestamp()
+                    )
                     after_date_query = f"{date_key} > {after_date_created_utc}"
                 if self.before_date[0] is not None:
                     before_date_created_utc = int(
-                        self.before_date[0].timestamp())
-                    before_date_query = f"{date_key} <= {before_date_created_utc}"
+                        self.before_date[0].timestamp()
+                    )
+                    before_date_query = (
+                        f"{date_key} <= {before_date_created_utc}"
+                    )
 
-            if self.search_types[0] == 'all':
+            if self.search_types[0] == "all":
                 search_types = all_crawler_search_type
             else:
                 search_types = self.search_types
 
-            if self.fields[0] == 'all':
-                fields = all_crawler_fields
+            if self.fields[0] == "all":
                 fields_query = " * "
             else:
-                fields_query = ','.join(self.fields)
+                fields_query = ",".join(self.fields)
 
-            date_query = ""
-            search_types_query = ""
             aspect_query = f" aspect = '{asp}'"
-
-            all_query = ""
-            frequency_query = ""
 
             if len(search_types) == len(all_crawler_search_type):
                 all_query = [aspect_query]
@@ -167,7 +265,7 @@ class APIManager:
                 tmp = []
                 for t in search_types:
                     tmp.append(f" search_type = '{t}' ")
-                tmp = ' or '.join(tmp)
+                tmp = " or ".join(tmp)
                 tmp = " ( " + tmp + " ) "
                 all_query = [aspect_query, tmp]
 
@@ -188,52 +286,56 @@ class APIManager:
             if self.frequency[0] is not None:
                 frequency_query = f" frequency = '{self.frequency[0]}' "
                 all_query.append(frequency_query)
+            else:
+                frequency_query = ""
 
             print()
 
             return f"select {fields_query} from {crawler} where ".format(
-                fields_query, crawler) + " and ".join(all_query)
+                fields_query, crawler
+            ) + " and ".join(all_query)
+
+        social_media_database_name_path = {
+            ALL_CRALWERS[1]: str(pathlib.Path("reddit_database.db")),
+            ALL_CRALWERS[0]: str(pathlib.Path("twitter_database.db")),
+        }
+
+        def _get_all_retrived_data(_asp: str, _crawler: str) -> List[Dict]:
+            """
+            :type _asp:  str
+            :param _asp: an aspect name
+
+            :type _crawler:  str
+            :param _crawler: a crawler name
+            """
+            path_to_crawler_database = social_media_database_name_path[
+                _crawler
+            ]
+            path_to_crawler_database = str(path_to_crawler_database)
+
+            query = _get_query(
+                _crawler,
+                ALL_CRAWLERS_SEARCH_TYPE[_crawler],
+                all_crawler_fields[_crawler],
+            )
+            all_crawler_data_from_database = self._get_all_data_from_sqlite(
+                _crawler, path_to_crawler_database, query
+            )
+
+            return all_crawler_data_from_database
 
         for asp, crawler in product(self.aspects, self.crawlers):
-            if crawler == 'twitter':
-                crawler_folder = 'TwitterCrawler'
-            elif crawler == 'reddit':
-                crawler_folder = 'RedditCrawler'
-            else:
-                raise ValueError()
+            all_reddit_data = _get_all_retrived_data(asp, crawler)
 
-            if crawler == 'reddit':
-                # path_to_reddit_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPI\reddit_twitter_data_api_with_sqlite\reddit_database'
-                # path_to_reddit_database = pathlib.Path(BASE_DIR) / r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPI\reddit_twitter_data_api_with_sqlite\reddit_database'
-                path_to_reddit_database = r'reddit_database'
-                path_to_reddit_database = str(path_to_reddit_database)
-
-                query = _get_query(crawler, ALL_REDDIT_SEARCH_TYPE,
-                                   ALL_REDDIT_FEILDS)
-                all_reddit_data = self._get_all_data_from_sqlite(crawler,
-                                                                 path_to_reddit_database,
-                                                                 query)
-                returned_data.setdefault('all_retrived_data', []).extend(
-                    all_reddit_data)
-
-            if crawler == 'twitter':
-                # path_to_twitter_database = r'C:\Users\Anak\PycharmProjects\Covid19CookieCutter\Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPI\reddit_twitter_data_api_with_sqlite\twitter_database'
-                # path_to_twitter_database = pathlib.Path(BASE_DIR)/ r'Examples\Demo\CrawlDataFromSocialNetwork\RedditTwitterDataAPI\reddit_twitter_data_api_with_sqlite\twitter_database'
-                path_to_twitter_database = r'twitter_database'
-                path_to_twitter_database = str(path_to_twitter_database)
-
-                query = _get_query(crawler, ALL_TWITTER_SEARCH_TYPE,
-                                   ALL_TWITTER_FEILDS)
-                all_reddit_data = self._get_all_data_from_sqlite(crawler,
-                                                                 path_to_twitter_database,
-                                                                 query)
-                returned_data.setdefault('all_retrived_data', []).extend(
-                    all_reddit_data)
+            returned_data.setdefault(self.RETURNED_DATA_KEY, []).extend(
+                all_reddit_data
+            )
 
         return returned_data
 
-    def _get_all_data_from_sqlite(self, crawler: str, path_to_database: str,
-                                  query: str) -> List[Dict]:
+    def _get_all_data_from_sqlite(
+        self, crawler: str, path_to_database: str, query: str
+    ) -> List[Dict]:
         """
         get all stored crawled data of a specified crawler from sqlite database
 
@@ -250,7 +352,9 @@ class APIManager:
         :rtype:  list of dict
         :return:  list of dict containing all specified parameters
         """
-        assert crawler == path_to_database.split('\\')[-1].split('_')[0]
+        assert (
+            crawler == path_to_database.split("\\")[-1].split("_")[0]
+        ), path_to_database
         # print(path_to_database)
         conn = sqlite3.connect(path_to_database)
         cur = conn.cursor()
@@ -259,22 +363,35 @@ class APIManager:
         cur.execute(query)
 
         def unroll_all_variable_in_fields():
-            if self.fields[0] == 'all' and crawler == 'reddit':
+            if self.fields[0] == "all" and crawler == "reddit":
                 return ALL_REDDIT_FEILDS
-            if self.fields[0] == 'all' and crawler == 'twitter':
+            if self.fields[0] == "all" and crawler == "twitter":
                 return ALL_TWITTER_FEILDS
             return self.fields
 
         fields = unroll_all_variable_in_fields()
 
-        if 'crawler' in fields:
-            r = [{**dict((cur.description[i][0], value) \
-                         for i, value in enumerate(row)),
-                  **{"crawler": crawler}} for row in cur.fetchall()]
+        if "crawler" in fields:
+            r = [
+                {
+                    **dict(
+                        (cur.description[i][0], value)
+                        for i, value in enumerate(row)
+                    ),
+                    **{"crawler": crawler},
+                }
+                for row in cur.fetchall()
+            ]
         else:
-            r = [{**dict((cur.description[i][0], value) \
-                         for i, value in enumerate(row))} for row in
-                 cur.fetchall()]
+            r = [
+                {
+                    **dict(
+                        (cur.description[i][0], value)
+                        for i, value in enumerate(row)
+                    )
+                }
+                for row in cur.fetchall()
+            ]
         # self.conn.commit()
         conn.close()
         return r
@@ -282,58 +399,26 @@ class APIManager:
     def _get_retrieved_data_from_a_file(self, all_data_from_a_file):
         pass
 
-    # def _get_retrieved_data_from_a_file(self, all_data_from_a_file):
-    #     retrieved_since_ind = 0
-    #     retrieved_until_ind = 0
-    #     current_doc_count = 0
-    #     since_epoch = datetime.datetime.strptime(self.after_date, DATEFORMAT).timestamp()
-    #     until_epoch = datetime.datetime.strptime(self.before_date, DATEFORMAT).timestamp()
-    #
-    #     all_retrieved_data = 0
-    #     for j in all_data_from_a_file['aggs']['created_utc']:
-    #         if since_epoch < j['key']:
-    #             retrieved_until_ind = current_doc_count
-    #         if until_epoch < j['key']:
-    #             retrieved_since_ind = current_doc_count
-    #         current_doc_count += j['doc_count']
-    #
-    #     retrieved_data = [i['body'] for i in all_data_from_a_file['data'][retrieved_since_ind:retrieved_until_ind]]
-    #
-    #     return retrieved_data
-
-    # def get_all_fiile(self, all_data_path, aspect, search_types):
-    #     all_files = []
-    #     for i in all_data_path:
-    #         for (dirpath, dirnames, filenames) in walk(i):
-    #             x = dirpath.split('\\')[-1]
-    #             y = dirpath.split('\\')[-3]
-    #             if x in search_types and y in aspect:
-    #                 for (dirpath1, dirnames1, filenames1) in walk(
-    #                         pathlib.Path(dirpath)):
-    #                     for file in filenames1:
-    #                         all_files.append(os.path.join(dirpath1, file))
-    #     return all_files
-
 
 def is_date(date_string):
-    '''
-    return true if parameter is a date with a specified format (%Y-%m-%d) otherwise false
+    """
+    return true if parameter is a date with a specified format (%Y-%m-%d)
+    otherwise false
 
     :type date_string: str
     :param date_strng: date in the following format %Y-%m-%d
 
     :rtype: boolean
     :return: return true if arg is an accpeted frequency otherwise flase
-    '''
-    # format = "%m-%d-%y"
-    format = DATEFORMAT
+    """
 
     try:
-        x = datetime.datetime.strptime(date_string, format)
         return True
     except ValueError as e:
         print(
-            "This is the incorrect date string format. It should be %Y-%m-%d for example 12-25-2018")
+            "This is the incorrect date string format. It should be %Y-%m-%d "
+            "for example 12-25-2018"
+        )
         raise ValueError(e)
 
 
@@ -392,9 +477,11 @@ def is_supported_crawler(cr):
 # def is_search_types(cr):
 #     return cr in ALL_SEARCH_TYPES
 
+
 def get_respond_type_when_crawler_is_all(cr):
     """
-    return list of crawler's respond type when arg == 'all' else output arg without change
+    return list of crawler's respond type when arg == 'all' else output arg
+    without change
 
     :param cr: str
     :param cr: any accepted crawler
@@ -402,143 +489,259 @@ def get_respond_type_when_crawler_is_all(cr):
     :return: list of str
     :return: list of crawler name
     """
-    if cr == 'reddit':
+    if cr == "reddit":
         search_types = ALL_REDDIT_SEARCH_TYPE
-    if cr == 'twitter':
+    if cr == "twitter":
         search_types = search_types, ALL_TWITTER_SEARCH_TYPE
 
     return search_types
 
 
-@app.route("/", methods=['GET'])
+@app.route("/", methods=["GET"])
 def index():
     """
-    prepared specified input parameters and return all retirieved data in database in json format
+    prepared specified input parameters and return all retirieved data in
+    database in json format
 
     :rtype:  json
     :return: all retrieved data in database
     """
 
-    crawlers = request.args.get('crawlers')
-    since = request.args.get('since')
-    until = request.args.get('until')
+    crawlers = request.args.get("crawlers")
+    since = request.args.get("since")
+    until = request.args.get("until")
     # after =  request.args.get('after')
-    aspects = request.args.get('aspects')
-    search_types = request.args.get('search_types')
-    frequency = request.args.get('frequency')
-    fields = request.args.get('fields')
+    aspects = request.args.get("aspects")
+    search_types = request.args.get("search_types")
+    frequency = request.args.get("frequency")
+    fields = request.args.get("fields")
+    total_count = request.args.get("total_count")
+    top_amount = request.args.get("top_amount")
 
-    if aspects is None:
-        aspects = 'all'
+    def _convert_none_value_to_appropriate_value(
+        _aspects: Optional[Union[str, List[str]]],
+        _fields: Optional[Union[str, List[str]]],
+        _frequency: Optional[Union[str, List[str]]],
+        _crawlers: Optional[Union[str, List[str]]],
+        _total_count: Optional[bool],
+        _top_amount: Optional[str],
+    ) -> Tuple[str, str, str, str, bool, int]:
+        if _aspects is None:
+            _aspects = "all"
 
-    if fields is None:
-        fields = 'all'
+        if _fields is None:
+            _fields = "all"
 
-    if frequency is None:
-        frequency = 'day'
+        if _frequency is None:
+            _frequency = "day"
 
-    if crawlers is None:
-        crawlers = 'all'
+        if _crawlers is None:
+            _crawlers = "all"
+
+        if _total_count is None or _total_count == "false":
+            _total_count = False
+        else:
+            if _total_count == "true":
+                _total_count = True
+            else:
+                raise ValueError()
+
+        if _top_amount is not None:
+            if isinstance(_top_amount, str):
+                _top_amount = int(_top_amount)
+            else:
+                raise ValueError()
+
+        return (
+            _aspects,
+            _fields,
+            _frequency,
+            _crawlers,
+            _total_count,
+            _top_amount,
+        )
+
+    (
+        aspects,
+        fields,
+        frequency,
+        crawlers,
+        total_count,
+        top_amount,
+    ) = _convert_none_value_to_appropriate_value(
+        aspects, fields, frequency, crawlers, total_count, top_amount
+    )
 
     def is_reddit_search_type(s):
-        return s in ALL_REDDIT_SEARCH_TYPE or s == 'all'
+        return s in ALL_REDDIT_SEARCH_TYPE or s == "all"
 
     def is_twitter_search_type(s):
-        return s in ALL_TWITTER_SEARCH_TYPE or s == 'all'
+        return s in ALL_TWITTER_SEARCH_TYPE or s == "all"
 
-    def ensure_compatiblity_of_search_types_and_crawlers(c, st, f):
+    def _ensure_compatiblity_of_search_types_and_crawlers(c, st, f):
+        ENSURE_KEY: List[str] = ["search_types", "fields_types"]
+        REDDIT_ENSURE_FUNCTION: Dict = {
+            ENSURE_KEY[0]: is_reddit_search_type,
+            ENSURE_KEY[1]: is_reddit_fields,
+        }
+        TWITTER_ENSURE_FUNCTION: Dict = {
+            ENSURE_KEY[0]: is_twitter_search_type,
+            ENSURE_KEY[1]: is_twitter_fields,
+        }
+        ALL_CRALWER_ENSURE_FUNCTION: Dict = {
+            ALL_CRALWERS[0]: REDDIT_ENSURE_FUNCTION,
+            ALL_CRALWERS[1]: TWITTER_ENSURE_FUNCTION,
+        }
+
+        def _get_ensure_compatibility_dict(
+            _crawler: str,
+            ensure_function_type: str,
+        ):
+            return ALL_CRALWER_ENSURE_FUNCTION[_crawler][ensure_function_type]
+
         if st is None:
-            st = 'all'
+            st = "all"
         if f is None:
-            f = 'all'
-        search_types_split = st.split(',')
-        fields_split = f.split(',')
-        if c == 'reddit':
-            for i in search_types_split:
-                assert is_reddit_search_type(i)
-            for i in fields_split:
-                assert is_reddit_fields(i)
-            return [c], search_types_split, fields_split
-        elif c == 'twitter':
-            for i in search_types_split:
-                assert is_twitter_search_type(i)
-            for i in fields_split:
-                assert is_twitter_fields(i)
+            f = "all"
+
+        search_types_split = st.split(",")
+        fields_split = f.split(",")
+
+        args_split = {
+            ENSURE_KEY[0]: search_types_split,
+            ENSURE_KEY[1]: fields_split,
+        }
+
+        if c in ALL_CRALWERS:
+            for i in args_split[ENSURE_KEY[0]]:
+                assert _get_ensure_compatibility_dict(c, ENSURE_KEY[0])(i)
+            for i in args_split[ENSURE_KEY[1]]:
+                assert _get_ensure_compatibility_dict(c, ENSURE_KEY[1])(i)
             return [c], search_types_split, fields_split
         else:
-            crawler_split = c.split(',')
+            crawler_split = c.split(",")
             if len(crawler_split) == len(ALL_CRALWERS):
                 for i in crawler_split:
                     assert is_supported_crawler(i)
 
-                return ['all'], ['all'], ['all']
+                return ["all"], ["all"], ["all"]
             else:
                 raise ValueError
 
-    if crawlers != 'all' and crawlers is not None:
-        crawlers, search_types, fields = ensure_compatiblity_of_search_types_and_crawlers(
-            crawlers, search_types, fields)
-    elif crawlers == 'all':
-        search_types = ['all']
-        fields = ['all']
-    elif crawlers is None:
-        crawlers = ['all']
-        search_types = ['all']
-        fields = ['all']
-    else:
-        raise ValueError
+    def _applying_all_value_condition(
+        _crawlers: Optional[Union[str, List[str]]],
+        _search_types: Optional[Union[str, List[str]]],
+        _fields: Optional[Union[str, List[str]]],
+    ) -> List[Union[str, None]]:
+
+        if _crawlers != "all" and _crawlers is not None:
+            (
+                _crawlers,
+                _search_types,
+                _fields,
+            ) = _ensure_compatiblity_of_search_types_and_crawlers(
+                _crawlers, _search_types, _fields
+            )
+        elif _crawlers == "all":
+            _search_types = ["all"]
+            _fields = ["all"]
+        elif _crawlers is None:
+            _crawlers = ["all"]
+            _search_types = ["all"]
+            _fields = ["all"]
+        else:
+            raise ValueError
+        return _crawlers, _search_types, _fields
+
+    crawler, search_types, fields = _applying_all_value_condition(
+        crawlers, search_types, fields
+    )
 
     # def ensure_compatibility_of_fields_and_crawler(cr, f):
     #     if cr[0] == 'all'
 
     def convert_to_common_type(args, all_keywords=None, accept_all=True):
         if accept_all:
-            assert all_keywords is not None, ''
+            assert all_keywords is not None, ""
         else:
-            assert all_keywords is None, ''
+            assert all_keywords is None, ""
 
         if args is None:
             return [None]
         if accept_all:
-            args = args if isinstance(args, list) else args.split(',')
-            if len(args) == 1 and args[0] == 'all':
+            args = args if isinstance(args, list) else args.split(",")
+            if len(args) == 1 and args[0] == "all":
                 return all_keywords
             else:
                 return args
         else:
-            return args.split(',')
+            return args.split(",")
 
     crawlers = convert_to_common_type(crawlers, ALL_CRALWERS)
     aspects = convert_to_common_type(aspects, ALL_ASPECTS)
     since = convert_to_common_type(since, accept_all=False)
     until = convert_to_common_type(until, accept_all=False)
     frequency = convert_to_common_type(frequency, accept_all=False)
+
     # fields = convert_to_common_type(fields, accept_all=False)
 
-    for aspect in aspects:
-        assert is_supported_aspect(aspect)
+    def _check_param_types(
+        _aspects: Optional[Union[str, List[str]]],
+        _since: Optional[Union[str, List[str]]],
+        _until: Optional[Union[str, List[str]]],
+        _frequency: Optional[Union[str, List[str]]],
+        _total_count: bool,
+        _top_amount: int,
+    ) -> Tuple[List[datetime.datetime], List[datetime.datetime]]:
 
-    if since[0] is not None:
-        assert is_date(since[0]) and len(since) == 1
-        since_datetime = [datetime.datetime.strptime(since[0], DATEFORMAT)]
-    else:
-        since_datetime = since
+        for aspect in _aspects:
+            assert is_supported_aspect(aspect)
 
-    if until[0] is not None or until[0] == 'all':
-        assert is_date(until[0]) and len(until) == 1
+        if _since[0] is not None:
+            assert is_date(_since[0]) and len(_since) == 1
+            since_datetime = [
+                datetime.datetime.strptime(_since[0], DATEFORMAT)
+            ]
+        else:
+            since_datetime = _since
 
-        until_datetime = [datetime.datetime.strptime(until[0], DATEFORMAT)]
-    else:
-        until_datetime = until
+        if _until[0] is not None or _until[0] == "all":
+            assert is_date(_until[0]) and len(_until) == 1
 
-    assert is_supported_frequency(frequency[0])
+            until_datetime = [
+                datetime.datetime.strptime(_until[0], DATEFORMAT)
+            ]
+        else:
+            until_datetime = _until
 
-    api_manager = APIManager(aspects, crawlers, since_datetime, until_datetime,
-                             frequency, search_types, fields)
+        assert is_supported_frequency(_frequency[0])
 
-    return api_manager.get_all_retrived_data()
+        assert isinstance(_total_count, bool), ""
+
+        assert isinstance(_top_amount, int), ""
+
+        return since_datetime, until_datetime
+
+    since_datetime, until_datetime = _check_param_types(
+        aspects, since, until, frequency, total_count, top_amount
+    )
+
+    api_manager = APIManager(
+        aspects,
+        crawlers,
+        since_datetime,
+        until_datetime,
+        frequency,
+        search_types,
+        fields,
+        total_count,
+        top_amount,
+    )
+
+    return api_manager.select_returned_function()()
+    # return api_manager.get_all_retrived_data()
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
     # app.run(host='127.0.0.1', port=5501, debug=True)

@@ -5,19 +5,23 @@ from datetime import datetime, date, timedelta
 
 
 def DownloadTweets(SinceDate, UntilDate, Query):
-    '''
+    """
     Downloads all tweets from a certain month in three sessions in order to avoid sending too many requests.
     Date format = 'yyyy-mm-dd'.
     Query=string.
-    '''
-    since = datetime.strptime(SinceDate, '%Y-%m-%d')
-    until = datetime.strptime(UntilDate, '%Y-%m-%d')
+    """
+    since = datetime.strptime(SinceDate, "%Y-%m-%d")
+    until = datetime.strptime(UntilDate, "%Y-%m-%d")
     tenth = since + timedelta(days=10)
     twentieth = since + timedelta(days=20)
 
-    print('starting first download')
-    first = got.manager.TweetCriteria().setQuerySearch(Query).setSince(
-        since.strftime('%Y-%m-%d')).setUntil(tenth.strftime('%Y-%m-%d'))
+    print("starting first download")
+    first = (
+        got.manager.TweetCriteria()
+        .setQuerySearch(Query)
+        .setSince(since.strftime("%Y-%m-%d"))
+        .setUntil(tenth.strftime("%Y-%m-%d"))
+    )
     firstdownload = got.manager.TweetManager.getTweets(first)
     firstlist = [[tweet.date, tweet.text] for tweet in firstdownload]
 
@@ -26,9 +30,13 @@ def DownloadTweets(SinceDate, UntilDate, Query):
 
     time.sleep(600)
 
-    print('starting second download')
-    second = got.manager.TweetCriteria().setQuerySearch(Query).setSince(
-        tenth.strftime('%Y-%m-%d')).setUntil(twentieth.strftime('%Y-%m-%d'))
+    print("starting second download")
+    second = (
+        got.manager.TweetCriteria()
+        .setQuerySearch(Query)
+        .setSince(tenth.strftime("%Y-%m-%d"))
+        .setUntil(twentieth.strftime("%Y-%m-%d"))
+    )
     seconddownload = got.manager.TweetManager.getTweets(second)
     secondlist = [[tweet.date, tweet.text] for tweet in seconddownload]
 
@@ -37,9 +45,13 @@ def DownloadTweets(SinceDate, UntilDate, Query):
 
     time.sleep(600)
 
-    print('starting third download')
-    third = got.manager.TweetCriteria().setQuerySearch(Query).setSince(
-        twentieth.strftime('%Y-%m-%d')).setUntil(until.strftime('%Y-%m-%d'))
+    print("starting third download")
+    third = (
+        got.manager.TweetCriteria()
+        .setQuerySearch(Query)
+        .setSince(twentieth.strftime("%Y-%m-%d"))
+        .setUntil(until.strftime("%Y-%m-%d"))
+    )
     thirddownload = got.manager.TweetManager.getTweets(third)
     thirdlist = [[tweet.date, tweet.text] for tweet in thirddownload]
 

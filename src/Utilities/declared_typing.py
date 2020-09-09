@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""Declare all types that will be used in different modules"""
+
 import datetime
 import json
 from typing import Dict
@@ -8,6 +12,7 @@ from typing import Tuple
 
 from typing_extensions import Literal
 from typing_extensions import TypedDict
+
 # RunningConditions = Dict[str, str]
 
 Url = str
@@ -24,8 +29,8 @@ Crawler_type = str
 # y = json.loads(r)
 # Json = type(y)
 
-Frequency = Literal['day']
-Sort = Literal['asc', 'desc']
+Frequency = Literal["day"]
+Sort = Literal["asc", "desc"]
 epoch_datetime = int
 
 
@@ -33,17 +38,21 @@ class TwitterCollectionkey(TypedDict):
     aspect: List[str]
     query: Query
 
+
 class TwitterCollection(TypedDict):
     collection: TwitterCollectionkey
     name: str
+
 
 class SubredditCollectionKey(TypedDict):
     subreddit: List[str]
     query: Query
 
+
 class SubredditCollection(TypedDict):
     collection: SubredditCollectionKey
     name: str
+
 
 class RedditRunningConstraints(TypedDict):
     aggs: Optional[str]
@@ -53,7 +62,10 @@ class RedditRunningConstraints(TypedDict):
     metadata: str
     sort: Sort
     # fields: str
+
+
 #
+
 
 class TwitterRunningConstraints(TypedDict):
     aggs: Optional[str]
@@ -65,7 +77,6 @@ class TwitterRunningConstraints(TypedDict):
     fields: Optional[str]  # None = all
 
 
-
 class RunningConditions(TypedDict):
     crawler_option: str
     collection_name: str
@@ -75,7 +86,9 @@ class RunningConditions(TypedDict):
     tag: Optional[str]
     max_after: int
 
+
 RunningConditionsKeyValue = List[Tuple[List[str], RunningConditions]]
+
 
 class RedditMetadata(TypedDict):
     running_constraints: RedditRunningConstraints
@@ -114,7 +127,7 @@ class RedditData(TypedDict):
     # common_fields
     author: str
     author_flair_richtext: Optional[str]
-    author_flair_type: Optional['str']
+    author_flair_type: Optional["str"]
     author_fullname: str
     id: str
     created_utc: epoch_datetime
@@ -149,21 +162,21 @@ class RedditData(TypedDict):
 
 
 class TwitterData(TypedDict):
-    author_fullname: str #to author_fullname
+    author_fullname: str  # to author_fullname
     to: Optional[str]
-    body: str # body
+    body: str  # body
     retweets: int
-    favorites: int # to score
+    favorites: int  # to score
     replies: int
     id: str
     premalink: str
     author_id: int
-    created_utc: epoch_datetime # to craeted_ utc
+    created_utc: epoch_datetime  # to craeted_ utc
     formatted_date: str
     hashtags: str
     mentions: str
     geo: str
-    full_link: Url # to full_linh
+    full_link: Url  # to full_linh
     retrieved_on: epoch_datetime
 
     # Added later
@@ -180,4 +193,3 @@ class TwitterResponse(TypedDict):
     data: List[TwitterData]
     metadata: List[TwitterMetadata]
     aggs: List[TwitterAggs]
-

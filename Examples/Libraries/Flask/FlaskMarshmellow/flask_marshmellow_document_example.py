@@ -7,17 +7,20 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
 
 # Order matters: Initialize SQLAlchemy before Marshmallow
 db = SQLAlchemy(app)
-ma = Marshmallow(app) 
+ma = Marshmallow(app)
+
 
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
+
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
     author_id = db.Column(db.Integer, db.ForeignKey("author.id"))
     author = db.relationship("Author", backref="books")
+
 
 class AuthorSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -50,14 +53,14 @@ book1 = Book(title="street fighter", author=author)
 # print(author_schema.dump(author))
 # print( author_schema.dump(book) )
 
-#this have to be request context? in what scerio that it would consider as request context?
+# this have to be request context? in what scerio that it would consider as request context?
 
-with app.test_request_context(): # session, q 
-        
+with app.test_request_context():  # session, q
+
     print(author_schema.dump(author))
-    print( author_schema.dump(book) )
+    print(author_schema.dump(book))
 
-# view 
+# view
 @app.route("/api/book/")
 def users():
     all_book = Book.all()
@@ -69,6 +72,7 @@ def user_detail(id):
     book = Book.get(id)
     return book_schema.dump(book)
 
+
 @app.route("/api/")
 def user_api():
     return "it is connected"
@@ -76,4 +80,3 @@ def user_api():
 
 
 # with app.test_request_context():
-

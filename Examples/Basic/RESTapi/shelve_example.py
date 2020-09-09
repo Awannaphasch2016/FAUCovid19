@@ -1,7 +1,7 @@
 import shelve
 from global_parameters import BASE_DIR
 
-filename = BASE_DIR / 'Examples\\Basic\\RESTapi\\database.pickle'
+filename = BASE_DIR / "Examples\\Basic\\RESTapi\\database.pickle"
 
 d = shelve.open(filename)  # open -- file may get suffix added by low-level
 
@@ -14,7 +14,7 @@ d = shelve.open(filename)  # open -- file may get suffix added by low-level
 # # if no such key)
 # flag = key in d            # true if the key exists
 
-klist = list(d.keys())     # a list of all existing keys (slow!)
+klist = list(d.keys())  # a list of all existing keys (slow!)
 print(klist)
 
 # # as d was opened WITHOUT writeback=True, beware:
@@ -30,4 +30,4 @@ print(klist)
 # # d['xx'].append(5) and have it work as expected, BUT it would also
 # # consume more memory and make the d.close() operation slower.
 
-d.close()                  # close it
+d.close()  # close it

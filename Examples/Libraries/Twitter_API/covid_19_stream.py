@@ -4,15 +4,17 @@ import time
 from datetime import datetime
 from threading import Thread
 
-consumer_key="M2dcKnRZGqBWTrPBXeefFHHjZ"
-consumer_secret="ktTB1WAJNsZBnKTddPqHMpzczj7ehZigXtN77YIFUdSlZ1EW7v"
+consumer_key = "M2dcKnRZGqBWTrPBXeefFHHjZ"
+consumer_secret = "ktTB1WAJNsZBnKTddPqHMpzczj7ehZigXtN77YIFUdSlZ1EW7v"
 
 # After the step above, you will be redirected to your app's page.
 # Create an access token under the the "Your access token" section
-access_token="1140239819127365632-zgNBmmiLvfUV4ZXywwFMCaltCbOWW0"
-access_token_secret="bD0sjo0Jj2In2KldOw4PhHVhsiVShlQizY5R5l2gn9PMG"
+access_token = "1140239819127365632-zgNBmmiLvfUV4ZXywwFMCaltCbOWW0"
+access_token_secret = "bD0sjo0Jj2In2KldOw4PhHVhsiVShlQizY5R5l2gn9PMG"
 
-records_per_file = 5000  # Replace this with the number of tweets you want to store per file
+records_per_file = (
+    5000  # Replace this with the number of tweets you want to store per file
+)
 file_path = "tmp/"  # Replace with appropriate file path followed by / where you want to store the file
 
 counting = 0
@@ -25,14 +27,18 @@ def get_bearer_token(key, secret):
     response = requests.post(
         "https://api.twitter.com/oauth2/token",
         auth=(key, secret),
-        data={'grant_type': 'client_credentials'},
-        headers={"User-Agent": "TwitterDevCovid19StreamQuickStartPython"})
+        data={"grant_type": "client_credentials"},
+        headers={"User-Agent": "TwitterDevCovid19StreamQuickStartPython"},
+    )
 
     if response.status_code is not 200:
-        raise Exception(f"Cannot get a Bearer token (HTTP %d): %s" % (response.status_code, response.text))
+        raise Exception(
+            f"Cannot get a Bearer token (HTTP %d): %s"
+            % (response.status_code, response.text)
+        )
 
     body = response.json()
-    return body['access_token']
+    return body["access_token"]
 
 
 # Helper method that saves the tweets to a file at the specified path
@@ -41,14 +47,14 @@ def save_data(item):
     if file_object is None:
         file_name = int(datetime.utcnow().timestamp() * 1e3)
         count += 1
-        file_object = open(f'{file_path}covid19-{file_name}.csv', 'a')
+        file_object = open(f"{file_path}covid19-{file_name}.csv", "a")
         file_object.write("{}\n".format(item))
         return
     if count == records_per_file:
         file_object.close()
         count = 1
         file_name = int(datetime.utcnow().timestamp() * 1e3)
-        file_object = open(f'{file_path}covid19-{file_name}.csv', 'a')
+        file_object = open(f"{file_path}covid19-{file_name}.csv", "a")
         file_object.write("{}\n".format(item))
     else:
         count += 1
@@ -56,11 +62,18 @@ def save_data(item):
 
 
 def stream_connect(partition):
-    response = requests.get("https://api.twitter.com/labs/1/tweets/stream/covid19?partition={}".format(partition),
-                            headers={"User-Agent": "TwitterDevCovid19StreamQuickStartPython",
-                                     "Authorization": "Bearer {}".format(
-                                         get_bearer_token(consumer_key, consumer_secret))},
-                            stream=True)
+    response = requests.get(
+        "https://api.twitter.com/labs/1/tweets/stream/covid19?partition={}".format(
+            partition
+        ),
+        headers={
+            "User-Agent": "TwitterDevCovid19StreamQuickStartPython",
+            "Authorization": "Bearer {}".format(
+                get_bearer_token(consumer_key, consumer_secret)
+            ),
+        },
+        stream=True,
+    )
     # for response_line in response.iter_lines():
     #     if response_line:
     #         save_data(json.loads(response_line))

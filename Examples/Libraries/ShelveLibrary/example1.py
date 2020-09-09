@@ -4,5 +4,4 @@ import shelve
 #     db['eggs'] = 'eggs'
 #     print(db['something'])
 
-shelve.open('database.db')
-
+shelve.open("database.db")

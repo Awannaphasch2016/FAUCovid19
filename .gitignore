@@ -23,6 +23,10 @@ Outputs/Data/
 .Outputs/ZipFiles/
 .Outputs/Report/
 .Outputs/Log
+Examples/**
+Examples/
+/Examples
+Examples
 /.env
 .env
 **/work_env

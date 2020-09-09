@@ -1,27 +1,31 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """Update crawled social media data with sqlite3 database"""
 
 import os
+import pandas as pd
 import pathlib
 import sqlite3
 import sys
 from typing import Dict
+from typing import List
 from typing import Optional
-
-import pandas as pd
 
 sys.path.insert(0, str(pathlib.Path(os.getcwd()).parent.parent.parent.parent))
 
-from global_parameters import *
+from global_parameters import BASE_DIR  # noqa: E402
 
-ALL_ASPECTS = ['work_from_home', 'social_distance',
-               'corona', 'reopen', 'lockdown']
-ALL_CRALWERS = ['twitter', 'reddit']
-ALL_FREQUENCY = ['day']
-ALL_REDDIT_SEARCH_TYPE = ['comment', 'submission']
-ALL_TWITTER_SEARCH_TYPE = ['data_tweet']
+ALL_ASPECTS = [
+    "work_from_home",
+    "social_distance",
+    "corona",
+    "reopen",
+    "lockdown",
+]
+ALL_CRALWERS = ["twitter", "reddit"]
+ALL_FREQUENCY = ["day"]
+ALL_REDDIT_SEARCH_TYPE = ["comment", "submission"]
+ALL_TWITTER_SEARCH_TYPE = ["data_tweet"]
 
 
 def get_all_file_path() -> List[pathlib.Path]:
@@ -32,15 +36,18 @@ def get_all_file_path() -> List[pathlib.Path]:
     :return: list of path to crawler output data
     """
     reddit_path = pathlib.Path(BASE_DIR) / pathlib.Path(
-        r'Outputs\Data\RedditCrawler')
+        r"Outputs\Data\RedditCrawler"
+    )
     twitter_path = pathlib.Path(BASE_DIR) / pathlib.Path(
-        r'Outputs\Data\TwitterCrawler')
+        r"Outputs\Data\TwitterCrawler"
+    )
     # raise NotImplementedError
     return [reddit_path, twitter_path]
 
 
-def get_all_file_for_reddit(all_data_path: List[pathlib.Path]) -> Optional[
-    List[pathlib.Path]]:
+def get_all_file_for_reddit(
+    all_data_path: List[pathlib.Path],
+) -> Optional[List[pathlib.Path]]:  # noqa: E125
     """
     return list of file path contained reddit output date
 
@@ -50,12 +57,14 @@ def get_all_file_for_reddit(all_data_path: List[pathlib.Path]) -> Optional[
     :rtype: list of pathlib.Path
     :return: list of file path contained reddit output data
     """
-    return get_all_file_for_crawler(all_data_path, 'reddit', ALL_ASPECTS,
-                                    ALL_REDDIT_SEARCH_TYPE)
+    return get_all_file_for_crawler(
+        all_data_path, "reddit", ALL_ASPECTS, ALL_REDDIT_SEARCH_TYPE
+    )
 
 
-def get_all_file_for_twitter(all_data_path: List[pathlib.Path]) -> Optional[
-    List[pathlib.Path]]:
+def get_all_file_for_twitter(
+    all_data_path: List[pathlib.Path],
+) -> Optional[List[pathlib.Path]]:  # noqa: E125
     """
     return list of file path contained twitter output data
 
@@ -65,15 +74,20 @@ def get_all_file_for_twitter(all_data_path: List[pathlib.Path]) -> Optional[
     :rtype: list of pathlib.Path
     :return: list of file path contained twitter output data
     """
-    return get_all_file_for_crawler(all_data_path, 'twitter', ALL_ASPECTS,
-                                    ALL_TWITTER_SEARCH_TYPE)
+    return get_all_file_for_crawler(
+        all_data_path, "twitter", ALL_ASPECTS, ALL_TWITTER_SEARCH_TYPE
+    )
 
 
-def get_all_file_for_crawler(all_data_path: List[pathlib.Path], crawler: str,
-                             aspect: List[str], search_types: List[str]) -> \
-        Optional[List[pathlib.Path]]:
+def get_all_file_for_crawler(
+    all_data_path: List[pathlib.Path],
+    crawler: str,
+    aspect: List[str],
+    search_types: List[str],
+) -> Optional[List[pathlib.Path]]:
     """
-    prepared parameters + return list of file path contained a specified crawler output data
+    prepared parameters + return list of file path contained a specified
+    crawler output data
 
     :type all_data_path: list of pathlib.Path
     :param all_data_path: all reddit output data folder path
@@ -91,36 +105,40 @@ def get_all_file_for_crawler(all_data_path: List[pathlib.Path], crawler: str,
     :return: list of file path contained a specified crawler output data
     """
     all_files = []
-    if crawler == 'reddit':
+    if crawler == "reddit":
         all_reddit_files = []
         for i in all_data_path:
             for (dirpath, dirnames, filenames) in os.walk(i):
                 # print(dirpath, dirnames)
-                x = dirpath.split('\\')[-1]
-                y = dirpath.split('\\')[-3]
+                x = dirpath.split("\\")[-1]
+                y = dirpath.split("\\")[-3]
                 # if x in ['comment']:
                 if x in search_types and y in aspect:
                     for (dirpath1, dirnames1, filenames1) in os.walk(
-                            pathlib.Path(dirpath)):
+                        pathlib.Path(dirpath)
+                    ):
                         for file in filenames1:
                             all_reddit_files.append(
-                                pathlib.Path(dirpath1) / file)
+                                pathlib.Path(dirpath1) / file
+                            )
         all_files.extend(all_reddit_files)
 
-    if crawler == 'twitter':
+    if crawler == "twitter":
         all_twitter_files = []
         for i in all_data_path:
             for (dirpath, dirnames, filenames) in os.walk(i):
                 # print(dirpath, dirnames)
-                x = dirpath.split('\\')[-1]
-                y = dirpath.split('\\')[-3]
+                x = dirpath.split("\\")[-1]
+                y = dirpath.split("\\")[-3]
                 # if x in ['comment']:
                 if x in search_types and y in aspect:
                     for (dirpath1, dirnames1, filenames1) in os.walk(
-                            pathlib.Path(dirpath)):
+                        pathlib.Path(dirpath)
+                    ):
                         for file in filenames1:
                             all_twitter_files.append(
-                                pathlib.Path(dirpath1) / file)
+                                pathlib.Path(dirpath1) / file
+                            )
         all_files.extend(all_twitter_files)
 
     return all_files
@@ -141,19 +159,20 @@ def get_all_file(all_data_path: List[pathlib.Path], crawler: str) -> Dict:
     :return: dict of file path contained reddit output data
     """
 
-    if crawler == 'reddit':
+    if crawler == "reddit":
         all_reddit_files = get_all_file_for_reddit(all_data_path)
-        return {'all_reddit_files': all_reddit_files}
-    elif crawler == 'twitter':
+        return {"all_reddit_files": all_reddit_files}
+    elif crawler == "twitter":
         all_twitter_files = get_all_file_for_twitter(all_data_path)
-        return {'all_twitter_files': all_twitter_files}
+        return {"all_twitter_files": all_twitter_files}
     else:
         raise ValueError
 
 
 def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
     """
-    TODO: I need to refactor this code into get_all_data_from_reddit_file() and get_all_data_from_twitter_file()
+    TODO: I need to refactor this code into get_all_data_from_reddit_file() and
+        get_all_data_from_twitter_file()
 
     :type all_files: Dict
     :param all_files: all file paths to crawler's output data
@@ -169,13 +188,14 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
 
     def _get_all_data_from_a_file(file):
         import pickle
-        retrieved_data_from_a_file = pickle.load(open(file, 'rb'))
+
+        retrieved_data_from_a_file = pickle.load(open(file, "rb"))
 
         return retrieved_data_from_a_file
 
-    if crawler == 'reddit':
+    if crawler == "reddit":
         all_crawler_search_type = ALL_REDDIT_SEARCH_TYPE
-    elif crawler == 'twitter':
+    elif crawler == "twitter":
         all_crawler_search_type = ALL_TWITTER_SEARCH_TYPE
     else:
         raise ValueError
@@ -186,99 +206,128 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
             retrieved_data_from_a_file = _get_all_data_from_a_file(file)
 
             def _get_data_from_folder():
-                x = str(file).split('\\')
+                x = str(file).split("\\")
                 tmp = {}
                 if x[-3] in all_crawler_search_type:
-                    tmp.update({'search_type': x[-3]})
+                    tmp.update({"search_type": x[-3]})
                 else:
                     raise ValueError()
 
-                # # OPTIMIZE: I should check whether folder name is an acceptable value
+                # OPTIMIZE: I should check whether folder name is an
+                #   acceptable value
                 # if True:
                 #     tmp.update({'collection_name':x[-4]})
 
-                return {'data': tmp}
+                return {"data": tmp}
 
             retrieved_data_from_path_foler = _get_data_from_folder()
             all_retrieved_data.append(
-                {'data_from_a_file': retrieved_data_from_a_file,
-                 'data_from_folder_path': retrieved_data_from_path_foler})
+                {
+                    "data_from_a_file": retrieved_data_from_a_file,
+                    "data_from_folder_path": retrieved_data_from_path_foler,
+                }
+            )
 
     def _convert_to_output_format() -> Dict:
-        if crawler == 'reddit':
-            selected_data_keys: List[str] = ['body', 'title', 'created_utc',
-                                             'sentiment',
-                                             'subreddit', 'id', 'link_id',
-                                             'parent_id', 'sentiment']
-            selected_metadata_keys: List[str] = ['frequency', 'aspect']
+        if crawler == "reddit":
+            selected_data_keys: List[str] = [
+                "body",
+                "title",
+                "created_utc",
+                "sentiment",
+                "subreddit",
+                "id",
+                "link_id",
+                "parent_id",
+                "sentiment",
+            ]
+            selected_metadata_keys: List[str] = ["frequency", "aspect"]
 
             all_reddit_retrieved_data = []
 
             for data_from_file_and_folder in all_retrieved_data:
-                i = data_from_file_and_folder['data_from_a_file']
-                j = data_from_file_and_folder['data_from_folder_path']
+                i = data_from_file_and_folder["data_from_a_file"]
+                j = data_from_file_and_folder["data_from_folder_path"]
 
                 aggs, data, metadata = i
                 # each_reddit_aggs = { key: i[key] for key in aggs }
-                each_reddit_metadata = {key: i[metadata][key] for key in
-                                        i[metadata] if
-                                        key in selected_metadata_keys}
+                each_reddit_metadata = {
+                    key: i[metadata][key]
+                    for key in i[metadata]
+                    if key in selected_metadata_keys
+                }
                 for ind in range(len(i[data])):
-                    tmp = {key: i[data][ind][key] for key in i[data][ind]
-                           if key in selected_data_keys}
+                    tmp = {
+                        key: i[data][ind][key]
+                        for key in i[data][ind]
+                        if key in selected_data_keys
+                    }
                     all_reddit_retrieved_data.append(
-                        {**tmp, **each_reddit_metadata, **j['data']})
+                        {**tmp, **each_reddit_metadata, **j["data"]}
+                    )
 
                 # all_reddit_retrieved_data.append(
-                #     {**each_reddit_data, **each_reddit_metadata, **j['data']})
+                #     {**each_reddit_data, **each_reddit_metadata,
+                #      **j['data']})
 
             def check_if_aspect_has_no_duplicate(tmp: Dict) -> Dict:
                 tmp_df = pd.DataFrame(tmp)
                 tmp_dict: Dict = {}
                 tmp_dict = tmp_df.drop_duplicates(
-                    subset=['id', 'aspect']).to_dict('record')
+                    subset=["id", "aspect"]
+                ).to_dict("record")
                 return tmp_dict
 
-            # all_reddit_retrieved_data_df = pd.DataFrame(all_reddit_retrieved_data)
+            # all_reddit_retrieved_data_df = pd.DataFrame(
+            #     all_reddit_retrieved_data)
             all_reddit_retrieved_data: Dict = check_if_aspect_has_no_duplicate(
-                all_reddit_retrieved_data)
-            # all_reddit_retrieved_data = all_reddit_retrieved_data_df.to_dict('record')
+                all_reddit_retrieved_data
+            )
+            # all_reddit_retrieved_data = all_reddit_retrieved_data_df.to_dict(
+            #     'record')
 
             return_data_no_dubplicate: Dict = {
-                'reddit': all_reddit_retrieved_data}
+                "reddit": all_reddit_retrieved_data
+            }
 
             return return_data_no_dubplicate
             # import pandas as pd
-            # all_reddit_retrieved_data_pd = pd.DataFrame.from_dict(all_reddit_retrieved_data)
+            # all_reddit_retrieved_data_pd = pd.DataFrame.from_dict(
+            #     all_reddit_retrieved_data)
 
-        elif crawler == 'twitter':
-            selected_data_keys: List[str] = ['text', 'id', 'date',
-                                             'sentiment']
-            selected_metadata_keys: List[str] = ['frequency', 'aspect']
+        elif crawler == "twitter":
+            selected_data_keys: List[str] = ["text", "id", "date", "sentiment"]
+            selected_metadata_keys: List[str] = ["frequency", "aspect"]
 
             all_twitter_retrieved_data = []
 
             acc = []
             for data_from_file_and_folder in all_retrieved_data:
-                i = data_from_file_and_folder['data_from_a_file']
-                j = data_from_file_and_folder['data_from_folder_path']
+                i = data_from_file_and_folder["data_from_a_file"]
+                j = data_from_file_and_folder["data_from_folder_path"]
 
                 data, aggs, metadata = i
                 # each_reddit_aggs = { key: i[key] for key in aggs }
-                each_twitter_metadata = {key: i[metadata][key] for key in
-                                         i[metadata] if
-                                         key in selected_metadata_keys}
+                each_twitter_metadata = {
+                    key: i[metadata][key]
+                    for key in i[metadata]
+                    if key in selected_metadata_keys
+                }
 
-                for ind in range(len(i['data'])):
-                    tmp = {key: i[data][ind][key] for key in i[data][ind]
-                           if key in selected_data_keys}
+                for ind in range(len(i["data"])):
+                    tmp = {
+                        key: i[data][ind][key]
+                        for key in i[data][ind]
+                        if key in selected_data_keys
+                    }
                     for d, y in tmp.items():
-                        if d == 'id':
+                        if d == "id":
                             acc.append(y)
                     all_twitter_retrieved_data.append(
-                        {**tmp, **each_twitter_metadata, **j['data']})
+                        {**tmp, **each_twitter_metadata, **j["data"]}
+                    )
 
-            returned_data: Dict = {'twitter': all_twitter_retrieved_data}
+            returned_data: Dict = {"twitter": all_twitter_retrieved_data}
             return returned_data
             # _convert_to_pandas()
         else:
@@ -289,27 +338,28 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
     return returned_data
 
 
-class SocialMediaDatabase():
-    """prepare data to create table and insert data into specified crawler database"""
+class SocialMediaDatabase:
+    """prepare data to create table and insert data into specified crawler
+    database"""
 
     def __init__(self, dbfile: str, data: Dict):
 
         self.conn = self._create_connection(dbfile)
         # self._get_all_data_from_sqlite()
 
-        if dbfile == 'reddit_database.db':
+        if dbfile == "reddit_database.db":
             self.conn.cursor().execute("DROP table if exists reddit")
             self._create_table_reddit()
 
-            for i in data['reddit']:
-                self._insert_data_to_database('reddit', **i)
+            for i in data["reddit"]:
+                self._insert_data_to_database("reddit", **i)
 
-        elif dbfile == 'twitter_database.db':
+        elif dbfile == "twitter_database.db":
             self.conn.cursor().execute("DROP table if exists twitter")
             self._create_table_twitter()
 
-            for i in data['twitter']:
-                self._insert_data_to_database('twitter', **i)
+            for i in data["twitter"]:
+                self._insert_data_to_database("twitter", **i)
         else:
             raise ValueError
 
@@ -329,7 +379,8 @@ class SocialMediaDatabase():
 
     def _create_connection(self, dbfile: str) -> sqlite3.Connection:
         """
-        create a database connection to the SQLite database specified by db_file
+        create a database connection to the SQLite database specified by
+        db_file
 
         :type db_file: str
         :param db_file: database file
@@ -359,11 +410,11 @@ class SocialMediaDatabase():
                                     , frequency STRING
                                     , sentiment double
                                     , subreddit STRING
-                                    , link_id STRING 
-                                    , id STRING 
-                                    , parent_id STRING 
+                                    , link_id STRING
+                                    , id STRING
+                                    , parent_id STRING
                                     , UNIQUE (id, aspect)
-                                ); 
+                                );
                                 """
 
         c = self.conn.cursor()
@@ -384,9 +435,9 @@ class SocialMediaDatabase():
                                     , aspect STRING
                                     , frequency STRING
                                     , sentiment double
-                                    , id STRING 
+                                    , id STRING
                                     , UNIQUE (id , aspect)
-                                ); 
+                                );
                                 """
 
         c = self.conn.cursor()
@@ -414,24 +465,25 @@ class SocialMediaDatabase():
             new_val = []
             new_col = []
             for i, (v, k) in enumerate(
-                    zip(value_to_be_inserted, columns_to_be_inserted)):
-                if not isinstance(v,
-                                  str):
+                zip(value_to_be_inserted, columns_to_be_inserted)
+            ):
+                if not isinstance(v, str):
                     if v is None:
-                        value_to_be_inserted[i] = 'None'
+                        value_to_be_inserted[i] = "None"
                         continue
                     else:
                         value_to_be_inserted[i] = str(v)
                         value_to_be_inserted[i] = value_to_be_inserted[
-                            i].replace('"', "'")
+                            i
+                        ].replace('"', "'")
                 else:
                     value_to_be_inserted[i] = v
                     value_to_be_inserted[i] = value_to_be_inserted[i].replace(
-                        '"',
-                        "'")
+                        '"', "'"
+                    )
 
                 if value_to_be_inserted[i] is not None:
-                    if k != 'sentiment' and k != 'created_utc':
+                    if k != "sentiment" and k != "created_utc":
                         tmp = value_to_be_inserted[i]
                         value_to_be_inserted[i] = '"' + tmp + '"'
                 new_val.append(value_to_be_inserted[i])
@@ -439,12 +491,17 @@ class SocialMediaDatabase():
 
             return new_val, new_col
 
-        value_to_be_inserted, columns_to_be_inserted = _convert_value_to_correct_type()
+        (
+            value_to_be_inserted,
+            columns_to_be_inserted,
+        ) = _convert_value_to_correct_type()
 
         return """INSERT INTO reddit ({columns_to_be_inserted})
         VALUES({value_to_be_inserted});
-        """.format(columns_to_be_inserted=','.join(columns_to_be_inserted),
-                   value_to_be_inserted=','.join(value_to_be_inserted))
+        """.format(
+            columns_to_be_inserted=",".join(columns_to_be_inserted),
+            value_to_be_inserted=",".join(value_to_be_inserted),
+        )
 
     def _twitter_insert_query(self, **kwargs) -> str:
         """
@@ -468,24 +525,25 @@ class SocialMediaDatabase():
             new_val = []
             new_col = []
             for i, (v, k) in enumerate(
-                    zip(value_to_be_inserted, columns_to_be_inserted)):
-                if not isinstance(v,
-                                  str):
+                zip(value_to_be_inserted, columns_to_be_inserted)
+            ):
+                if not isinstance(v, str):
                     if v is None:
-                        value_to_be_inserted[i] = 'None'
+                        value_to_be_inserted[i] = "None"
                         continue
                     else:
                         value_to_be_inserted[i] = str(v)
                         value_to_be_inserted[i] = value_to_be_inserted[
-                            i].replace('"', "'")
+                            i
+                        ].replace('"', "'")
                 else:
                     value_to_be_inserted[i] = v
                     value_to_be_inserted[i] = value_to_be_inserted[i].replace(
-                        '"',
-                        "'")
+                        '"', "'"
+                    )
 
                 if value_to_be_inserted[i] is not None:
-                    if k != 'sentiment' and k != 'created_utc':
+                    if k != "sentiment" and k != "created_utc":
                         tmp = value_to_be_inserted[i]
                         value_to_be_inserted[i] = '"' + tmp + '"'
                 new_val.append(value_to_be_inserted[i])
@@ -493,12 +551,17 @@ class SocialMediaDatabase():
 
             return new_val, new_col
 
-        value_to_be_inserted, columns_to_be_inserted = _convert_value_to_correct_type()
+        (
+            value_to_be_inserted,
+            columns_to_be_inserted,
+        ) = _convert_value_to_correct_type()
 
         return """INSERT INTO twitter ({columns_to_be_inserted})
         VALUES({value_to_be_inserted});
-        """.format(columns_to_be_inserted=','.join(columns_to_be_inserted),
-                   value_to_be_inserted=','.join(value_to_be_inserted))
+        """.format(
+            columns_to_be_inserted=",".join(columns_to_be_inserted),
+            value_to_be_inserted=",".join(value_to_be_inserted),
+        )
 
     def _insert_reddit_data_to_database(self, reddit_query: str):
         """
@@ -530,15 +593,17 @@ class SocialMediaDatabase():
         :param kwargs: dict
         :param kwargs: dict of parameters
         """
-        if crawler == 'reddit':
+        if crawler == "reddit":
             # all_reddit_retrieved_data.append(
             #     {**each_reddit_data, **each_reddit_metadata, **j['data']})
-            kwargs = {**kwargs, 'crawler': crawler}
+            kwargs = {**kwargs, "crawler": crawler}
             self._insert_reddit_data_to_database(
-                self._reddit_insert_query(**kwargs))
-        elif crawler == 'twitter':
+                self._reddit_insert_query(**kwargs)
+            )
+        elif crawler == "twitter":
             self._insert_twitter_data_to_database(
-                self._twitter_insert_query(**kwargs))
+                self._twitter_insert_query(**kwargs)
+            )
         else:
             raise ValueError()
 
@@ -556,13 +621,13 @@ class SocialMediaDatabase():
 
 if __name__ == "__main__":
     all_data_path = get_all_file_path()
-    all_files = get_all_file(all_data_path, 'reddit')
-    all_data = get_all_data_from_files(all_files, 'reddit')
-    SocialMediaDatabase('reddit_database.db', all_data)
+    all_files = get_all_file(all_data_path, "reddit")
+    all_data = get_all_data_from_files(all_files, "reddit")
+    SocialMediaDatabase("reddit_database.db", all_data)
 
     all_data_path = get_all_file_path()
-    all_files = get_all_file(all_data_path, 'twitter')
-    all_data = get_all_data_from_files(all_files, 'twitter')
-    SocialMediaDatabase('twitter_database.db', all_data)
+    all_files = get_all_file(all_data_path, "twitter")
+    all_data = get_all_data_from_files(all_files, "twitter")
+    SocialMediaDatabase("twitter_database.db", all_data)
 
-    print('complete running..')
+    print("complete running..")

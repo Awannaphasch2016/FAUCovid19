@@ -5,10 +5,10 @@ import pandas
 x = []
 for i in range(len(all_retrieved_data)):
     # for i i n range(10):
-    tt = all_retrieved_data[i]['data_from_a_file']['metadata']['aspect']
-    dd = pandas.DataFrame(all_retrieved_data[i]['data_from_a_file']['data'])
+    tt = all_retrieved_data[i]["data_from_a_file"]["metadata"]["aspect"]
+    dd = pandas.DataFrame(all_retrieved_data[i]["data_from_a_file"]["data"])
     tmp = []
-    for i in dd['id'].tolist():
+    for i in dd["id"].tolist():
         tmp.append(tt + str(i))
     # print(tmp)
     # x.append(dd['id'])
@@ -29,19 +29,25 @@ def intersection(a, b):
 
 # == Reddit
 tmp = {}
-ALL_ASPECTS = ['work_from_home', 'social_distance', 'lockdown', 'reopen',
-               'corona']
+ALL_ASPECTS = [
+    "work_from_home",
+    "social_distance",
+    "lockdown",
+    "reopen",
+    "corona",
+]
 for i in all_reddit_retrieved_data:
-    if i['aspect'] in ALL_ASPECTS:
+    if i["aspect"] in ALL_ASPECTS:
         # if i['id'] == 'ibxs9m':
         # print(i['aspect'])
         # tmp.setdefault(i['aspect'], []).append(i['id'])
-        tmp.setdefault(i['aspect'], []).append(i)
+        tmp.setdefault(i["aspect"], []).append(i)
         # tmp.append(i)
         # tmp.append(i['id'])
 
 
 # print(len(tmp))
+
 
 def has_no_duplicate(aspect, tmp):
     return len(tmp[aspect]) == len(set(tmp[aspect]))
@@ -53,15 +59,15 @@ import pandas as pd
 def check_if_aspect_has_no_duplicate(tmp):
     def has_no_duplicate(aspect, tmp):
         tmp_df = pd.DataFrame(tmp[aspect])
-        return tmp_df['id'].unique().shape[0] == tmp_df['id'].shape[0]
+        return tmp_df["id"].unique().shape[0] == tmp_df["id"].shape[0]
 
     for i in ALL_ASPECTS:
         # print(i)
         # if not has_no_duplicate(i, tmp):
         if not has_no_duplicate(i, tmp):
             tmp_df = pd.DataFrame(tmp[i])
-            tmp_df = tmp_df.drop_duplicates(subset=['id'])
-            tmp[i] = tmp_df.to_dict('record')
+            tmp_df = tmp_df.drop_duplicates(subset=["id"])
+            tmp[i] = tmp_df.to_dict("record")
     return tmp
 
 

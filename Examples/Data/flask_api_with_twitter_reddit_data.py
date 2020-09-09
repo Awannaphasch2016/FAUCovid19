@@ -8,15 +8,17 @@ app = FlaskAPI(__name__)
 # 	/twitter_cralwer
 # 	/end_date
 
-@app.route("/keyword", methods=['GET'])
+
+@app.route("/keyword", methods=["GET"])
 def get_keyword():
     pass
 
-@app.route("/crawler_type", methods=['GET'])
+
+@app.route("/crawler_type", methods=["GET"])
 def get_keyword():
     pass
 
-@app.route("/end_date", methods=['GET'])
+
+@app.route("/end_date", methods=["GET"])
 def get_keyword():
     pass
-

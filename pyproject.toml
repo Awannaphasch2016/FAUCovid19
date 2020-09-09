@@ -1,0 +1,40 @@
+[tool.black]
+    line-length = 79
+    target-version = ['py38']
+    include = '\.pyi?$'
+    exclude = '''
+    /(
+        .git
+      | \.hg
+      | \.mypy_cache
+      | \.tox
+      | \.venv
+      | _build
+      | buck-out
+      | build
+      | dist
+      | migration
+      | _pycache__
+      | \.history
+      | \.mypy_cache
+      | \.pytest_cache
+      | \.vscode
+      | Data
+      | Models
+      | Examples/
+      | Notebooks
+      | Outputs
+      | venv
+      | \.gitignore
+      | \.flake8
+      | \.travis.yml
+      | docker-compose.yml
+      | Dockerfile
+      | environment.yml
+      | LICENSE
+      | README.md
+      | requirements.txt
+      | setup.cfg
+    )/
+    '''
+

@@ -1,4 +1,8 @@
 [flake8]
+ignore =   E501, F403, W605, F401, W503, C901
+max-line-length = 79
+max-complexity = 18
+select = B,C,E,F,W,T4,B9
 exclude =
     migrations
     _pycache__,
@@ -6,25 +10,17 @@ exclude =
     .mypy_cache,
     .pytest_cache,
     .vscode,
-    Data,
-    Examples,
-    Models,
-    Notebooks,
-    Outputs,
-    src,
-    tests,
-    Utilities,
-    venv,
+    Data/,
+    Outputs/,
+    Examples/*,
+    venv/,
     .gitignore,
     .flake8,
     .travis.yml,
     docker-compose.yml,
     Dockerfile,
     environment.yml,
-    global_parameters.py,
     LICENSE,
     README.md,
     requirements.txt,
     setup.cfg,
-    setup.py,
-    testing_travis_ci.py,

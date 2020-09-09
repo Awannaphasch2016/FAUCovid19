@@ -8,17 +8,17 @@ def cli():
 
 @click.command()
 def initdb():
-    click.echo('Ehllo Initialized the database!')
+    click.echo("Ehllo Initialized the database!")
 
 
 @click.command()
 def dropdb():
-    click.echo('Dropped the database')
+    click.echo("Dropped the database")
+
 
 cli.add_command(initdb)
 cli.add_command(dropdb)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
-
