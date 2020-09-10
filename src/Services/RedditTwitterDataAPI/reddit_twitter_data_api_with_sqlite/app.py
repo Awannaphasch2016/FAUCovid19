@@ -15,6 +15,7 @@ from typing import Union
 
 from flask import Flask
 from flask import request
+from flask_api import status
 from flask_restful import Api
 
 # Create an instance of Flask
@@ -168,8 +169,12 @@ class APIManager:
         :param fields: list of desired fields by crawler
 
         :type total_count: bool
-        :param total_count: indicate whether or not to return total count of
-            the returned output instead of output itself
+        :param total_count: it indicates whether or not to return
+            total  count of the returned output instead of output itself
+
+        :type top_amount: Optional[int]
+        :param top_amount: if specified, only the most recent of the selected
+            time interval range will be shown in the output
 
         """
         self.RETURNED_DATA_KEY = "all_retrived_data"
@@ -518,6 +523,47 @@ def index():
     total_count = request.args.get("total_count")
     top_amount = request.args.get("top_amount")
 
+    def _check_param_compatibility(
+        _top_amount: Optional[str], _total_count: Optional[str]
+    ) -> Optional[Tuple[str, int]]:
+        """
+
+        :type _total_count: bool
+        :param _total_count: it indicates whether or not to return
+            total  count of the returned output instead of output itself
+
+        :type _top_amount: Optional[int]
+        :param _top_amount: if specified, only the most recent of the selected
+            time interval range will be shown in the output
+
+        :rtype: Tuple[str,int]
+        :return: tuple of error message and error status code
+        """
+
+        def _check_compatibility_of_top_amount_and_total_count() -> Optional[
+            Tuple[str, int]
+        ]:
+            count = 0
+            if _top_amount is not None:
+                count += 1
+            if _total_count is not None:
+                count += 1
+            if count >= 2:
+                return (
+                    "Either top_amount or total_count must be provided."
+                    " Not Both",
+                    status.HTTP_400_BAD_REQUEST,
+                )
+            return None
+
+        params_error = _check_compatibility_of_top_amount_and_total_count()
+        return params_error
+
+    params_error = _check_param_compatibility(top_amount, total_count)
+
+    if params_error is not None:
+        return params_error
+
     def _convert_none_value_to_appropriate_value(
         _aspects: Optional[Union[str, List[str]]],
         _fields: Optional[Union[str, List[str]]],
@@ -716,9 +762,10 @@ def index():
 
         assert is_supported_frequency(_frequency[0])
 
-        assert isinstance(_total_count, bool), ""
+        if _top_amount is not None:
+            assert isinstance(_top_amount, int), ""
 
-        assert isinstance(_top_amount, int), ""
+        assert isinstance(_total_count, bool), ""
 
         return since_datetime, until_datetime
 
