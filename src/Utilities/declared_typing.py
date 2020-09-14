@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""Declare all types that will be used in different modules"""
+"""Declare all types that will be used in different modules."""
 
-import datetime
-import json
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Sequence
 from typing import Tuple
 
 from typing_extensions import Literal
@@ -35,26 +32,36 @@ epoch_datetime = int
 
 
 class TwitterCollectionkey(TypedDict):
+    """Skipped."""
+
     aspect: List[str]
     query: Query
 
 
 class TwitterCollection(TypedDict):
+    """Skipped."""
+
     collection: TwitterCollectionkey
     name: str
 
 
 class SubredditCollectionKey(TypedDict):
+    """Skipped."""
+
     subreddit: List[str]
     query: Query
 
 
 class SubredditCollection(TypedDict):
+    """Skipped."""
+
     collection: SubredditCollectionKey
     name: str
 
 
 class RedditRunningConstraints(TypedDict):
+    """Skipped."""
+
     aggs: Optional[str]
     after: int
     before: Optional[int]
@@ -64,10 +71,9 @@ class RedditRunningConstraints(TypedDict):
     # fields: str
 
 
-#
-
-
 class TwitterRunningConstraints(TypedDict):
+    """Skipped."""
+
     aggs: Optional[str]
     after: int
     before: Optional[int]
@@ -78,6 +84,8 @@ class TwitterRunningConstraints(TypedDict):
 
 
 class RunningConditions(TypedDict):
+    """Skipped."""
+
     crawler_option: str
     collection_name: str
     respond_type: str
@@ -91,6 +99,8 @@ RunningConditionsKeyValue = List[Tuple[List[str], RunningConditions]]
 
 
 class RedditMetadata(TypedDict):
+    """Skipped."""
+
     running_constraints: RedditRunningConstraints
     after: str
     agg_size: int
@@ -108,6 +118,8 @@ class RedditMetadata(TypedDict):
 
 
 class TwitterMetadata(TypedDict):
+    """Skipped."""
+
     running_constraints: TwitterRunningConstraints
     after: str
     aggs: List[str]
@@ -124,6 +136,8 @@ class TwitterMetadata(TypedDict):
 
 
 class RedditData(TypedDict):
+    """Skipped."""
+
     # common_fields
     author: str
     author_flair_richtext: Optional[str]
@@ -162,6 +176,8 @@ class RedditData(TypedDict):
 
 
 class TwitterData(TypedDict):
+    """Skipped."""
+
     author_fullname: str  # to author_fullname
     to: Optional[str]
     body: str  # body
@@ -184,12 +200,16 @@ class TwitterData(TypedDict):
 
 
 class RedditResponse(TypedDict):
+    """Skipped."""
+
     data: List[RedditData]
     metadata: List[RedditMetadata]
     aggs: List[RedditAggs]
 
 
 class TwitterResponse(TypedDict):
+    """Skipped."""
+
     data: List[TwitterData]
     metadata: List[TwitterMetadata]
     aggs: List[TwitterAggs]

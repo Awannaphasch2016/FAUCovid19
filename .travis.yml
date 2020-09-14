@@ -1,11 +1,14 @@
 language: python
-python:
-  - "3.7"
-
-services:
-  - docker
-
-before_script: pip install docker-compose
-
+python: "3.8"
+install:
+  - pip install tox
 script:
-  - docker-compose run app sh -c "python testing_travis_ci.py test && flake8"
+  - tox
+
+#services:
+#  - docker
+#
+#before_script: pip install docker-compose
+#
+#script:
+#  - docker-compose run app sh -c "python testing_travis_ci.py test && flake8"

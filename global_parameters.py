@@ -5,6 +5,21 @@ from typing import List
 BASE_DIR: pathlib.Path = pathlib.Path(
     os.path.dirname(os.path.realpath(__file__))
 )
+
+# Data
+DATA_DIR: pathlib.Path = (
+    pathlib.Path(os.path.dirname(os.path.realpath(__file__))) / "Data"
+)
+
+# sqlite database
+REDDIT_DATABASE = str(
+    DATA_DIR / "Processed" / pathlib.Path("reddit_database.db")
+)
+
+TWITTER_DATABASE = str(
+    DATA_DIR / "Processed" / pathlib.Path("twitter_database.db")
+)
+
 # General
 ERROR_1 = "responds are empty"
 ERROR_2 = "Expecting value: line 1 column 1 (char 0)"

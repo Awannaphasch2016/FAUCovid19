@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Run social media data api so users can requests for social media data"""
+"""Run social media data api so users can requests for social media data."""
 
 import datetime
-import pathlib
 import sqlite3
 from itertools import product
 from typing import Callable
@@ -20,6 +19,8 @@ from flask_restful import Api
 
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
+from global_parameters import REDDIT_DATABASE
+from global_parameters import TWITTER_DATABASE
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -80,7 +81,7 @@ all_crawler_fields = {
 
 def is_reddit_fields(s):
     """
-    return true if arg is an accepted reddit's fields
+    Return true if arg is an accepted reddit's fields.
 
     :type s: str
     :param s: any accepted fields
@@ -93,7 +94,7 @@ def is_reddit_fields(s):
 
 def is_twitter_fields(s):
     """
-    return true if arg is an accepted twitter's fields
+    Return true if arg is an accepted twitter's fields.
 
     :type s: str
     :param s: any accepted fields
@@ -105,6 +106,8 @@ def is_twitter_fields(s):
 
 
 class APIManager:
+    """Skipped."""
+
     def __init__(
         self,
         aspects,
@@ -117,7 +120,7 @@ class APIManager:
         total_count,
         top_amount,
     ):
-
+        """Skipped."""
         self.init_vars(
             aspects,
             crawlers,
@@ -143,7 +146,7 @@ class APIManager:
         top_amount,
     ):
         """
-        prepare common data that will be used among class's methods
+        Prepare common data that will be used among class's methods.
 
         :type aspects: List of str
         :param aspects: list of aspects
@@ -190,6 +193,7 @@ class APIManager:
         self.top_retrieved_data = top_amount
 
     def select_returned_function(self) -> Callable:
+        """Skipped summary."""
         if self.total_count:
             return self._get_total_count
         elif self.top_retrieved_data:
@@ -198,13 +202,15 @@ class APIManager:
             return self._get_all_retrieved_data
 
     def _get_total_count(self) -> Dict:
+        """Skipped summary."""
         return {
             "total_count": len(
-                self._get_all_retrieved_data()[self.RETURNED_DATA_KEY]
-            )
+                self._get_all_retrieved_data()[self.RETURNED_DATA_KEY],
+            ),
         }
 
     def _get_top_retrieved_data(self) -> Dict:
+        """Skipped summary."""
         return {
             "top_retrieved": self.top_retrieved_data,
             self.RETURNED_DATA_KEY: self._get_all_retrieved_data()[
@@ -213,15 +219,15 @@ class APIManager:
         }
 
     def _get_all_retrieved_data(self) -> Dict:
-        """
-        prepared + return all  stored crawled data of selected crawlers to
-         browser
+        """Skipped summary.
+
+        Prepared + return all  stored crawled data of selected crawlers to
+         browser.
 
          :rtype: Dict
          :return: returned all stored cralwed data of selected crawlers
 
         """
-
         returned_data = {}
 
         def _get_query(crawler, all_crawler_search_type, all_crawler_fields):
@@ -241,12 +247,12 @@ class APIManager:
 
                 if self.after_date[0] is not None:
                     after_date_created_utc = int(
-                        self.after_date[0].timestamp()
+                        self.after_date[0].timestamp(),
                     )
                     after_date_query = f"{date_key} > {after_date_created_utc}"
                 if self.before_date[0] is not None:
                     before_date_created_utc = int(
-                        self.before_date[0].timestamp()
+                        self.before_date[0].timestamp(),
                     )
                     before_date_query = (
                         f"{date_key} <= {before_date_created_utc}"
@@ -296,17 +302,19 @@ class APIManager:
 
             print()
 
-            return f"select {fields_query} from {crawler} where ".format(
-                fields_query, crawler
-            ) + " and ".join(all_query)
+            return (
+                f"select {fields_query} from {crawler} where "
+                + " and ".join(all_query)
+            )
 
         social_media_database_name_path = {
-            ALL_CRALWERS[1]: str(pathlib.Path("reddit_database.db")),
-            ALL_CRALWERS[0]: str(pathlib.Path("twitter_database.db")),
+            ALL_CRALWERS[1]: REDDIT_DATABASE,
+            ALL_CRALWERS[0]: TWITTER_DATABASE,
         }
 
         def _get_all_retrived_data(_asp: str, _crawler: str) -> List[Dict]:
-            """
+            """Skipped summary.
+
             :type _asp:  str
             :param _asp: an aspect name
 
@@ -316,7 +324,6 @@ class APIManager:
             path_to_crawler_database = social_media_database_name_path[
                 _crawler
             ]
-            path_to_crawler_database = str(path_to_crawler_database)
 
             query = _get_query(
                 _crawler,
@@ -324,7 +331,9 @@ class APIManager:
                 all_crawler_fields[_crawler],
             )
             all_crawler_data_from_database = self._get_all_data_from_sqlite(
-                _crawler, path_to_crawler_database, query
+                _crawler,
+                path_to_crawler_database,
+                query,
             )
 
             return all_crawler_data_from_database
@@ -333,16 +342,20 @@ class APIManager:
             all_reddit_data = _get_all_retrived_data(asp, crawler)
 
             returned_data.setdefault(self.RETURNED_DATA_KEY, []).extend(
-                all_reddit_data
+                all_reddit_data,
             )
 
         return returned_data
 
     def _get_all_data_from_sqlite(
-        self, crawler: str, path_to_database: str, query: str
+        self,
+        crawler: str,
+        path_to_database: str,
+        query: str,
     ) -> List[Dict]:
-        """
-        get all stored crawled data of a specified crawler from sqlite database
+        """Skipped summary.
+
+        Get all stored crawled data of a specified crawler from sqlite database.
 
         :type  crawler:
         :param crawler:
@@ -360,10 +373,11 @@ class APIManager:
         assert (
             crawler == path_to_database.split("\\")[-1].split("_")[0]
         ), path_to_database
+
         # print(path_to_database)
+        print(path_to_database)
         conn = sqlite3.connect(path_to_database)
         cur = conn.cursor()
-        # cur.execute("select * from reddit")
         print(query)
         cur.execute(query)
 
@@ -379,10 +393,10 @@ class APIManager:
         if "crawler" in fields:
             r = [
                 {
-                    **dict(
-                        (cur.description[i][0], value)
+                    **{
+                        cur.description[i][0]: value
                         for i, value in enumerate(row)
-                    ),
+                    },
                     **{"crawler": crawler},
                 }
                 for row in cur.fetchall()
@@ -390,10 +404,10 @@ class APIManager:
         else:
             r = [
                 {
-                    **dict(
-                        (cur.description[i][0], value)
+                    **{
+                        cur.description[i][0]: value
                         for i, value in enumerate(row)
-                    )
+                    },
                 }
                 for row in cur.fetchall()
             ]
@@ -402,13 +416,15 @@ class APIManager:
         return r
 
     def _get_retrieved_data_from_a_file(self, all_data_from_a_file):
+        """Skipped summary."""
         pass
 
 
 def is_date(date_string):
-    """
-    return true if parameter is a date with a specified format (%Y-%m-%d)
-    otherwise false
+    """Skipped summary.
+
+    Return true if parameter is a date with a specified format (%Y-%m-%d)
+    otherwise false.
 
     :type date_string: str
     :param date_strng: date in the following format %Y-%m-%d
@@ -416,20 +432,19 @@ def is_date(date_string):
     :rtype: boolean
     :return: return true if arg is an accpeted frequency otherwise flase
     """
-
     try:
         return True
     except ValueError as e:
         print(
             "This is the incorrect date string format. It should be %Y-%m-%d "
-            "for example 12-25-2018"
+            "for example 12-25-2018",
         )
         raise ValueError(e)
 
 
 def is_supported_frequency(freq):
     """
-    return true if arg is an accpeted frequency otherwise false
+    Return true if arg is an accpeted frequency otherwise false.
 
     :type freq: str
     :param freq: any accpeted frequency str
@@ -455,7 +470,7 @@ def is_supported_frequency(freq):
 
 def is_supported_aspect(asp):
     """
-    return true if arg is an accpeted frequency
+    Return true if arg is an accpeted frequency.
 
     :type asp: str
     :param asp: any accpeted frequency str
@@ -468,7 +483,7 @@ def is_supported_aspect(asp):
 
 def is_supported_crawler(cr):
     """
-    return true if arg is an supported crawler
+    Return true if arg is an supported crawler.
 
     :type cr: str
     :param cr: any accpeted crawler str
@@ -484,7 +499,8 @@ def is_supported_crawler(cr):
 
 
 def get_respond_type_when_crawler_is_all(cr):
-    """
+    """Skipped summary.
+
     return list of crawler's respond type when arg == 'all' else output arg
     without change
 
@@ -504,14 +520,14 @@ def get_respond_type_when_crawler_is_all(cr):
 
 @app.route("/", methods=["GET"])
 def index():
-    """
+    """Skipped summary.
+
     prepared specified input parameters and return all retirieved data in
     database in json format
 
     :rtype:  json
     :return: all retrieved data in database
     """
-
     crawlers = request.args.get("crawlers")
     since = request.args.get("since")
     until = request.args.get("until")
@@ -524,9 +540,10 @@ def index():
     top_amount = request.args.get("top_amount")
 
     def _check_param_compatibility(
-        _top_amount: Optional[str], _total_count: Optional[str]
+        _top_amount: Optional[str],
+        _total_count: Optional[str],
     ) -> Optional[Tuple[str, int]]:
-        """
+        """Skipped summary.
 
         :type _total_count: bool
         :param _total_count: it indicates whether or not to return
@@ -615,7 +632,12 @@ def index():
         total_count,
         top_amount,
     ) = _convert_none_value_to_appropriate_value(
-        aspects, fields, frequency, crawlers, total_count, top_amount
+        aspects,
+        fields,
+        frequency,
+        crawlers,
+        total_count,
+        top_amount,
     )
 
     def is_reddit_search_type(s):
@@ -686,7 +708,9 @@ def index():
                 _search_types,
                 _fields,
             ) = _ensure_compatiblity_of_search_types_and_crawlers(
-                _crawlers, _search_types, _fields
+                _crawlers,
+                _search_types,
+                _fields,
             )
         elif _crawlers == "all":
             _search_types = ["all"]
@@ -700,7 +724,9 @@ def index():
         return _crawlers, _search_types, _fields
 
     crawler, search_types, fields = _applying_all_value_condition(
-        crawlers, search_types, fields
+        crawlers,
+        search_types,
+        fields,
     )
 
     # def ensure_compatibility_of_fields_and_crawler(cr, f):
@@ -746,7 +772,7 @@ def index():
         if _since[0] is not None:
             assert is_date(_since[0]) and len(_since) == 1
             since_datetime = [
-                datetime.datetime.strptime(_since[0], DATEFORMAT)
+                datetime.datetime.strptime(_since[0], DATEFORMAT),
             ]
         else:
             since_datetime = _since
@@ -755,7 +781,7 @@ def index():
             assert is_date(_until[0]) and len(_until) == 1
 
             until_datetime = [
-                datetime.datetime.strptime(_until[0], DATEFORMAT)
+                datetime.datetime.strptime(_until[0], DATEFORMAT),
             ]
         else:
             until_datetime = _until
@@ -770,7 +796,12 @@ def index():
         return since_datetime, until_datetime
 
     since_datetime, until_datetime = _check_param_types(
-        aspects, since, until, frequency, total_count, top_amount
+        aspects,
+        since,
+        until,
+        frequency,
+        total_count,
+        top_amount,
     )
 
     api_manager = APIManager(

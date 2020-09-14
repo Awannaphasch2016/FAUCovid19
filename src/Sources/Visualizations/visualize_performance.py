@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""The module contains visualization utility"""
+"""The module contains visualization utility."""
 
 import matplotlib.pyplot as plt  # type: ignore
 import numbers
@@ -12,8 +12,11 @@ from collections.abc import Iterable
 
 
 class PlotPerformance:
+    """Skipped."""
+
     def __init__(self, is_plotted, is_saved_plot, **kwargs):
-        """
+        """SKipped.
+
         usecase
         :plotting loss
         1orplot_class = PlotClass()
@@ -50,7 +53,7 @@ class PlotPerformance:
         self,
         dict_for_plot,
     ):
-
+        """SKipped."""
         assert isinstance(dict_for_plot, dict), ""
 
         for name, val in dict_for_plot.items():
@@ -64,7 +67,7 @@ class PlotPerformance:
         title=None,
         save_path=None,
     ):
-
+        """SKipped."""
         assert isinstance(subplot_size, tuple), ""
         assert isinstance(name_and_tuple_dict, dict), ""
 
@@ -77,7 +80,8 @@ class PlotPerformance:
                 try:
                     for i in tuple_pos:
                         assert isinstance(
-                            i, tuple
+                            i,
+                            tuple,
                         ), "tuple_pos canot be iterate over"
                         assert (
                             i[0] - 1 <= subplot_size[0]
@@ -89,7 +93,8 @@ class PlotPerformance:
                 except Exception as e:
                     print(e)
                     assert isinstance(
-                        tuple_pos, tuple
+                        tuple_pos,
+                        tuple,
                     ), "tuple_pos canot be iterate over"
                     assert (
                         tuple_pos[0] - 1 <= subplot_size[0]
@@ -103,22 +108,25 @@ class PlotPerformance:
         if self.is_saved_plot:
             assert isinstance(save_path, str), ""
             assert isinstance(
-                save_file_name, str
+                save_file_name,
+                str,
             ), "save_file_name must be specified to avoid ambiguity"
 
             self.save_hist_with_pickel(
-                path=save_path, name=f"{save_file_name}.pickle"
+                path=save_path,
+                name=f"{save_file_name}.pickle",
             )
             self.save_fig(name=f"{save_file_name}.png", path=save_path)
         else:
             print(
-                f"is_saved_plot is false => pickle is not saved to {save_path}"
+                f"is_saved_plot is false => pickle is not saved to "
+                f"{save_path}",
             )
 
         self.plt.show()
 
     def collect_hist(self, name, val):
-        """
+        """Skipped.
 
         :param name: str
         :param val: int, float
@@ -143,24 +151,27 @@ class PlotPerformance:
 
             else:
                 raise ValueError(
-                    "only accept val of type number or numpy or torch.Tensor"
+                    "only accept val of type number or numpy or torch.Tensor",
                 )
         else:
             self.hist.setdefault(name, []).append(val)
 
     def set_subplots(self, row_col):
+        """Skipped."""
         self.row_col = row_col
 
         if self.row_col is None:
             self.fig, self.axs = plt.subplots()
         else:
             assert isinstance(
-                self.row_col, tuple
+                self.row_col,
+                tuple,
             ), "self.row_col must be tuple"
             self.fig, self.axs = plt.subplots(*self.row_col)
             # self.axs = [a for ax in self.axs for a in ax]
 
     def plot_each_hist(self, ax_tuple=None, name=None):
+        """Skipped."""
         assert isinstance(ax_tuple, tuple), "ax_ind must be tuple"
         assert name is not None, "name must be specified to avoid ambiguity"
 
@@ -180,20 +191,23 @@ class PlotPerformance:
                 #                                        ylabel='val',
                 #                                        title=name)
                 self.axs[ax_tuple[0]][ax_tuple[1]].set(
-                    ylabel="val", title=name
+                    ylabel="val",
+                    title=name,
                 )
                 self.axs[ax_tuple[0]][ax_tuple[1]].plot(
-                    np.array(self.hist[name]).flatten(), label=name
+                    np.array(self.hist[name]).flatten(),
+                    label=name,
                 )
                 self.axs[ax_tuple[0]][ax_tuple[1]].legend()
         else:
             raise ValueError("use plot_hist instead of plot_each_hist")
 
     def show(self):
-        """use with plot_each_hist"""
+        """Display on screen. Use with plot_each_hist."""
         self.plt.plot()
 
     def plot_hist(self, plot_title):
+        """Skipped."""
         self.axs.set(xlabel="epochs", ylabel="val", title=plot_title)
         for name, val_hist in self.hist.items():
             self.axs.plot(val_hist, label=name)
@@ -201,7 +215,10 @@ class PlotPerformance:
 
     # def save_fig(self, path=r'Output/Plot/', name=None):
     def save_hist_with_pickel(self, name=None, key=None, path=None):
-        """name_of_file should reflect hist key that is dumped"""
+        """Save hist with pickle.
+
+        name_of_file should reflect hist key that is dumped.
+        """
         assert name is not None, "name must be specified to avoid ambiguity"
         assert path is not None, (
             "save_path must be specified to avoid " "ambiguity"
@@ -218,6 +235,7 @@ class PlotPerformance:
             pickle.dump(hist, p)
 
     def save_fig(self, name=None, path=None):
+        """Skipped."""
         # permission denied
         assert name is not None, "name must be specified to avoid ambiguity"
         assert path is not None, "path must be specified to avoid ambiguity"
@@ -229,5 +247,5 @@ class PlotPerformance:
         else:
             print(
                 f"is_saved_plot is false => figure is not saved to "
-                f"{save_path}"
+                f"{save_path}",
             )

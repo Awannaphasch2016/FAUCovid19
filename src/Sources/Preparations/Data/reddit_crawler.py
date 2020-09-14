@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Prepare and crawl Reddit data"""
+"""Prepare and crawl Reddit data."""
 
 import datetime
 import json
@@ -42,9 +42,7 @@ from src.Utilities.time_utility import _get_epoch_datetime_subtract_timedelta
 
 
 class RedditCrawler:
-    """
-    This class will prepare and crawl data from reddit
-    """
+    """This class will prepare and crawl data from reddit."""
 
     def __init__(
         self,
@@ -56,7 +54,7 @@ class RedditCrawler:
         aspect: str,
         max_after: int,
     ):
-
+        """Skipped summary."""
         self.crawler_name = "RedditCrawler"
         self.verbose = verbose
         self.prepare_crawler(
@@ -78,7 +76,7 @@ class RedditCrawler:
         max_after: int,
     ) -> None:
         """
-        prepare common data that will be used among class's methods
+        Prepare common data that will be used among class's methods.
 
         :type subreddits_collection_class:  SubredditCollection
         :param subreddits_collection_class: Dict contains info about collection
@@ -100,8 +98,6 @@ class RedditCrawler:
         :param max_after: number of (previous) frequency that will be collected
 
         """
-
-        self.respond_type = respond_type
         self.search_type = search_type
         self.frequency = frequency
         self.collection_name = subreddits_collection_class["name"]
@@ -111,19 +107,23 @@ class RedditCrawler:
         self.max_after = max_after
 
     def prepare_running_crawler(
-        self, before: Optional[int], after: int, max_after: int
+        self,
+        before: Optional[int],
+        after: int,
+        max_after: int,
     ) -> RedditRunningConstraints:
-        """
-        prepare dict constraints that will be used to run (crawl) data for each
-         iteration
+        """Skipped summary.
+
+        Prepare dict constraints that will be used to run (crawl) data for each
+             iteration.
 
         :type before: None or int
         :param before: date in which all aata BEFORE this date should be
-        retrieved
+            retrieved
 
         :type after: int
         :param after: date in which all aata AFTER this date should be
-        retrieved
+            retrieved
 
         :param max_after: int
         :param max_after: number of (previous) frequency that will be collected
@@ -131,7 +131,6 @@ class RedditCrawler:
         :rtype:  RedditRunningConstraints
         :return: dict of constraint that will be used to run (crawl) data
         """
-
         common_fields = (
             "author, author_flair_richtext, author_flair_type, "
             "author_fullname,id, created_utc, permalink, "
@@ -149,11 +148,15 @@ class RedditCrawler:
 
         now = datetime.datetime.now()
         self.timestamp_utc = _get_epoch_datetime_subtract_timedelta(
-            now, self.frequency, after
+            now,
+            self.frequency,
+            after,
         )
 
         max_after_timestamp_utc = _get_epoch_datetime_subtract_timedelta(
-            now, "day", max_after
+            now,
+            "day",
+            max_after,
         )
 
         # FIXME: fix this error
@@ -215,7 +218,7 @@ class RedditCrawler:
 
     def get_url(self, running_constraints: RedditRunningConstraints) -> Url:
         """
-        prepare variable + get url with selected parameters
+        Prepare variable + get url with selected parameters.
 
         :type running_constraints: RedditRunningConstraints
         :param running_constraints: Dict contains keys that determines contains
@@ -224,7 +227,6 @@ class RedditCrawler:
         :rtype:  Url
         :return: url with selected parameters
         """
-
         # frequency = running_constraints['frequency']
         before = running_constraints["before"]
 
@@ -245,11 +247,13 @@ class RedditCrawler:
 
         if self.aspect is None:
             endpoint_url = self._get_url_endpoint_without_query_param(
-                running_constraints, after_frequency
+                running_constraints,
+                after_frequency,
             )
         elif self.aspect in ALL_REDDIT_TAGS:
             endpoint_url = self._get_url_endpoint_with_query_param(
-                running_constraints, after_frequency
+                running_constraints,
+                after_frequency,
             )
         else:
             raise NotImplementedError
@@ -262,11 +266,13 @@ class RedditCrawler:
     @my_timer
     # @signature_logger
     def get_responds(
-        self, running_constraints: RedditRunningConstraints
+        self,
+        running_constraints: RedditRunningConstraints,
     ) -> Json:
-        """
-        prepare varaibles to be pass in (ANY) api and prepare output from (ANY)
-         api
+        """Skipped summary.
+
+        Prepare varaibles to be pass in (ANY) api and prepare output from (ANY)
+         api.
 
         :type running_constraints: RedditRunningConstraints
         :param running_constraints: Dict contains keys that determines contains
@@ -275,7 +281,6 @@ class RedditCrawler:
         :rtype: None or Json
         :return: respond data with appropriate respond key format
         """
-
         before = running_constraints["before"]
         after = running_constraints["after"]
 
@@ -302,9 +307,10 @@ class RedditCrawler:
     @my_timer
     # @signature_logger
     def get_submission_avg_per_day(self, res: Json) -> float:
-        """
-        get average reddit submission per frequency given certain period of
-        time
+        """Skipped summary.
+
+        Get average reddit submission per frequency given certain period of
+        time.
 
         :type res: Json
         :param res: respond from (ANY) twitter api
@@ -322,7 +328,7 @@ class RedditCrawler:
         num_interval = len(created_utc)
 
         total = 0
-        for ind, key in enumerate(created_utc):
+        for _ind, key in enumerate(created_utc):
             total += key["doc_count"]
 
         avg = total / num_interval
@@ -335,26 +341,30 @@ class RedditCrawler:
                 f" {self.current_condition_str} "
                 f"||  avg_per_{self.frequency} given {num_interval}"
                 f" {self.frequency}s "
-                f"|| {avg}"
+                f"|| {avg}",
             )  # pass in variable to be pretty printedJ
 
         return avg
 
     def run(
-        self, before: Optional[int], after: int, max_after: int
+        self,
+        before: Optional[int],
+        after: int,
+        max_after: int,
     ) -> Tuple[Dict[str, Dict], int, int]:
-        """
+        """Skipped summary.
+
         crawl ALL data by running all iteration (loops) neccessary to retrieved
         all data. (this could largely depends on how selected twitter api are
         designed))
 
         :type before: None or int
         :param before: date in which all aata BEFORE this date should be
-        retrieved
+            retrieved
 
         :type after: int
         :param after: date in which all aata AFTER this date should be
-        retrieved
+            retrieved
 
         :param max_after: int
         :param max_after: number of (previous) frequency that will be collected
@@ -362,7 +372,6 @@ class RedditCrawler:
         :rtype: None or tuple of dict and int
         :return: all respond (crawled) data with appropriate respond key format
         """
-
         control_limit = ControlLimit()
         try:
             responds_content = self.run_once(before, after, max_after)
@@ -375,7 +384,7 @@ class RedditCrawler:
                 print(
                     f" {self.current_condition_str} "
                     f"|| total_results = {total_result} "
-                    f"|| missing_result = {missing_results}"
+                    f"|| missing_result = {missing_results}",
                 )
             else:
                 print(f"missing_reulst = {missing_results}")
@@ -383,7 +392,7 @@ class RedditCrawler:
         except Exception as e:
             if str(e) not in KNOWN_ERROR:
                 raise NotImplementedError(
-                    f"exception occur in {self.run.__name__}"
+                    f"exception occur in {self.run.__name__}",
                 )
             else:
                 raise Warning(str(e))
@@ -395,54 +404,62 @@ class RedditCrawler:
     @my_timer
     # @signature_logger
     def run_once(
-        self, before: Optional[int], after: int, max_after: int
+        self,
+        before: Optional[int],
+        after: int,
+        max_after: int,
     ) -> Dict:
         """
-        crawl 1 iteration (loops) neccessary to retrieved all data.
+        Crawl 1 iteration (loops) neccessary to retrieved all data.
 
         :type before: None or int
         :param before: date in which all aata BEFORE this date should be
-        retrieved
+            retrieved
 
         :type after: int
         :param after: date in which all aata AFTER this date should be
-        retrieved
+            retrieved
 
         :param max_after: int
         :param max_after: number of (previous) frequency that will be collected
 
         :rtype: None or Dict
         :return: respond (crawled) data for 1 iteration with appropriate
-        respond key format
+            respond key format
         """
-
         try:
             running_constraints = self.prepare_running_crawler(
-                before, after, max_after
+                before,
+                after,
+                max_after,
             )
             res = self.get_responds(running_constraints)
             reponds_content = self.apply_crawling_strategy(
-                running_constraints, res
+                running_constraints,
+                res,
             )
             return reponds_content
         except Exception as e:
             if str(e) not in KNOWN_ERROR:
                 raise NotImplementedError(
-                    f"unknown error occur in {self.run_once.__name__} "
+                    f"unknown error occur in {self.run_once.__name__} ",
                 )
             else:
                 raise ValueError(str(e))
 
     def adjust_after_step(
-        self, per_interval_average: float, max_responds_size: int
+        self,
+        per_interval_average: float,
+        max_responds_size: int,
     ) -> int:
-        """
+        """Skipped summary.
+
+        Dynamically adjust length of frequency to request data from api.
         (specific to reddit api (pushshift.io) behavior)
-        dynamically adjust length of frequency to request data from api
 
         :param per_interval_average: float
         :param per_interval_average: average number of returned data per
-        interval (period) of frequency
+            interval (period) of frequency
 
         :param max_responds_size: int
         :param max_responds_size: maximum responds size allowed by api
@@ -451,21 +468,23 @@ class RedditCrawler:
         :return: length of frequency for the next iteration of run
         """
         max_responds_threshold = max_responds_size - int(
-            max_responds_size * 0.40
+            max_responds_size * 0.40,
         )
         time_interval = int(max_responds_threshold / per_interval_average)
         time_interval = 1 if time_interval < 1 else time_interval
         return time_interval
 
     def get_submission_data(
-        self, running_constraints: RedditRunningConstraints, res: Json
+        self,
+        running_constraints: RedditRunningConstraints,
+        res: Json,
     ) -> RedditResponse:
         """
-        get reddit (submission) data given constraint to run
+        Get reddit (submission) data given constraint to run.
 
         :type running_constraints: RedditRunningConstraints
         :param running_constraints: Dict contains keys that determines contains
-        before running a crolwer
+            before running a crolwer
 
         :type res: Json
         :param res: respond from (ANY) twitter api
@@ -477,7 +496,10 @@ class RedditCrawler:
             res = _get_reddit_data(res, running_constraints, self)
             # _get_reddit_aggs(res)
             res = _get_reddit_metadata(
-                res, running_constraints, self.aspect, self.query
+                res,
+                running_constraints,
+                self.aspect,
+                self.query,
             )
 
             check_response_keys(res)
@@ -485,7 +507,7 @@ class RedditCrawler:
             if str(e) != "responds are empty":
                 raise NotImplementedError(
                     f"unknown error occur in "
-                    f"{self.get_submission_data.__name__} "
+                    f"{self.get_submission_data.__name__} ",
                 )
             else:
                 raise ValueError(str(e))
@@ -499,15 +521,18 @@ class RedditCrawler:
         return res
 
     def apply_crawling_strategy(
-        self, running_constraints: RedditRunningConstraints, res: Json
+        self,
+        running_constraints: RedditRunningConstraints,
+        res: Json,
     ) -> RedditResponse:
-        """
-        apply crawler "strategy" where a strategy is determined by selected
-        collection type
+        """Skipped summary.
+
+        Apply crawler "strategy" where a strategy is determined by selected
+        collection type.
 
         :type running_constraints: TwitterRunningConstraints
         :param running_constraints: Dict contains keys that determines contains
-        before running a crolwer
+            before running a crolwer
 
         :type res: Json
         :param res: respond from (ANY) twitter api
@@ -515,11 +540,10 @@ class RedditCrawler:
         :rtype: Dict
         :return: respond data with appropriate respond key format
         """
-
         try:
             if self.respond_type == "avg":
                 raise DeprecationWarning(
-                    f"no longer support {self.respond_type}"
+                    f"no longer support {self.respond_type}",
                 )
 
             elif self.respond_type == "data":
@@ -530,34 +554,36 @@ class RedditCrawler:
             if str(e) != "responds are empty":
                 raise NotImplementedError(
                     f"unknown error occur in "
-                    f"{self.apply_crawling_strategy.__name__} "
+                    f"{self.apply_crawling_strategy.__name__} ",
                 )
             else:
                 raise ValueError(str(e))
 
     def after_run(self, res: Json, after: int, max_after: int) -> Tuple:
-        """
-        analyze data from previous run + output neccessary data required to
-        dynamically select next interval
+        """Skipped summary.
+
+        Analyze data from previous run + output neccessary data required to
+        dynamically select next interval.
 
         :type res: Json
         :param res: respond from (ANY) twitter api
 
         :type after: int
         :param after: date in which all aata AFTER this date should be
-        retrieved
+            retrieved
 
         :param max_after: int
         :param max_after: number of (previous) frequency that will be collected
 
         :rtype: tuple
         :return: interval freqency for next run + average of the current
-        returned data
+            returned data
         """
         per_interval_average: float = self.get_submission_avg_per_day(res)
 
         next_interval: int = self.adjust_after_step(
-            per_interval_average, max_responds_size=1000
+            per_interval_average,
+            max_responds_size=1000,
         )
 
         # next_before, next_after, next_interval = \
@@ -576,8 +602,7 @@ class RedditCrawler:
         after_frequency: str,
     ):
         """
-        get url with query as parameters
-
+        Get url with query as parameters.
 
         :type running_constraints: RedditRunningConstraints
         :param running_constraints: Dict contains keys that determines contains
@@ -588,7 +613,6 @@ class RedditCrawler:
 
         :return:
         """
-
         aggs = running_constraints["aggs"]
         after = running_constraints["after"]
         size = running_constraints["size"]
@@ -620,8 +644,7 @@ class RedditCrawler:
         after_frequency: str,
     ) -> Url:
         """
-        get url without query as parameters
-
+        Get url without query as parameters.
 
         :type running_constraints: RedditRunningConstraints
         :param running_constraints: Dict contains keys that determines contains
@@ -661,8 +684,7 @@ class RedditCrawler:
         next_interval: int,
     ) -> Tuple:
         """
-        update frequency interval for 'before' and 'after' variable
-
+        Update frequency interval for 'before' and 'after' variable.
 
         :type running_constraints: RedditRunningConstraints
         :param running_constraints: Dict contains keys that determines contains
@@ -676,7 +698,6 @@ class RedditCrawler:
         """
         # NOTE: this only works for day ( don't use max_after, use max_after
         #  of the same frequency
-
         next_before: int = (
             max_after_with_specified_frequency
             if after + 1 >= max_after_with_specified_frequency
@@ -696,6 +717,8 @@ class RedditCrawler:
 
 
 class RedditCrawlerCondition(TypedDict):
+    """Skipped."""
+
     crawler_class: Type[RedditCrawler]
     collection_class: SubredditCollection
     initial_interval: int
@@ -708,23 +731,22 @@ class RedditCrawlerCondition(TypedDict):
     max_after: int
 
 
+# NOTE: I am not sure what casued missing data when request urls are exactly
+#     the same prepared varaibles, check conditions, run crawlers and saved
+#     respond data.
 def run_reddit_crawler(
     reddit_crawler_condition: RedditCrawlerCondition,
 ) -> List[int]:
-    """
-    NOTE: I am not sure what casued missing data when request urls are exactly
-        the same prepared varaibles, check conditions, run crawlers and saved
-        respond data.
+    """Skipped summay.
 
     :type reddit_crawler_condition: RedditCrawlerCondition
     :param reddit_crawler_condition: shared conditions (constraints) not
-    specific to any given crawler
+        specific to any given crawler
 
     :return: list of int
     :return: total number of returned responds data + total missing respond
-    data
+        data
     """
-
     crawler_class: Type[RedditCrawler] = reddit_crawler_condition[
         "crawler_class"
     ]
@@ -750,22 +772,25 @@ def run_reddit_crawler(
     # saved_path = None
 
     max_after_epoch_datetime = _get_epoch_datetime_subtract_timedelta(
-        datetime.datetime.now(), "day", max_after
+        datetime.datetime.now(),
+        "day",
+        max_after,
     )
     max_after_epoch_datetime_date = max_after_epoch_datetime.date()
 
     def _select_optimize_frequency(
-        before: Optional[int] = None, after: int = 100
+        before: Optional[int] = None,
+        after: int = 100,
     ):
         print(
             "selecting optimized frequency length among: day, hour, minute,"
-            " second "
+            " second ",
         )
         sorted_frequency_rank = ["day", "hour", "minute", "second"]
 
         def _count_num_missing_value(res: Json) -> int:
             num_missing_val = res["metadata"]["total_results"] - len(
-                res["data"]
+                res["data"],
             )
             return num_missing_val
 
@@ -785,7 +810,9 @@ def run_reddit_crawler(
             )
 
             responds_content, _, _ = reddit_crawler.run(
-                before, after, max_after
+                before,
+                after,
+                max_after,
             )
 
             if len(responds_content["data"]) > 0:
@@ -794,7 +821,9 @@ def run_reddit_crawler(
                 ):  # if next_interval
                     # (predicted_interval) still have too many respon
                     next_interval, per_day_average = reddit_crawler.after_run(
-                        responds_content, after, max_after
+                        responds_content,
+                        after,
+                        max_after,
                     )
 
                     if next_interval == 1 and per_day_average > 1000:  # if
@@ -804,7 +833,7 @@ def run_reddit_crawler(
                         print(
                             f" || adjust frequency from "
                             f'{reddit_crawler_condition["frequency"]} to'
-                            f" {sorted_frequency_rank[0]}"
+                            f" {sorted_frequency_rank[0]}",
                         )
                         print()
 
@@ -823,7 +852,7 @@ def run_reddit_crawler(
                             f"|| adjust initial_interval(after) "
                             f"from "
                             f'{reddit_crawler_condition["initial_interval"]} '
-                            f"to {after}"
+                            f"to {after}",
                         )
                         print()
 
@@ -833,14 +862,17 @@ def run_reddit_crawler(
                 else:
                     after_timestamp_utc = (
                         _get_epoch_datetime_subtract_timedelta(
-                            datetime.datetime.now(), frequency, after
+                            datetime.datetime.now(),
+                            frequency,
+                            after,
                         )
                     )
 
                     time_diff = datetime.datetime.now() - after_timestamp_utc
 
                     after = _convert_timedelta_to_specified_frequency(
-                        time_diff, frequency
+                        time_diff,
+                        frequency,
                     )
 
                     reddit_crawler_condition["initial_interval"] = after
@@ -848,7 +880,7 @@ def run_reddit_crawler(
                     print(
                         f"Given frequency = {frequency} "
                         f"|| after is set to "
-                        f"{reddit_crawler_condition['initial_interval']}"
+                        f"{reddit_crawler_condition['initial_interval']}",
                     )
                     print()
 
@@ -870,7 +902,9 @@ def run_reddit_crawler(
     # request_timestamp_str = get_full_datetime_str(request_timestamp)
 
     max_after_delta = _get_epoch_datetime_subtract_timedelta(
-        datetime.datetime.now(), "day", max_after
+        datetime.datetime.now(),
+        "day",
+        max_after,
     )
     # max_after_delta = _get_epoch_datetime_subtract_timedelta(
     #     datetime.datetime.now(), frequency, max_after)
@@ -940,7 +974,9 @@ def run_reddit_crawler(
             total_missing_data += num_missing_data
 
             next_interval, per_day_average = reddit_crawler.after_run(
-                responds_content, after, max_after
+                responds_content,
+                after,
+                max_after,
             )
 
             saved_file = get_saved_file_path(
@@ -958,7 +994,7 @@ def run_reddit_crawler(
 
             if str(e) not in KNOWN_ERROR:
                 raise NotImplementedError(
-                    f"unknown error occur in {run_reddit_crawler.__name__} "
+                    f"unknown error occur in {run_reddit_crawler.__name__} ",
                 )
             else:
                 print("responds are empty")
@@ -991,14 +1027,16 @@ def run_reddit_crawler(
             after,
             next_interval,
         ) = reddit_crawler._update_interval_before_after(
-            after, max_after_with_specified_frequency, next_interval
+            after,
+            max_after_with_specified_frequency,
+            next_interval,
         )
 
         assert after <= max_after_with_specified_frequency, ""
 
     print(
         f"|| total returned data = {total_returned_data} "
-        f"|| total_missing_data = {total_missing_data}"
+        f"|| total_missing_data = {total_missing_data}",
     )
     print(" >>>> finished crawling data <<<<")
     print()
@@ -1008,17 +1046,15 @@ def run_reddit_crawler(
 # =====================
 # ==Reddit Test
 # =====================
+# FIXME: this function should be method of TwitterCrawler class.
+#     (Is there any reason not to?)
 def _get_reddit_metadata(
     res: Json,
     running_constraints: RedditRunningConstraints,
     aspect: Tags,
     query: Query,
 ) -> Json:
-    """
-    FIXME: this function should be method of TwitterCrawler class.
-        (Is there any reason not to?)
-    prepare and format 'metadata' key in respond data to have an appropriate
-    format
+    """Prepare 'metadata' key in respond data to have an appropriate format.
 
     :type respond_type: str
     :param respond_type: desired respond type by crawler
@@ -1039,7 +1075,6 @@ def _get_reddit_metadata(
     :rtype: Json
     :return: respond data with appropriate 'metadata' key format
     """
-
     metadata = {}
     metadata["running_constraints"] = running_constraints
 
@@ -1067,16 +1102,15 @@ def _get_reddit_metadata(
     return res
 
 
+# FIXME: this function should be method of TwitterCrawler class. (Is there
+#     any reason not to?)
 @my_timer
 def _get_reddit_data(
     res: Json,
     running_constraints: RedditRunningConstraints,
     crawler_class: RedditCrawler,
 ) -> Json:
-    """
-    FIXME: this function should be method of TwitterCrawler class. (Is there
-        any reason not to?)
-    prepare and format 'data' key in respond data to have an appropriate format
+    """Prepare 'data' key in respond data to have an appropriate format.
 
     :type respond_type: str
     :param respond_type: desired respond type by crawler
@@ -1129,7 +1163,7 @@ def _get_reddit_data(
     except Exception as e:
         if str(e) != "responds are empty":
             raise NotImplementedError(
-                f"unknown error occur in {_get_reddit_data.__name__} "
+                f"unknown error occur in {_get_reddit_data.__name__} ",
             )
         else:
             raise ValueError(str(e))
@@ -1149,4 +1183,5 @@ def _get_reddit_data(
 
 
 def _get_reddit_aggs(res: Json) -> None:
+    """Skipped."""
     raise NotImplementedError

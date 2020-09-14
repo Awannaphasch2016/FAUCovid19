@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contain functions that ensure type to be pass to a 'common'
-funnction that are used across the project"""
+"""Contain common functions that ensure type to be passed."""
 
 import datetime
 from typing import Optional
@@ -14,9 +13,11 @@ from src.Utilities.time_utility import (
 
 
 def only_download_full_day(
-    frequency: str, before: Optional[int], after: int
+    frequency: str,
+    before: Optional[int],
+    after: int,
 ) -> Optional[Tuple[str, str]]:
-    """
+    """Ensure that full day of data can be collected before download.
 
     :type frequency:
     :param frequency:
@@ -33,13 +34,12 @@ def only_download_full_day(
     if frequency == "day":
 
         def is_full_day(before: int, after: int):
-
-            """exclude data from today aka datetime.datetime.now().day"""
+            """Exclude data from today aka datetime.datetime.now().day ."""
             if before == 0:
                 print(
                     "!!! exclude data from today aka "
                     "datetime.datetime.now().day => to make sure that only "
-                    "full day of data will be loaded !!!"
+                    "full day of data will be loaded !!!",
                 )
                 return False
             else:
@@ -53,6 +53,7 @@ def only_download_full_day(
 
 
 def ensure_epoch_datetime(date: datetime.datetime) -> int:
+    """Ensure that date contain epoch datetime."""
     epoch_datetime = str(date.timestamp()).split(".")[0]
     assert len(epoch_datetime) == 10, ""
     return int(epoch_datetime)
@@ -64,10 +65,12 @@ def _ensure_datetime_for_specified_frequency_not_consider_max_after(
     frequency: Frequency,
     after: int,
 ) -> int:
+    """Ensure that datetime for specified frequency."""
     time_diff = max_after - after_timestamp_utc
 
     after_in_specified_frequency = _convert_timedelta_to_specified_frequency(
-        time_diff, frequency
+        time_diff,
+        frequency,
     )
 
     # if after_timestamp_utc.date() < max_after_timestamp_utc.date():
@@ -93,5 +96,8 @@ def _ensure_datetime_for_specified_frequency_not_consider_max_after(
 
 if __name__ == "__main__":
     _ensure_datetime_for_specified_frequency_not_consider_max_after(
-        datetime.datetime.now(), datetime.datetime.now(), "day", 20
+        datetime.datetime.now(),
+        datetime.datetime.now(),
+        "day",
+        20,
     )

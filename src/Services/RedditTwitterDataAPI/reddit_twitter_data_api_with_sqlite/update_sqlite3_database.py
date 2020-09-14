@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
-"""Update crawled social media data with sqlite3 database"""
+"""Update crawled social media data with sqlite3 database."""
 
 import os
-import pandas as pd
 import pathlib
 import sqlite3
 import sys
 from typing import Dict
 from typing import List
 from typing import Optional
+
+import pandas as pd
+
+from global_parameters import REDDIT_DATABASE
+from global_parameters import TWITTER_DATABASE
 
 sys.path.insert(0, str(pathlib.Path(os.getcwd()).parent.parent.parent.parent))
 
@@ -30,16 +34,16 @@ ALL_TWITTER_SEARCH_TYPE = ["data_tweet"]
 
 def get_all_file_path() -> List[pathlib.Path]:
     """
-    return all available social media date distinct root path
+    Return all available social media date distinct root path.
 
     :rtype: list of pathlib.Path
     :return: list of path to crawler output data
     """
     reddit_path = pathlib.Path(BASE_DIR) / pathlib.Path(
-        r"Outputs\Data\RedditCrawler"
+        r"Outputs\Data\RedditCrawler",
     )
     twitter_path = pathlib.Path(BASE_DIR) / pathlib.Path(
-        r"Outputs\Data\TwitterCrawler"
+        r"Outputs\Data\TwitterCrawler",
     )
     # raise NotImplementedError
     return [reddit_path, twitter_path]
@@ -49,7 +53,7 @@ def get_all_file_for_reddit(
     all_data_path: List[pathlib.Path],
 ) -> Optional[List[pathlib.Path]]:  # noqa: E125
     """
-    return list of file path contained reddit output date
+    Return list of file path contained reddit output date.
 
     :type all_data_path: list of pathlib.Path
     :param all_data_path: all reddit output data folder path
@@ -58,7 +62,10 @@ def get_all_file_for_reddit(
     :return: list of file path contained reddit output data
     """
     return get_all_file_for_crawler(
-        all_data_path, "reddit", ALL_ASPECTS, ALL_REDDIT_SEARCH_TYPE
+        all_data_path,
+        "reddit",
+        ALL_ASPECTS,
+        ALL_REDDIT_SEARCH_TYPE,
     )
 
 
@@ -66,7 +73,7 @@ def get_all_file_for_twitter(
     all_data_path: List[pathlib.Path],
 ) -> Optional[List[pathlib.Path]]:  # noqa: E125
     """
-    return list of file path contained twitter output data
+    Return list of file path contained twitter output data.
 
     :type all_data_path: list of pathlib.Path
     :param all_data_path: all twitter output data folder path
@@ -75,7 +82,10 @@ def get_all_file_for_twitter(
     :return: list of file path contained twitter output data
     """
     return get_all_file_for_crawler(
-        all_data_path, "twitter", ALL_ASPECTS, ALL_TWITTER_SEARCH_TYPE
+        all_data_path,
+        "twitter",
+        ALL_ASPECTS,
+        ALL_TWITTER_SEARCH_TYPE,
     )
 
 
@@ -85,9 +95,10 @@ def get_all_file_for_crawler(
     aspect: List[str],
     search_types: List[str],
 ) -> Optional[List[pathlib.Path]]:
-    """
-    prepared parameters + return list of file path contained a specified
-    crawler output data
+    """Skipped summary.
+
+    Prepared parameters + return list of file path contained a specified
+    crawler output data.
 
     :type all_data_path: list of pathlib.Path
     :param all_data_path: all reddit output data folder path
@@ -108,36 +119,36 @@ def get_all_file_for_crawler(
     if crawler == "reddit":
         all_reddit_files = []
         for i in all_data_path:
-            for (dirpath, dirnames, filenames) in os.walk(i):
+            for (dirpath, _dirnames, _filenames) in os.walk(i):
                 # print(dirpath, dirnames)
                 x = dirpath.split("\\")[-1]
                 y = dirpath.split("\\")[-3]
                 # if x in ['comment']:
                 if x in search_types and y in aspect:
-                    for (dirpath1, dirnames1, filenames1) in os.walk(
-                        pathlib.Path(dirpath)
+                    for (dirpath1, _dirnames1, filenames1) in os.walk(
+                        pathlib.Path(dirpath),
                     ):
                         for file in filenames1:
                             all_reddit_files.append(
-                                pathlib.Path(dirpath1) / file
+                                pathlib.Path(dirpath1) / file,
                             )
         all_files.extend(all_reddit_files)
 
     if crawler == "twitter":
         all_twitter_files = []
         for i in all_data_path:
-            for (dirpath, dirnames, filenames) in os.walk(i):
+            for (dirpath, _dirnames, _filenames) in os.walk(i):
                 # print(dirpath, dirnames)
                 x = dirpath.split("\\")[-1]
                 y = dirpath.split("\\")[-3]
                 # if x in ['comment']:
                 if x in search_types and y in aspect:
-                    for (dirpath1, dirnames1, filenames1) in os.walk(
-                        pathlib.Path(dirpath)
+                    for (dirpath1, _dirnames1, filenames1) in os.walk(
+                        pathlib.Path(dirpath),
                     ):
                         for file in filenames1:
                             all_twitter_files.append(
-                                pathlib.Path(dirpath1) / file
+                                pathlib.Path(dirpath1) / file,
                             )
         all_files.extend(all_twitter_files)
 
@@ -146,7 +157,7 @@ def get_all_file_for_crawler(
 
 def get_all_file(all_data_path: List[pathlib.Path], crawler: str) -> Dict:
     """
-    return list of file path contained a specified crawler output data
+    Return list of file path contained a specified crawler output data.
 
     :type all_data_path: list of pathlib.Path
     :param all_data_path: all reddit output data folder path
@@ -158,7 +169,6 @@ def get_all_file(all_data_path: List[pathlib.Path], crawler: str) -> Dict:
     :rtype: dict containing a specified crawler file path
     :return: dict of file path contained reddit output data
     """
-
     if crawler == "reddit":
         all_reddit_files = get_all_file_for_reddit(all_data_path)
         return {"all_reddit_files": all_reddit_files}
@@ -169,10 +179,10 @@ def get_all_file(all_data_path: List[pathlib.Path], crawler: str) -> Dict:
         raise ValueError
 
 
+# TODO: I need to refactor this code into get_all_data_from_reddit_file() and
+#     get_all_data_from_twitter_file()
 def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
-    """
-    TODO: I need to refactor this code into get_all_data_from_reddit_file() and
-        get_all_data_from_twitter_file()
+    """Skipped summary.
 
     :type all_files: Dict
     :param all_files: all file paths to crawler's output data
@@ -183,9 +193,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
     :rtype: Dict
     :return: dict of all returned data from specified crawler's database
     """
-
     # all_data_from_a_file
-
     def _get_all_data_from_a_file(file):
         import pickle
 
@@ -225,7 +233,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                 {
                     "data_from_a_file": retrieved_data_from_a_file,
                     "data_from_folder_path": retrieved_data_from_path_foler,
-                }
+                },
             )
 
     def _convert_to_output_format() -> Dict:
@@ -263,7 +271,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                         if key in selected_data_keys
                     }
                     all_reddit_retrieved_data.append(
-                        {**tmp, **each_reddit_metadata, **j["data"]}
+                        {**tmp, **each_reddit_metadata, **j["data"]},
                     )
 
                 # all_reddit_retrieved_data.append(
@@ -274,20 +282,20 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                 tmp_df = pd.DataFrame(tmp)
                 tmp_dict: Dict = {}
                 tmp_dict = tmp_df.drop_duplicates(
-                    subset=["id", "aspect"]
+                    subset=["id", "aspect"],
                 ).to_dict("record")
                 return tmp_dict
 
             # all_reddit_retrieved_data_df = pd.DataFrame(
             #     all_reddit_retrieved_data)
             all_reddit_retrieved_data: Dict = check_if_aspect_has_no_duplicate(
-                all_reddit_retrieved_data
+                all_reddit_retrieved_data,
             )
             # all_reddit_retrieved_data = all_reddit_retrieved_data_df.to_dict(
             #     'record')
 
             return_data_no_dubplicate: Dict = {
-                "reddit": all_reddit_retrieved_data
+                "reddit": all_reddit_retrieved_data,
             }
 
             return return_data_no_dubplicate
@@ -324,7 +332,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                         if d == "id":
                             acc.append(y)
                     all_twitter_retrieved_data.append(
-                        {**tmp, **each_twitter_metadata, **j["data"]}
+                        {**tmp, **each_twitter_metadata, **j["data"]},
                     )
 
             returned_data: Dict = {"twitter": all_twitter_retrieved_data}
@@ -339,12 +347,17 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
 
 
 class SocialMediaDatabase:
-    """prepare data to create table and insert data into specified crawler
-    database"""
+    """Skipped summary.
 
-    def __init__(self, dbfile: str, data: Dict):
+    Prepare data to create table and insert data into specified crawler
+    database.
+    """
 
-        self.conn = self._create_connection(dbfile)
+    def __init__(self, dbfile_path: str, data: Dict):
+        """Skipped summary."""
+        dbfile = dbfile_path.split("/")[-1]
+
+        self.conn = self._create_connection(dbfile_path)
         # self._get_all_data_from_sqlite()
 
         if dbfile == "reddit_database.db":
@@ -378,9 +391,10 @@ class SocialMediaDatabase:
     #     print(r)
 
     def _create_connection(self, dbfile: str) -> sqlite3.Connection:
-        """
-        create a database connection to the SQLite database specified by
-        db_file
+        """Skipped summary.
+
+        Create a database connection to the SQLite database specified by
+        db_file.
 
         :type db_file: str
         :param db_file: database file
@@ -396,10 +410,7 @@ class SocialMediaDatabase:
             raise ValueError(e)
 
     def _create_table_reddit(self) -> str:
-        """
-        run query to create reddit schema in twitter database
-        """
-
+        """Run query to create reddit schema in twitter database."""
         query = """ CREATE TABLE IF NOT EXISTS reddit (
                                     crawler STRING
                                     , created_utc str
@@ -421,10 +432,7 @@ class SocialMediaDatabase:
         c.execute(query)
 
     def _create_table_twitter(self) -> None:
-        """
-        run query to create twitter schema in twitter database
-        """
-
+        """Run query to create twitter schema in twitter database."""
         # text
         # id, date, sentiment, frequency, aspect
         query = """ CREATE TABLE IF NOT EXISTS twitter (
@@ -445,7 +453,7 @@ class SocialMediaDatabase:
 
     def _reddit_insert_query(self, **kwargs):
         """
-        return str of query to insert data into reddit database
+        Return str of query to insert data into reddit database.
 
         :param kwargs: dict
         :param kwargs: dict of parameters
@@ -453,7 +461,6 @@ class SocialMediaDatabase:
         :rtype: str
         :return: str of character to insert query to reddit
         """
-
         columns_to_be_inserted: List[str] = []
         value_to_be_inserted: List[str] = []
 
@@ -465,7 +472,7 @@ class SocialMediaDatabase:
             new_val = []
             new_col = []
             for i, (v, k) in enumerate(
-                zip(value_to_be_inserted, columns_to_be_inserted)
+                zip(value_to_be_inserted, columns_to_be_inserted),
             ):
                 if not isinstance(v, str):
                     if v is None:
@@ -479,7 +486,8 @@ class SocialMediaDatabase:
                 else:
                     value_to_be_inserted[i] = v
                     value_to_be_inserted[i] = value_to_be_inserted[i].replace(
-                        '"', "'"
+                        '"',
+                        "'",
                     )
 
                 if value_to_be_inserted[i] is not None:
@@ -496,16 +504,16 @@ class SocialMediaDatabase:
             columns_to_be_inserted,
         ) = _convert_value_to_correct_type()
 
-        return """INSERT INTO reddit ({columns_to_be_inserted})
+        columns_to_be_inserted = ",".join(columns_to_be_inserted)
+        value_to_be_inserted = ",".join(value_to_be_inserted)
+
+        return f"""INSERT INTO reddit ({columns_to_be_inserted})
         VALUES({value_to_be_inserted});
-        """.format(
-            columns_to_be_inserted=",".join(columns_to_be_inserted),
-            value_to_be_inserted=",".join(value_to_be_inserted),
-        )
+        """
 
     def _twitter_insert_query(self, **kwargs) -> str:
         """
-        return str of query to insert data into twitter database
+        Return str of query to insert data into twitter database.
 
         :param kwargs: dict
         :param kwargs: dict of parameters
@@ -513,7 +521,6 @@ class SocialMediaDatabase:
         :rtype: str
         :return: str of character to insert query to twitter
         """
-
         columns_to_be_inserted: List[str] = []
         value_to_be_inserted: List[str] = []
 
@@ -525,7 +532,7 @@ class SocialMediaDatabase:
             new_val = []
             new_col = []
             for i, (v, k) in enumerate(
-                zip(value_to_be_inserted, columns_to_be_inserted)
+                zip(value_to_be_inserted, columns_to_be_inserted),
             ):
                 if not isinstance(v, str):
                     if v is None:
@@ -539,7 +546,8 @@ class SocialMediaDatabase:
                 else:
                     value_to_be_inserted[i] = v
                     value_to_be_inserted[i] = value_to_be_inserted[i].replace(
-                        '"', "'"
+                        '"',
+                        "'",
                     )
 
                 if value_to_be_inserted[i] is not None:
@@ -556,16 +564,16 @@ class SocialMediaDatabase:
             columns_to_be_inserted,
         ) = _convert_value_to_correct_type()
 
-        return """INSERT INTO twitter ({columns_to_be_inserted})
+        columns_to_be_inserted = ",".join(columns_to_be_inserted)
+        value_to_be_inserted = ",".join(value_to_be_inserted)
+
+        return f"""INSERT INTO twitter ({columns_to_be_inserted})
         VALUES({value_to_be_inserted});
-        """.format(
-            columns_to_be_inserted=",".join(columns_to_be_inserted),
-            value_to_be_inserted=",".join(value_to_be_inserted),
-        )
+        """
 
     def _insert_reddit_data_to_database(self, reddit_query: str):
         """
-        execute reddit insert query
+        Execute reddit insert query.
 
         :type twitter_query: str
         :param twitter_query: str of character to insert query to twitter
@@ -575,7 +583,7 @@ class SocialMediaDatabase:
 
     def _insert_twitter_data_to_database(self, twitter_query: str):
         """
-        execute twitter insert query
+        Execute twitter insert query.
 
         :type twitter_query: str
         :param twitter_query: str of character to insert query to twitter
@@ -585,7 +593,7 @@ class SocialMediaDatabase:
 
     def _insert_data_to_database(self, crawler: str, **kwargs):
         """
-        insert data into a specified crawler database
+        Insert data into a specified crawler database.
 
         :type crawler: str
         :param crawler: crawler name
@@ -598,11 +606,11 @@ class SocialMediaDatabase:
             #     {**each_reddit_data, **each_reddit_metadata, **j['data']})
             kwargs = {**kwargs, "crawler": crawler}
             self._insert_reddit_data_to_database(
-                self._reddit_insert_query(**kwargs)
+                self._reddit_insert_query(**kwargs),
             )
         elif crawler == "twitter":
             self._insert_twitter_data_to_database(
-                self._twitter_insert_query(**kwargs)
+                self._twitter_insert_query(**kwargs),
             )
         else:
             raise ValueError()
@@ -623,11 +631,11 @@ if __name__ == "__main__":
     all_data_path = get_all_file_path()
     all_files = get_all_file(all_data_path, "reddit")
     all_data = get_all_data_from_files(all_files, "reddit")
-    SocialMediaDatabase("reddit_database.db", all_data)
+    SocialMediaDatabase(REDDIT_DATABASE, all_data)
 
     all_data_path = get_all_file_path()
     all_files = get_all_file(all_data_path, "twitter")
     all_data = get_all_data_from_files(all_files, "twitter")
-    SocialMediaDatabase("twitter_database.db", all_data)
+    SocialMediaDatabase(TWITTER_DATABASE, all_data)
 
     print("complete running..")

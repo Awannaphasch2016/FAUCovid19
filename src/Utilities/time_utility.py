@@ -1,9 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""Contains time utility function."""
+
 import datetime
 
 
 def _get_epoch_datetime_subtract_timedelta(
-    timestamp: datetime.datetime, frequency: str, interval: int
+    timestamp: datetime.datetime,
+    frequency: str,
+    interval: int,
 ) -> datetime.datetime:
+    """Get epoch datetime - interval time."""
     if frequency == "day":
         after_timestamp_utc = timestamp - datetime.timedelta(days=interval)
     elif frequency == "hour":
@@ -18,8 +26,10 @@ def _get_epoch_datetime_subtract_timedelta(
 
 
 def _convert_timedelta_to_specified_frequency(
-    duration: datetime.timedelta, frequency: str
+    duration: datetime.timedelta,
+    frequency: str,
 ) -> int:
+    """Convert timedelta to specified freqeyncy."""
     days, seconds = duration.days, duration.seconds
     hours = days * 24 + seconds // 3600
     minutes = (seconds % 3600) // 60
