@@ -28,7 +28,7 @@ def test_crawler_parameters(
 
 
 def test_crawler_parameters_with_all_value(client):
-    concat_crawlers = ALL_CRALWERS.join(',')
+    concat_crawlers = ','.join(ALL_CRALWERS)
     x = client.get("/?crawlers=all")
     y = client.get(f"/?crawlers={concat_crawlers}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
@@ -54,4 +54,8 @@ def test_aspects_parameter(client, request_value, responds_value):
            == x.json["all_retrived_data"][0]['aspect']
 
 def test_aspects_parameter_with_all_value(client):
-    pass
+    concat_crawlers = ','.join(ALL_ASPECTS)
+    x = client.get("/?aspects=all")
+    # y = client.get(f"/?aspects={concat_crawlers}")
+    # assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    # assert status.HTTP_200_OK == int(y.status.split(" ")[0])
