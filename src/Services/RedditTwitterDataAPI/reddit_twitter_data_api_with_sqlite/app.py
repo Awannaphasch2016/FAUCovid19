@@ -179,13 +179,16 @@ class APIManager:
             return self._get_total_count
         elif self.top_retrieved_data:
             return self._get_top_retrieved_data
-        elif self.pages is not None:
+        elif self.pages[0] is not None:
+            if self.pages[0] == 'all' and self.limit == 'inf':
+                return self._get_all_retrieved_data
             return self._get_all_pages
         else:
             return self._get_all_retrieved_data
 
     def _get_all_pages(self):
         """Return specified pages where each len(pages) == limit."""
+
 
         total_retrived_data = \
             self._get_all_retrieved_data()[self.RETURNED_DATA_KEY]
