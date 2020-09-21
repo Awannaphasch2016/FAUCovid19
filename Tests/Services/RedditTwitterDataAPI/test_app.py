@@ -36,7 +36,7 @@ def test_crawler_parameters_with_all_value(client):
     assert len(y) == len(x)
 
 
-def test_aspects_parameter():
+def test_aspects_parameter(client):
     pass
 
 
