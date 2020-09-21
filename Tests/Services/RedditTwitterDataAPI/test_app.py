@@ -125,11 +125,11 @@ def test_total_count_parameter(client):
     assert x.json["total_count"] == len(y.json['all_retrived_data'])
 
 
-# @pytest.mark.test_paramete
-# def test_top_amount_parameter(client):
-#     y = client.get("/?top_amount=100")
-#     assert status.HTTP_200_OK == int(y.status.split(" ")[0])
-
+@pytest.mark.test_paramete
+def test_top_amount_parameter(client):
+    x = client.get("/?top_amount=100")
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    assert x.json["top_retrieved"] == len(x.json['all_retrived_data'])
 
 
 @pytest.mark.test_all_value
