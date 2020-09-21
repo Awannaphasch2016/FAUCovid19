@@ -15,7 +15,6 @@ from typing import Union
 
 from flask import Flask
 from flask import request
-from flask_api import status
 from flask_restful import Api
 
 from global_parameters import ALL_ASPECTS
@@ -30,6 +29,7 @@ from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
 from src.Utilities.Errors.http_errors import https_400_bad_request_template
+from src.Utilities.utilities import return_error_template
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -556,7 +556,7 @@ def index():
     params_error = \
         _check_param_compatibility(
             _check_compatibility_of_top_amount_and_total_count
-            , top_amount,total_count
+            , top_amount, total_count
         )
 
     if params_error is not None:
@@ -710,8 +710,7 @@ def index():
             _crawlers: Optional[Union[str, List[str]]],
             _search_types: Optional[Union[str, List[str]]],
             _fields: Optional[Union[str, List[str]]],
-    ) -> Union[List[Union[str, None]],Tuple[str, int]]:
-
+    ) -> Union[List[Union[str, None]], Tuple[str, int]]:
 
         if _crawlers != "all" and _crawlers is not None:
             (
@@ -744,17 +743,10 @@ def index():
     has_error = _applying_all_value_condition(
         crawlers, search_types, fields,
     )
-    try:
-        if status.HTTP_400_BAD_REQUEST == has_error[1]:
-            return has_error
-        else:
-            crawler, search_types, fields = has_error
-    except:
-        return "ERROR is not properly caught, unknown error is returned."
 
-
-    # def ensure_compatibility_of_fields_and_crawler(cr, f):
-    #     if cr[0] == 'all'
+    if return_error_template(has_error) is not None:
+        return has_error
+    crawler, search_types, fields = has_error
 
     def convert_to_common_type(args, all_keywords=None, accept_all=True):
         if accept_all:
@@ -792,25 +784,38 @@ def index():
             _top_amount: int,
             _page: str,
             _limit: str,
-    ) -> Tuple[List[datetime.datetime], List[datetime.datetime]]:
+    ) -> Union[
+        Tuple[List[datetime.datetime], List[datetime.datetime]],
+        Tuple[str, int]
+    ]:
 
         for aspect in _aspects:
             assert is_supported_aspect(aspect)
 
         if _since[0] is not None:
-            assert is_date(_since[0]) and len(_since) == 1
-            since_datetime = [
-                datetime.datetime.strptime(_since[0], DATEFORMAT),
-            ]
+            # assert is_date(_since[0]) and len(_since) == 1
+            try:
+                since_datetime = [
+                    datetime.datetime.strptime(_since[0], DATEFORMAT),
+                ]
+            except:
+                return https_400_bad_request_template(
+                    "since params only except dateformat = %Y-%m-%d"
+                )
         else:
             since_datetime = _since
 
         if _until[0] is not None or _until[0] == "all":
-            assert is_date(_until[0]) and len(_until) == 1
+            # assert is_date(_until[0]) and len(_until) == 1
 
-            until_datetime = [
-                datetime.datetime.strptime(_until[0], DATEFORMAT),
-            ]
+            try:
+                until_datetime = [
+                    datetime.datetime.strptime(_until[0], DATEFORMAT),
+                ]
+            except:
+                return https_400_bad_request_template(
+                    "until params only except dateformat = %Y-%m-%d"
+                )
         else:
             until_datetime = _until
 
@@ -826,7 +831,7 @@ def index():
 
         return since_datetime, until_datetime
 
-    since_datetime, until_datetime = _check_param_types(
+    has_error = _check_param_types(
         crawlers,
         since,
         until,
@@ -838,6 +843,11 @@ def index():
         page,
         limit
     )
+
+    if return_error_template(has_error) is not None:
+        return has_error
+
+    since_datetime, until_datetime = has_error
 
     api_manager = APIManager(
         aspects,
@@ -852,7 +862,6 @@ def index():
     )
 
     return api_manager.select_returned_function()()
-    # return api_manager.get_all_retrived_data()
 
 
 if __name__ == "__main__":

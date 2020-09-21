@@ -20,6 +20,11 @@ TWITTER_DATABASE = str(
     DATA_DIR / "Processed" / pathlib.Path("twitter_database.db")
 )
 
+PATH_TO_DATABASE = {
+    "reddit": REDDIT_DATABASE,
+    "twitter": TWITTER_DATABASE,
+}
+
 # General
 ERROR_1 = "responds are empty"
 ERROR_2 = "Expecting value: line 1 column 1 (char 0)"
