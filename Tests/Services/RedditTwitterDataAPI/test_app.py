@@ -49,6 +49,8 @@ def test_aspects_parameter(client):
     assert status.HTTP_200_OK == int(reopen.status.split(" ")[0])
     assert status.HTTP_200_OK == int(corona.status.split(" ")[0])
 
+    assert 'work_from_home' \
+           == work_from_home.json["all_retrived_data"][0]['aspect']
 
 def test_aspects_parameter_with_all_value(client):
     pass
