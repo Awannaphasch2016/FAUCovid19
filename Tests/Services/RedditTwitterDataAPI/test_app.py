@@ -101,8 +101,8 @@ def test_reddit_fields_parameters_random_combination(client,):
     sampled_fields = ','.join(sampled_fields)
     x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&fields={sampled_fields}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-    # assert f'{sampled_fields}' \
-    #        == list(x.json["all_retrived_data"][0].keys())
+    assert f'{sampled_fields}' \
+           == ','.join(list(x.json["all_retrived_data"][0].keys()))
 
 
 
