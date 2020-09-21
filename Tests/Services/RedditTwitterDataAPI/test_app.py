@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """test_app_response"""
+import random
 
 import pytest
 from flask_api import status
@@ -87,12 +88,23 @@ def test_fields_parameter(client,
     ],
 )
 def test_reddit_fields_parameter(client,
-                                         request_value,
-                                         responds_value):
+                                 request_value,
+                                 responds_value):
     x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&fields={request_value}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert f'{responds_value}' \
            == list(x.json["all_retrived_data"][0].keys())[0]
+
+
+def test_reddit_fields_parameters_random_combination(client,):
+    sampled_fields = random.sample(ALL_REDDIT_FEILDS, 5)
+    sampled_fields = ','.join(',')
+    # x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&fields={}")
+    # assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    # assert f'{responds_value}' \
+    #        == list(x.json["all_retrived_data"][0].keys())[0]
+
+
 
 @pytest.mark.parametrize(
     "request_value,responds_value",
@@ -101,8 +113,8 @@ def test_reddit_fields_parameter(client,
     ],
 )
 def test_twitter_fields_parameter(client,
-                                         request_value,
-                                         responds_value):
+                                  request_value,
+                                  responds_value):
     x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&fields={request_value}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert f'{responds_value}' \
