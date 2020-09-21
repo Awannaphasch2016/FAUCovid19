@@ -1,44 +1,44 @@
-import sqlite3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""test_app_response"""
 
 import pytest
-
-from global_parameters import DATA_DIR
-
-path_to_database = {
-    "reddit": str(DATA_DIR / "Processed/reddit_database.db"),
-    "twitter": str(DATA_DIR / "Processed/twitter_database.db"),
-}
+from flask_api import status
 
 
-@pytest.fixture(scope="module")
-def reddit_cur():
-    print("-----------setup---------")
-    conn = sqlite3.connect(path_to_database["reddit"])
-    cur = conn.cursor()
-    yield cur
-    print("-----------teardown---------")
-    conn.close()
+@pytest.mark.parametrize(
+    "crawler_request_value,crawler_responds_value",
+    [
+        ("reddit", "reddit"),
+        ("twitter", "twitter"),
+    ],
+)
+def test_crawler_parameters(
+    client, crawler_request_value, crawler_responds_value,
+):
+    x = client.get(f"/?crawlers={crawler_request_value}")
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    assert (
+        f"{crawler_responds_value}"
+        == x.json["all_retrived_data"][0]["crawler"]
+    )
 
 
-@pytest.fixture(scope="module")
-def twitter_cur():
-    print("-----------setup---------")
-    conn = sqlite3.connect(path_to_database["twitter"])
-    cur = conn.cursor()
-    yield cur
-    print("-----------teardown---------")
-    conn.close()
+def test_crawler_parameters_with_all_value(client):
+    x = client.get("/?crawlers=all")
+    y = client.get("/?crawlers=twitter,reddit")
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    assert status.HTTP_200_OK == int(y.status.split(" ")[0])
+
+    x = x.json["all_retrived_data"]
+    y = y.json["all_retrived_data"]
+    assert len(y) == len(x)
 
 
-def test_reddit_data_not_empty(reddit_cur):
-    query = "select count(*) from reddit"
-    reddit_cur.execute(query)
-    num_data = reddit_cur.fetchone()[0]
-    assert num_data > 0, f'{path_to_database["reddit"]} is empty'
+def test_aspects_parameter():
+    pass
 
 
-def test_twitter_data_not_empty(twitter_cur):
-    query = "select count(*) from twitter"
-    twitter_cur.execute(query)
-    num_data = twitter_cur.fetchone()[0]
-    assert num_data > 0, f'{path_to_database["twitter"]} is empty'
+def test_aspects_parameter_with_all_value(client):
+    pass

@@ -5,7 +5,7 @@
 
 from .Decorators import *
 from .control_limit import *
-from .declared_typing import *
+from .DeclaredTyping.social_network_crawlers_typing import *
 from .ensure_type import (
     _ensure_datetime_for_specified_frequency_not_consider_max_after,
 )

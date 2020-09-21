@@ -5,6 +5,7 @@
 import datetime
 import sqlite3
 from itertools import product
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -24,6 +25,7 @@ from global_parameters import TWITTER_DATABASE
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
+# app.config["DB_HOST"] = 'localhost'
 
 # Create the API
 api = Api(app)
@@ -109,16 +111,16 @@ class APIManager:
     """Skipped."""
 
     def __init__(
-        self,
-        aspects,
-        crawlers,
-        after_date,
-        before_date,
-        frequency,
-        search_types,
-        fields,
-        total_count,
-        top_amount,
+            self,
+            aspects,
+            crawlers,
+            after_date,
+            before_date,
+            frequency,
+            search_types,
+            fields,
+            total_count,
+            top_amount,
     ):
         """Skipped."""
         self.init_vars(
@@ -134,16 +136,16 @@ class APIManager:
         )
 
     def init_vars(
-        self,
-        aspects,
-        crawlers,
-        after_date,
-        before_date,
-        frequency,
-        search_types,
-        fields,
-        total_count,
-        top_amount,
+            self,
+            aspects,
+            crawlers,
+            after_date,
+            before_date,
+            frequency,
+            search_types,
+            fields,
+            total_count,
+            top_amount,
     ):
         """
         Prepare common data that will be used among class's methods.
@@ -214,8 +216,8 @@ class APIManager:
         return {
             "top_retrieved": self.top_retrieved_data,
             self.RETURNED_DATA_KEY: self._get_all_retrieved_data()[
-                self.RETURNED_DATA_KEY
-            ][: self.top_retrieved_data],
+                                        self.RETURNED_DATA_KEY
+                                    ][: self.top_retrieved_data],
         }
 
     def _get_all_retrieved_data(self) -> Dict:
@@ -303,8 +305,8 @@ class APIManager:
             print()
 
             return (
-                f"select {fields_query} from {crawler} where "
-                + " and ".join(all_query)
+                    f"select {fields_query} from {crawler} where "
+                    + " and ".join(all_query)
             )
 
         social_media_database_name_path = {
@@ -348,10 +350,10 @@ class APIManager:
         return returned_data
 
     def _get_all_data_from_sqlite(
-        self,
-        crawler: str,
-        path_to_database: str,
-        query: str,
+            self,
+            crawler: str,
+            path_to_database: str,
+            query: str,
     ) -> List[Dict]:
         """Skipped summary.
 
@@ -371,7 +373,7 @@ class APIManager:
         :return:  list of dict containing all specified parameters
         """
         assert (
-            crawler == path_to_database.split("\\")[-1].split("_")[0]
+                crawler == path_to_database.split("\\")[-1].split("_")[0]
         ), path_to_database
 
         # print(path_to_database)
@@ -538,10 +540,11 @@ def index():
     fields = request.args.get("fields")
     total_count = request.args.get("total_count")
     top_amount = request.args.get("top_amount")
+    limit = request.args.get("limit")
+    page = request.args.get("page")
 
     def _check_param_compatibility(
-        _top_amount: Optional[str],
-        _total_count: Optional[str],
+            _top_amount: Optional[str], _total_count: Optional[str],
     ) -> Optional[Tuple[str, int]]:
         """Skipped summary.
 
@@ -582,13 +585,19 @@ def index():
         return params_error
 
     def _convert_none_value_to_appropriate_value(
-        _aspects: Optional[Union[str, List[str]]],
-        _fields: Optional[Union[str, List[str]]],
-        _frequency: Optional[Union[str, List[str]]],
-        _crawlers: Optional[Union[str, List[str]]],
-        _total_count: Optional[bool],
-        _top_amount: Optional[str],
-    ) -> Tuple[str, str, str, str, bool, int]:
+            _crawlers: Optional[Union[str, List[str]]],
+            _since: Any,
+            _until: Any,
+            _aspects: Optional[Union[str, List[str]]],
+            _search_types: Any,
+            _fields: Optional[Union[str, List[str]]],
+            _frequency: Optional[Union[str, List[str]]],
+            _total_count: Optional[bool],
+            _top_amount: Optional[str],
+            _page: Optional[str],
+            _limit: Optional[str],
+    ) -> Tuple[Union[List, str], Optional[str], Optional[str],
+               str, str, str, str, bool, int, str, str]:
         if _aspects is None:
             _aspects = "all"
 
@@ -615,45 +624,65 @@ def index():
             else:
                 raise ValueError()
 
+        if _page is None:
+            _page = 'all'
+
+        if _limit is None:
+            _limit = 'all'
+
         return (
+            _crawlers,
+            _since,
+            _until,
             _aspects,
+            _search_types,
             _fields,
             _frequency,
-            _crawlers,
             _total_count,
             _top_amount,
+            _limit,
+            _page,
         )
 
     (
+        crawlers,
+        since,
+        until,
         aspects,
+        search_types,
         fields,
         frequency,
-        crawlers,
         total_count,
         top_amount,
-    ) = _convert_none_value_to_appropriate_value(
-        aspects,
-        fields,
-        frequency,
-        crawlers,
-        total_count,
-        top_amount,
-    )
+        limit,
+        page
+    ) = _convert_none_value_to_appropriate_value(crawlers,
+                                                 since,
+                                                 until,
+                                                 aspects,
+                                                 search_types,
+                                                 fields,
+                                                 frequency,
+                                                 total_count,
+                                                 top_amount,
+                                                 limit,
+                                                 page,
+                                                 )
 
-    def is_reddit_search_type(s):
+    def _is_reddit_search_type(s):
         return s in ALL_REDDIT_SEARCH_TYPE or s == "all"
 
-    def is_twitter_search_type(s):
+    def _is_twitter_search_type(s):
         return s in ALL_TWITTER_SEARCH_TYPE or s == "all"
 
     def _ensure_compatiblity_of_search_types_and_crawlers(c, st, f):
         ENSURE_KEY: List[str] = ["search_types", "fields_types"]
         REDDIT_ENSURE_FUNCTION: Dict = {
-            ENSURE_KEY[0]: is_reddit_search_type,
+            ENSURE_KEY[0]: _is_reddit_search_type,
             ENSURE_KEY[1]: is_reddit_fields,
         }
         TWITTER_ENSURE_FUNCTION: Dict = {
-            ENSURE_KEY[0]: is_twitter_search_type,
+            ENSURE_KEY[0]: _is_twitter_search_type,
             ENSURE_KEY[1]: is_twitter_fields,
         }
         ALL_CRALWER_ENSURE_FUNCTION: Dict = {
@@ -662,8 +691,8 @@ def index():
         }
 
         def _get_ensure_compatibility_dict(
-            _crawler: str,
-            ensure_function_type: str,
+                _crawler: str,
+                ensure_function_type: str,
         ):
             return ALL_CRALWER_ENSURE_FUNCTION[_crawler][ensure_function_type]
 
@@ -697,9 +726,9 @@ def index():
                 raise ValueError
 
     def _applying_all_value_condition(
-        _crawlers: Optional[Union[str, List[str]]],
-        _search_types: Optional[Union[str, List[str]]],
-        _fields: Optional[Union[str, List[str]]],
+            _crawlers: Optional[Union[str, List[str]]],
+            _search_types: Optional[Union[str, List[str]]],
+            _fields: Optional[Union[str, List[str]]],
     ) -> List[Union[str, None]]:
 
         if _crawlers != "all" and _crawlers is not None:
@@ -721,12 +750,10 @@ def index():
             _fields = ["all"]
         else:
             raise ValueError
-        return _crawlers, _search_types, _fields
+        return [_crawlers, _search_types, _fields]
 
     crawler, search_types, fields = _applying_all_value_condition(
-        crawlers,
-        search_types,
-        fields,
+        crawlers, search_types, fields,
     )
 
     # def ensure_compatibility_of_fields_and_crawler(cr, f):
@@ -758,12 +785,16 @@ def index():
     # fields = convert_to_common_type(fields, accept_all=False)
 
     def _check_param_types(
-        _aspects: Optional[Union[str, List[str]]],
-        _since: Optional[Union[str, List[str]]],
-        _until: Optional[Union[str, List[str]]],
-        _frequency: Optional[Union[str, List[str]]],
-        _total_count: bool,
-        _top_amount: int,
+            _crawlers: Optional[Union[str, List[str]]],
+            _since: Optional[Union[str, List[str]]],
+            _until: Optional[Union[str, List[str]]],
+            _aspects: Optional[Union[str, List[str]]],
+            _search_types: Any,
+            _frequency: Optional[Union[str, List[str]]],
+            _total_count: bool,
+            _top_amount: int,
+            _page: str,
+            _limit: str,
     ) -> Tuple[List[datetime.datetime], List[datetime.datetime]]:
 
         for aspect in _aspects:
@@ -791,17 +822,24 @@ def index():
         if _top_amount is not None:
             assert isinstance(_top_amount, int), ""
 
+        if _top_amount is not None:
+            assert isinstance(_top_amount, int), ""
+
         assert isinstance(_total_count, bool), ""
 
         return since_datetime, until_datetime
 
     since_datetime, until_datetime = _check_param_types(
-        aspects,
+        crawlers,
         since,
         until,
+        aspects,
+        search_types,
         frequency,
         total_count,
         top_amount,
+        page,
+        limit
     )
 
     api_manager = APIManager(
