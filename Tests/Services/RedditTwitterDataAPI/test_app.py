@@ -45,12 +45,12 @@ def test_crawler_parameters_with_all_value(client):
     ],
 )
 def test_aspects_parameter(client, request_value, responds_value):
-    work_from_home = client.get("/?aspects=work_from_home")
+    x = client.get(f"/?aspects={request_value}")
 
-    assert status.HTTP_200_OK == int(work_from_home.status.split(" ")[0])
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
 
-    assert 'work_from_home' \
-           == work_from_home.json["all_retrived_data"][0]['aspect']
+    assert f'{responds_value}' \
+           == x.json["all_retrived_data"][0]['aspect']
 
 def test_aspects_parameter_with_all_value(client):
     pass
