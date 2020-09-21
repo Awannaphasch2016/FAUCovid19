@@ -20,18 +20,33 @@ TWITTER_DATABASE = str(
     DATA_DIR / "Processed" / pathlib.Path("twitter_database.db")
 )
 
+PATH_TO_DATABASE = {
+    "reddit": REDDIT_DATABASE,
+    "twitter": TWITTER_DATABASE,
+}
+
 # General
 ERROR_1 = "responds are empty"
 ERROR_2 = "Expecting value: line 1 column 1 (char 0)"
 KNOWN_ERROR = [ERROR_1, ERROR_2]
 
+# Crawlers
+ALL_CRALWERS = ["twitter", "reddit"]
+
 # Aspects keywords
+# ALL_ASPECTS = [
+#     "work_from_home",
+#     "social_distance",
+#     "lockdown",
+#     "reopen",
+#     "corona",
+# ]
 ALL_ASPECTS = [
     "work_from_home",
     "social_distance",
-    "lockdown",
-    "reopen",
     "corona",
+    "reopen",
+    "lockdown",
 ]
 LOCKDOWN_KEYWORDS = [
     "quarantine",
@@ -68,8 +83,23 @@ ALL_REDDIT_COLLECTION_NAMES: List = [
     "corona_regions",
     "corona_states_with_tag",
 ]
-ALL_REDDIT_SEARCH_TYPES = ["submission", "comment"]
+# ALL_REDDIT_SEARCH_TYPES = ["submission", "comment"]
+ALL_REDDIT_SEARCH_TYPES = ["comment", "submission"]
 ALL_REDDIT_RESPOND_TYPES = ["data"]
+ALL_REDDIT_FEILDS = [
+    "aspect",
+    "created_utc",
+    "search_type",
+    "crawler",
+    "frequency",
+    "subreddit",
+    "link_id",
+    "parent_id",
+    "title",
+    "body",
+    "id",
+    "sentiment",
+]
 
 # MAX_AFTER = 166
 MAX_AFTER = 30
@@ -120,6 +150,16 @@ ALL_TWITTER_TAGS: List = ALL_ASPECTS
 ALL_TWITTER_COLLETION_NAMES: List = ["twitter_tweet"]
 ALL_TWITTER_SEARCH_TYPES = ["data_tweet"]
 ALL_TWITTER_RESPOND_TYPES = ["data_tweet"]
+ALL_TWITTER_FEILDS = [
+    "crawler",
+    "text",
+    "date",
+    "search_type",
+    "aspect",
+    "frequency",
+    "sentiment",
+    "id",
+]
 
-# this is new checkpoint Anak 'Wannaphaschaiyong'
-# this is not in checkpoint
+# Frequency
+ALL_FREQUENCY = ["day"]

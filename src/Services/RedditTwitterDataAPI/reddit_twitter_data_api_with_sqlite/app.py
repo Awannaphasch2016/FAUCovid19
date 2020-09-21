@@ -5,6 +5,7 @@
 import datetime
 import sqlite3
 from itertools import product
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -14,16 +15,25 @@ from typing import Union
 
 from flask import Flask
 from flask import request
-from flask_api import status
 from flask_restful import Api
 
+from global_parameters import ALL_ASPECTS
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
+from global_parameters import ALL_CRALWERS
+from global_parameters import ALL_FREQUENCY
+from global_parameters import ALL_REDDIT_FEILDS
+from global_parameters import ALL_REDDIT_SEARCH_TYPES
+from global_parameters import ALL_TWITTER_FEILDS
+from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
+from src.Utilities.Errors.http_errors import https_400_bad_request_template
+from src.Utilities.utilities import return_error_template
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
+# app.config["DB_HOST"] = 'localhost'
 
 # Create the API
 api = Api(app)
@@ -31,47 +41,10 @@ api = Api(app)
 # /?crawlers=twitter&since=2020-08-07&until=2020-08-08&aspects=work_from_home,reopen
 DATEFORMAT = "%Y-%m-%d"
 
-ALL_ASPECTS = [
-    "work_from_home",
-    "social_distance",
-    "corona",
-    "reopen",
-    "lockdown",
-]
-ALL_CRALWERS = ["twitter", "reddit"]
-ALL_FREQUENCY = ["day"]
-ALL_REDDIT_SEARCH_TYPE = ["comment", "submission"]
-ALL_TWITTER_SEARCH_TYPE = ["data_tweet"]
-
 ALL_CRAWLERS_SEARCH_TYPE = {
-    ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPE,
-    ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPE,
+    ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPES,
+    ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPES,
 }
-
-ALL_REDDIT_FEILDS = [
-    "aspect",
-    "created_utc",
-    "search_types",
-    "crawler",
-    "frequency",
-    "subreddit",
-    "link_id",
-    "parent_id",
-    "title",
-    "body",
-    "id",
-    "sentiment",
-]
-ALL_TWITTER_FEILDS = [
-    "crawler",
-    "text",
-    "date",
-    "search_type",
-    "aspect",
-    "frequency",
-    "sentiment",
-    "id",
-]
 
 all_crawler_fields = {
     ALL_CRALWERS[0]: ALL_TWITTER_FEILDS,
@@ -109,16 +82,18 @@ class APIManager:
     """Skipped."""
 
     def __init__(
-        self,
-        aspects,
-        crawlers,
-        after_date,
-        before_date,
-        frequency,
-        search_types,
-        fields,
-        total_count,
-        top_amount,
+            self,
+            aspects,
+            crawlers,
+            after_date,
+            before_date,
+            frequency,
+            search_types,
+            fields,
+            total_count,
+            top_amount,
+            page,
+            limit
     ):
         """Skipped."""
         self.init_vars(
@@ -131,19 +106,23 @@ class APIManager:
             fields,
             total_count,
             top_amount,
+            page,
+            limit
         )
 
     def init_vars(
-        self,
-        aspects,
-        crawlers,
-        after_date,
-        before_date,
-        frequency,
-        search_types,
-        fields,
-        total_count,
-        top_amount,
+            self,
+            aspects,
+            crawlers,
+            after_date,
+            before_date,
+            frequency,
+            search_types,
+            fields,
+            total_count,
+            top_amount,
+            page,
+            limit,
     ):
         """
         Prepare common data that will be used among class's methods.
@@ -191,6 +170,8 @@ class APIManager:
         self.fields = fields
         self.total_count = total_count
         self.top_retrieved_data = top_amount
+        self.pages = page
+        self.limit = limit
 
     def select_returned_function(self) -> Callable:
         """Skipped summary."""
@@ -198,8 +179,55 @@ class APIManager:
             return self._get_total_count
         elif self.top_retrieved_data:
             return self._get_top_retrieved_data
+        elif self.pages[0] is not None:
+            if self.pages[0] == 'all' and self.limit == 'inf':
+                return self._get_all_retrieved_data
+            return self._get_all_pages
         else:
             return self._get_all_retrieved_data
+
+    def _get_all_pages(self):
+        """Return specified pages where each len(pages) == limit."""
+
+
+        total_retrived_data = \
+            self._get_all_retrieved_data()[self.RETURNED_DATA_KEY]
+
+        total_num_data = \
+            list(
+                range(len(total_retrived_data))
+            )
+
+        def _apply_pagination():
+            all_pages = \
+                [
+                    total_retrived_data[i:j] for i, j in
+                    zip(
+                        total_num_data[::self.limit][:-1],
+                        total_num_data[::self.limit][1:],
+                    )
+                ]
+            all_pages.append(
+                total_retrived_data[total_num_data[::self.limit][-1]:]
+            )
+            return all_pages
+
+        all_pages = _apply_pagination()
+
+        def _return_selected_pages():
+            if self.pages[0] == 'all':
+                return {
+                    "select_pages": f"{self.pages[0]}",
+                    self.RETURNED_DATA_KEY: all_pages
+                }
+            else:
+                selected_pages = ','.join([str(i) for i in self.pages])
+                return {
+                    "select_pages": f"{selected_pages}",
+                    self.RETURNED_DATA_KEY: [all_pages[i] for i in self.pages]
+                }
+
+        return _return_selected_pages()
 
     def _get_total_count(self) -> Dict:
         """Skipped summary."""
@@ -214,8 +242,8 @@ class APIManager:
         return {
             "top_retrieved": self.top_retrieved_data,
             self.RETURNED_DATA_KEY: self._get_all_retrieved_data()[
-                self.RETURNED_DATA_KEY
-            ][: self.top_retrieved_data],
+                                        self.RETURNED_DATA_KEY
+                                    ][: self.top_retrieved_data],
         }
 
     def _get_all_retrieved_data(self) -> Dict:
@@ -303,8 +331,8 @@ class APIManager:
             print()
 
             return (
-                f"select {fields_query} from {crawler} where "
-                + " and ".join(all_query)
+                    f"select {fields_query} from {crawler} where "
+                    + " and ".join(all_query)
             )
 
         social_media_database_name_path = {
@@ -348,10 +376,10 @@ class APIManager:
         return returned_data
 
     def _get_all_data_from_sqlite(
-        self,
-        crawler: str,
-        path_to_database: str,
-        query: str,
+            self,
+            crawler: str,
+            path_to_database: str,
+            query: str,
     ) -> List[Dict]:
         """Skipped summary.
 
@@ -371,7 +399,7 @@ class APIManager:
         :return:  list of dict containing all specified parameters
         """
         assert (
-            crawler == path_to_database.split("\\")[-1].split("_")[0]
+                crawler == path_to_database.split("\\")[-1].split("_")[0]
         ), path_to_database
 
         # print(path_to_database)
@@ -511,9 +539,9 @@ def get_respond_type_when_crawler_is_all(cr):
     :return: list of crawler name
     """
     if cr == "reddit":
-        search_types = ALL_REDDIT_SEARCH_TYPE
+        search_types = ALL_REDDIT_SEARCH_TYPES
     if cr == "twitter":
-        search_types = search_types, ALL_TWITTER_SEARCH_TYPE
+        search_types = search_types, ALL_TWITTER_SEARCH_TYPES
 
     return search_types
 
@@ -538,10 +566,53 @@ def index():
     fields = request.args.get("fields")
     total_count = request.args.get("total_count")
     top_amount = request.args.get("top_amount")
+    limit = request.args.get("limit")
+    pages = request.args.get("pages")
+
+    def _check_compatibility_of_top_amount_and_total_count(
+            _top_amount: Optional[str],
+            _total_count: Optional[str],
+            _page: Optional[str],
+            _limit: Optional[str]
+    ) -> \
+            Optional[
+                Tuple[str, int]
+            ]:
+        count = 0
+        if _top_amount is not None:
+            count += 1
+        if _total_count is not None:
+            count += 1
+        if _page is not None:
+            if _limit is None:
+                return https_400_bad_request_template(
+                    "Either top_amount or total_count must be provided."
+                    " Not Both",
+                )
+            count += 1
+        if count >= 2:
+            return https_400_bad_request_template(
+                "Either top_amount or total_count must be provided."
+                " Not Both",
+            )
+        return None
+
+    def _check_compatibility_of_page_limit(
+            _page: Optional[str], _limit: Optional[str],
+    ) -> \
+            Optional[
+                Tuple[str, int]
+            ]:
+        if _page is not None and _limit is None:
+            return https_400_bad_request_template(
+                "More explicit is required: when page is specified, "
+                "limit must also be specified.",
+            )
+        return None
 
     def _check_param_compatibility(
-        _top_amount: Optional[str],
-        _total_count: Optional[str],
+            _check_param_compatibility_func,
+            *args
     ) -> Optional[Tuple[str, int]]:
         """Skipped summary.
 
@@ -557,43 +628,43 @@ def index():
         :return: tuple of error message and error status code
         """
 
-        def _check_compatibility_of_top_amount_and_total_count() -> Optional[
-            Tuple[str, int]
-        ]:
-            count = 0
-            if _top_amount is not None:
-                count += 1
-            if _total_count is not None:
-                count += 1
-            if count >= 2:
-                return (
-                    "Either top_amount or total_count must be provided."
-                    " Not Both",
-                    status.HTTP_400_BAD_REQUEST,
-                )
-            return None
-
-        params_error = _check_compatibility_of_top_amount_and_total_count()
+        params_error = _check_param_compatibility_func(*args)
         return params_error
 
-    params_error = _check_param_compatibility(top_amount, total_count)
+    params_error = \
+        _check_param_compatibility(
+            _check_compatibility_of_top_amount_and_total_count
+            , top_amount, total_count, pages, limit
+        )
+
+    if params_error is not None:
+        return params_error
+
+    params_error = \
+        _check_param_compatibility(
+            _check_compatibility_of_page_limit
+            , pages, limit
+        )
 
     if params_error is not None:
         return params_error
 
     def _convert_none_value_to_appropriate_value(
-        _aspects: Optional[Union[str, List[str]]],
-        _fields: Optional[Union[str, List[str]]],
-        _frequency: Optional[Union[str, List[str]]],
-        _crawlers: Optional[Union[str, List[str]]],
-        _total_count: Optional[bool],
-        _top_amount: Optional[str],
-    ) -> Tuple[str, str, str, str, bool, int]:
+            _crawlers: Optional[Union[str, List[str]]],
+            _since: Any,
+            _until: Any,
+            _aspects: Optional[Union[str, List[str]]],
+            _search_types: Any,
+            _fields: Optional[Union[str, List[str]]],
+            _frequency: Optional[Union[str, List[str]]],
+            _total_count: Optional[bool],
+            _top_amount: Optional[str],
+            _page: Optional[str],
+            _limit: Optional[str],
+    ) -> Tuple[Union[List, str], Optional[str], Optional[str],
+               str, str, str, str, bool, int, str, str]:
         if _aspects is None:
             _aspects = "all"
-
-        if _fields is None:
-            _fields = "all"
 
         if _frequency is None:
             _frequency = "day"
@@ -615,55 +686,85 @@ def index():
             else:
                 raise ValueError()
 
+        if _page is not None:
+            if isinstance(_page, str):
+                _page = _page
+            else:
+                raise ValueError()
+        else:
+            _page = 'all'
+
+        if _limit is not None:
+            if isinstance(_limit, str):
+                _limit = int(_limit)
+            else:
+                raise ValueError()
+        else:
+            _limit = 'inf'
+
         return (
+            _crawlers,
+            _since,
+            _until,
             _aspects,
+            _search_types,
             _fields,
             _frequency,
-            _crawlers,
             _total_count,
             _top_amount,
+            _limit,
+            _page,
         )
 
     (
+        crawlers,
+        since,
+        until,
         aspects,
+        search_types,
         fields,
         frequency,
-        crawlers,
         total_count,
         top_amount,
-    ) = _convert_none_value_to_appropriate_value(
-        aspects,
-        fields,
-        frequency,
-        crawlers,
-        total_count,
-        top_amount,
-    )
+        limit,
+        pages
+    ) = _convert_none_value_to_appropriate_value(crawlers,
+                                                 since,
+                                                 until,
+                                                 aspects,
+                                                 search_types,
+                                                 fields,
+                                                 frequency,
+                                                 total_count,
+                                                 top_amount,
+                                                 pages,
+                                                 limit,
+                                                 )
 
-    def is_reddit_search_type(s):
-        return s in ALL_REDDIT_SEARCH_TYPE or s == "all"
+    def _is_reddit_search_type(s):
+        return s in ALL_REDDIT_SEARCH_TYPES or s == "all"
 
-    def is_twitter_search_type(s):
-        return s in ALL_TWITTER_SEARCH_TYPE or s == "all"
+    def _is_twitter_search_type(s):
+        return s in ALL_TWITTER_SEARCH_TYPES or s == "all"
 
     def _ensure_compatiblity_of_search_types_and_crawlers(c, st, f):
         ENSURE_KEY: List[str] = ["search_types", "fields_types"]
         REDDIT_ENSURE_FUNCTION: Dict = {
-            ENSURE_KEY[0]: is_reddit_search_type,
+            ENSURE_KEY[0]: _is_reddit_search_type,
             ENSURE_KEY[1]: is_reddit_fields,
         }
         TWITTER_ENSURE_FUNCTION: Dict = {
-            ENSURE_KEY[0]: is_twitter_search_type,
+            ENSURE_KEY[0]: _is_twitter_search_type,
             ENSURE_KEY[1]: is_twitter_fields,
         }
         ALL_CRALWER_ENSURE_FUNCTION: Dict = {
-            ALL_CRALWERS[0]: REDDIT_ENSURE_FUNCTION,
-            ALL_CRALWERS[1]: TWITTER_ENSURE_FUNCTION,
+            ALL_CRALWERS[0]: TWITTER_ENSURE_FUNCTION,
+            ALL_CRALWERS[1]: REDDIT_ENSURE_FUNCTION,
         }
 
         def _get_ensure_compatibility_dict(
-            _crawler: str,
-            ensure_function_type: str,
+                _crawler: str,
+                ensure_function_type: str,
         ):
             return ALL_CRALWER_ENSURE_FUNCTION[_crawler][ensure_function_type]
 
@@ -697,10 +798,10 @@ def index():
                 raise ValueError
 
     def _applying_all_value_condition(
-        _crawlers: Optional[Union[str, List[str]]],
-        _search_types: Optional[Union[str, List[str]]],
-        _fields: Optional[Union[str, List[str]]],
-    ) -> List[Union[str, None]]:
+            _crawlers: Optional[Union[str, List[str]]],
+            _search_types: Optional[Union[str, List[str]]],
+            _fields: Optional[Union[str, List[str]]],
+    ) -> Union[List[Union[str, None]], Tuple[str, int]]:
 
         if _crawlers != "all" and _crawlers is not None:
             (
@@ -713,24 +814,30 @@ def index():
                 _fields,
             )
         elif _crawlers == "all":
-            _search_types = ["all"]
-            _fields = ["all"]
-        elif _crawlers is None:
-            _crawlers = ["all"]
+            if _fields is not None:
+                return https_400_bad_request_template(
+                    "Do you forget to specified crawler_type? "
+                    "fields must always be specified with specific cralwer"
+                )
+            if _search_types is not None:
+                return https_400_bad_request_template(
+                    "Do you forget to specified crawler_type? "
+                    "search_types must always be specified with specific "
+                    "cralwer"
+                )
             _search_types = ["all"]
             _fields = ["all"]
         else:
             raise ValueError
-        return _crawlers, _search_types, _fields
+        return [_crawlers, _search_types, _fields]
 
-    crawler, search_types, fields = _applying_all_value_condition(
-        crawlers,
-        search_types,
-        fields,
+    has_error = _applying_all_value_condition(
+        crawlers, search_types, fields,
     )
 
-    # def ensure_compatibility_of_fields_and_crawler(cr, f):
-    #     if cr[0] == 'all'
+    if return_error_template(has_error) is not None:
+        return has_error
+    crawler, search_types, fields = has_error
 
     def convert_to_common_type(args, all_keywords=None, accept_all=True):
         if accept_all:
@@ -747,42 +854,61 @@ def index():
             else:
                 return args
         else:
-            return args.split(",")
+            try:
+                return [int(i) for i in args.split(",")]
+            except:
+                return args.split(",")
 
     crawlers = convert_to_common_type(crawlers, ALL_CRALWERS)
     aspects = convert_to_common_type(aspects, ALL_ASPECTS)
     since = convert_to_common_type(since, accept_all=False)
     until = convert_to_common_type(until, accept_all=False)
     frequency = convert_to_common_type(frequency, accept_all=False)
-
-    # fields = convert_to_common_type(fields, accept_all=False)
+    pages = convert_to_common_type(pages, accept_all=False)
 
     def _check_param_types(
-        _aspects: Optional[Union[str, List[str]]],
-        _since: Optional[Union[str, List[str]]],
-        _until: Optional[Union[str, List[str]]],
-        _frequency: Optional[Union[str, List[str]]],
-        _total_count: bool,
-        _top_amount: int,
-    ) -> Tuple[List[datetime.datetime], List[datetime.datetime]]:
+            _crawlers: Optional[Union[str, List[str]]],
+            _since: Optional[Union[str, List[str]]],
+            _until: Optional[Union[str, List[str]]],
+            _aspects: Optional[Union[str, List[str]]],
+            _search_types: Any,
+            _frequency: Optional[Union[str, List[str]]],
+            _total_count: bool,
+            _top_amount: int,
+            _page: str,
+            _limit: str,
+    ) -> Union[
+        Tuple[List[datetime.datetime], List[datetime.datetime]],
+        Tuple[str, int]
+    ]:
 
         for aspect in _aspects:
             assert is_supported_aspect(aspect)
 
         if _since[0] is not None:
-            assert is_date(_since[0]) and len(_since) == 1
-            since_datetime = [
-                datetime.datetime.strptime(_since[0], DATEFORMAT),
-            ]
+            # assert is_date(_since[0]) and len(_since) == 1
+            try:
+                since_datetime = [
+                    datetime.datetime.strptime(_since[0], DATEFORMAT),
+                ]
+            except:
+                return https_400_bad_request_template(
+                    "since params only except dateformat = %Y-%m-%d"
+                )
         else:
             since_datetime = _since
 
         if _until[0] is not None or _until[0] == "all":
-            assert is_date(_until[0]) and len(_until) == 1
+            # assert is_date(_until[0]) and len(_until) == 1
 
-            until_datetime = [
-                datetime.datetime.strptime(_until[0], DATEFORMAT),
-            ]
+            try:
+                until_datetime = [
+                    datetime.datetime.strptime(_until[0], DATEFORMAT),
+                ]
+            except:
+                return https_400_bad_request_template(
+                    "until params only except dateformat = %Y-%m-%d"
+                )
         else:
             until_datetime = _until
 
@@ -791,18 +917,37 @@ def index():
         if _top_amount is not None:
             assert isinstance(_top_amount, int), ""
 
+        if _top_amount is not None:
+            assert isinstance(_top_amount, int), ""
+
+        if _page is not None and _page[0] != 'all':
+            for i in _page:
+                assert isinstance(i, int), ""
+
+        if _limit is not None and _limit != 'inf':
+            assert isinstance(_limit, int), ""
+
         assert isinstance(_total_count, bool), ""
 
         return since_datetime, until_datetime
 
-    since_datetime, until_datetime = _check_param_types(
-        aspects,
+    has_error = _check_param_types(
+        crawlers,
         since,
         until,
+        aspects,
+        search_types,
         frequency,
         total_count,
         top_amount,
+        pages,
+        limit
     )
+
+    if return_error_template(has_error) is not None:
+        return has_error
+
+    since_datetime, until_datetime = has_error
 
     api_manager = APIManager(
         aspects,
@@ -814,10 +959,11 @@ def index():
         fields,
         total_count,
         top_amount,
+        pages,
+        limit
     )
 
     return api_manager.select_returned_function()()
-    # return api_manager.get_all_retrived_data()
 
 
 if __name__ == "__main__":
