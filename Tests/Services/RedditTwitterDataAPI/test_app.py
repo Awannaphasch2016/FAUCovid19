@@ -10,6 +10,7 @@ from flask_api import status
 from global_parameters import ALL_ASPECTS
 from global_parameters import ALL_CRALWERS
 from global_parameters import ALL_REDDIT_FEILDS
+from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_TWITTER_FEILDS
 
 
@@ -129,6 +130,21 @@ class TestRedditParameters():
         assert f'{sampled_fields}' \
                == ','.join(list(x.json["all_retrived_data"][0].keys()))
 
+    @pytest.mark.parametrize(
+        "request_value,responds_value",
+        [
+            (i, i) for i in ALL_REDDIT_SEARCH_TYPES
+        ],
+    )
+    def test_reddit_search_types_parameter(self,
+                                     client,
+                                     request_value,
+                                     responds_value):
+        x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&search_types"
+                       f"={request_value}")
+        assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+        # assert f'{responds_value}' \
+        #        == list(x.json["all_retrived_data"][0].keys())[0]
 
 @pytest.mark.test_twitter_parameters
 class TestTwitterParamter:
