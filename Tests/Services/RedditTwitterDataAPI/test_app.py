@@ -85,13 +85,27 @@ def test_fields_parameter(client,
         (i, i) for i in ALL_REDDIT_FEILDS
     ],
 )
-def test_reddit_twitter_fields_parameter(client,
+def test_reddit_fields_parameter(client,
                                          request_value,
                                          responds_value):
-    x = client.get(f"/?crawlers=reddit&fields={request_value}")
+    x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&fields={request_value}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert f'{responds_value}' \
            == list(x.json["all_retrived_data"][0].keys())[0]
+
+# @pytest.mark.parametrize(
+#     "request_value,responds_value",
+#     [
+#         (i, i) for i in ALL_REDDIT_FEILDS
+#     ],
+# )
+# def test_twitter_fields_parameter(client,
+#                                          request_value,
+#                                          responds_value):
+#     x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&fields={request_value}")
+#     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+#     assert f'{responds_value}' \
+#            == list(x.json["all_retrived_data"][0].keys())[0]
 
 
 def test_fields_parameter_with_all_value(client):
