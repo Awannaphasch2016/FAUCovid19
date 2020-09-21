@@ -25,6 +25,9 @@ ERROR_1 = "responds are empty"
 ERROR_2 = "Expecting value: line 1 column 1 (char 0)"
 KNOWN_ERROR = [ERROR_1, ERROR_2]
 
+# Crawlers
+ALL_CRALWERS = ["twitter", "reddit"]
+
 # Aspects keywords
 # ALL_ASPECTS = [
 #     "work_from_home",

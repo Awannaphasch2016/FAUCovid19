@@ -20,6 +20,7 @@ from flask_restful import Api
 
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
+from global_parameters import ALL_CRALWERS
 from global_parameters import ALL_ASPECTS
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
@@ -36,7 +37,6 @@ api = Api(app)
 # /?crawlers=twitter&since=2020-08-07&until=2020-08-08&aspects=work_from_home,reopen
 DATEFORMAT = "%Y-%m-%d"
 
-ALL_CRALWERS = ["twitter", "reddit"]
 ALL_FREQUENCY = ["day"]
 
 ALL_CRAWLERS_SEARCH_TYPE = {
