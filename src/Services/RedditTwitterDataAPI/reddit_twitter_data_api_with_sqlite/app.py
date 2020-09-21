@@ -21,6 +21,7 @@ from flask_restful import Api
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
 from global_parameters import ALL_ASPECTS
+from global_parameters import ALL_REDDIT_SEARCH_TYPE
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
 
@@ -36,7 +37,6 @@ DATEFORMAT = "%Y-%m-%d"
 
 ALL_CRALWERS = ["twitter", "reddit"]
 ALL_FREQUENCY = ["day"]
-ALL_REDDIT_SEARCH_TYPE = ["comment", "submission"]
 ALL_TWITTER_SEARCH_TYPE = ["data_tweet"]
 
 ALL_CRAWLERS_SEARCH_TYPE = {

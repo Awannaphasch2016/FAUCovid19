@@ -75,7 +75,8 @@ ALL_REDDIT_COLLECTION_NAMES: List = [
     "corona_regions",
     "corona_states_with_tag",
 ]
-ALL_REDDIT_SEARCH_TYPES = ["submission", "comment"]
+# ALL_REDDIT_SEARCH_TYPES = ["submission", "comment"]
+ALL_REDDIT_SEARCH_TYPE = ["comment", "submission"]
 ALL_REDDIT_RESPOND_TYPES = ["data"]
 
 # MAX_AFTER = 166
