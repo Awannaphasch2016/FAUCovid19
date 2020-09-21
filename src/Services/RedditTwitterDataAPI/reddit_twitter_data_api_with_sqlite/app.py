@@ -586,14 +586,14 @@ def index():
         if _page is not None:
             if _limit is None:
                 return https_400_bad_request_template(
-                    "Either top_amount or total_count must be provided."
-                    " Not Both",
+                    "Either top_amount,total_count, or pages&limit must be "
+                    "provided. Not Both.",
                 )
             count += 1
         if count >= 2:
             return https_400_bad_request_template(
-                "Either top_amount or total_count must be provided."
-                " Not Both",
+                "Either top_amount,total_count, or pages&limit must be "
+                "provided. Not Both.",
             )
         return None
 
