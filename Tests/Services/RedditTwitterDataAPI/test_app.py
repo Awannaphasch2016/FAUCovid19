@@ -56,6 +56,6 @@ def test_aspects_parameter(client, request_value, responds_value):
 def test_aspects_parameter_with_all_value(client):
     concat_crawlers = ','.join(ALL_ASPECTS)
     x = client.get("/?aspects=all")
-    # y = client.get(f"/?aspects={concat_crawlers}")
+    y = client.get(f"/?aspects={concat_crawlers}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-    # assert status.HTTP_200_OK == int(y.status.split(" ")[0])
+    assert status.HTTP_200_OK == int(y.status.split(" ")[0])
