@@ -8,19 +8,19 @@ from flask_api import status
 
 
 @pytest.mark.parametrize(
-    "crawler_request_value,crawler_responds_value",
+    "request_value,responds_value",
     [
         ("reddit", "reddit"),
         ("twitter", "twitter"),
     ],
 )
 def test_crawler_parameters(
-    client, crawler_request_value, crawler_responds_value,
+    client, request_value, responds_value,
 ):
-    x = client.get(f"/?crawlers={crawler_request_value}")
+    x = client.get(f"/?crawlers={request_value}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert (
-        f"{crawler_responds_value}"
+        f"{responds_value}"
         == x.json["all_retrived_data"][0]["crawler"]
     )
 
@@ -36,18 +36,17 @@ def test_crawler_parameters_with_all_value(client):
     assert len(y) == len(x)
 
 
-def test_aspects_parameter(client):
+# @pytest.mark.parametrize(
+#     "request_value,responds_value",
+#     [
+#         ("reddit", "reddit"),
+#         ("twitter", "twitter"),
+#     ],
+# )
+def test_aspects_parameter(client, ):
     work_from_home = client.get("/?aspects=work_from_home")
-    social_distance = client.get("/?aspects=social_distance")
-    lockdown = client.get("/?aspects=lockdown")
-    reopen = client.get("/?aspects=reopen")
-    corona = client.get("/?aspects=corona")
 
     assert status.HTTP_200_OK == int(work_from_home.status.split(" ")[0])
-    assert status.HTTP_200_OK == int(social_distance.status.split(" ")[0])
-    assert status.HTTP_200_OK == int(lockdown.status.split(" ")[0])
-    assert status.HTTP_200_OK == int(reopen.status.split(" ")[0])
-    assert status.HTTP_200_OK == int(corona.status.split(" ")[0])
 
     assert 'work_from_home' \
            == work_from_home.json["all_retrived_data"][0]['aspect']
