@@ -38,7 +38,10 @@ def test_crawler_parameters_with_all_value(client):
 
 def test_aspects_parameter(client):
     work_from_home = client.get("/?aspects=work_from_home")
-    print(work_from_home.status)
+    social_distance = client.get("/?aspects=social_distance")
+    lockdown = client.get("/?aspects=lockdown")
+    reopen = client.get("/?aspects=reopen")
+    corona = client.get("/?aspects=corona")
     pass
 
 
