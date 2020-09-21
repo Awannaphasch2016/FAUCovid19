@@ -179,8 +179,20 @@ class APIManager:
             return self._get_total_count
         elif self.top_retrieved_data:
             return self._get_top_retrieved_data
+        elif self.page is not None:
+            return self._get_all_pages
         else:
             return self._get_all_retrieved_data
+
+    def _get_all_pages(self):
+        """Return specified pages where each len(pages) == limit."""
+        all_retrived_data =\
+            [
+                i for i in range(len(self._get_all_retrieved_data()))[::100]
+            ]
+        return {
+            "pages": None
+        }
 
     def _get_total_count(self) -> Dict:
         """Skipped summary."""
@@ -523,7 +535,9 @@ def index():
     page = request.args.get("page")
 
     def _check_compatibility_of_top_amount_and_total_count(
-            _top_amount: Optional[str], _total_count: Optional[str],
+            _top_amount: Optional[str],
+            _total_count: Optional[str],
+            _page: Optional[str]
     ) -> \
             Optional[
                 Tuple[str, int]
@@ -532,6 +546,8 @@ def index():
         if _top_amount is not None:
             count += 1
         if _total_count is not None:
+            count += 1
+        if _page is not None:
             count += 1
         if count >= 2:
             return https_400_bad_request_template(
@@ -577,7 +593,7 @@ def index():
     params_error = \
         _check_param_compatibility(
             _check_compatibility_of_top_amount_and_total_count
-            , top_amount, total_count
+            , top_amount, total_count, page
         )
 
     if params_error is not None:
@@ -635,11 +651,21 @@ def index():
             else:
                 raise ValueError()
 
-        if _page is None:
+        if _page is not None:
+            if isinstance(_page, str):
+                _page = int(_page)
+            else:
+                raise ValueError()
+        else:
             _page = 'all'
 
         if _limit is None:
-            _limit = 'all'
+            if isinstance(_limit, str):
+                _limit = int(_limit)
+            else:
+                raise ValueError()
+        else:
+            _limit = 'inf'
 
         return (
             _crawlers,
@@ -856,6 +882,12 @@ def index():
 
         if _top_amount is not None:
             assert isinstance(_top_amount, int), ""
+
+        if _page is not None and _page != 'all':
+            assert isinstance(_page, int), ""
+
+        if _limit is not None and _limit != 'inf':
+            assert isinstance(_limit, int), ""
 
         assert isinstance(_total_count, bool), ""
 

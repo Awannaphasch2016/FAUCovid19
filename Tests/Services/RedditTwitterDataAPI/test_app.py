@@ -132,22 +132,31 @@ def test_top_amount_parameter(client):
     assert x.json["top_retrieved"] == len(x.json['all_retrived_data'])
 
 @pytest.mark.test_paramete
-def test_page_parameter(client):
+def test_limit_and_page_parameters(client):
     raise NotImplementedError()
-    x = client.get("/?page=100")
+    x = client.get("/?limit=100&page=100")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
 
 @pytest.mark.test_paramete
 def test_page_parameter_fail(client):
     x = client.get("/?page=100")
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
+    x = client.get("/?top_amount=100&page=100")
+    assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
+    x = client.get("/?total_count=true=100&page=100")
+    assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
 
 @pytest.mark.test_paramete
 def test_limit_parameter(client):
-    raise NotImplementedError()
     x = client.get("/?crawlers=reddit&limit=100")
+    y = client.get("/?crawlers=reddit&total_count=true")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-    # assert x.json["top_retrieved"] == len(x.json['all_retrived_data'])
+    assert len(x.json["pages"][0]) == 100
+
+    # total_amount = 0
+    # for i in x.json['pages']:
+    #     total_amount += len(i)
+    # assert total_amount == y.json['total_count']
 
 
 @pytest.mark.test_all_value
