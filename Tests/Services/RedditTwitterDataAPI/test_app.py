@@ -98,8 +98,8 @@ def test_reddit_fields_parameter(client,
 
 def test_reddit_fields_parameters_random_combination(client,):
     sampled_fields = random.sample(ALL_REDDIT_FEILDS, 5)
-    sampled_fields = ','.join(',')
-    # x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&fields={}")
+    sampled_fields = ','.join(sampled_fields)
+    # x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&fields={sampled_fields}")
     # assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     # assert f'{responds_value}' \
     #        == list(x.json["all_retrived_data"][0].keys())[0]
