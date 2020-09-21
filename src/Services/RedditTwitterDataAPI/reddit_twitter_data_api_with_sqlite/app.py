@@ -170,7 +170,7 @@ class APIManager:
         self.fields = fields
         self.total_count = total_count
         self.top_retrieved_data = top_amount
-        self.page = page
+        self.pages = page
         self.limit = limit
 
     def select_returned_function(self) -> Callable:
@@ -179,7 +179,7 @@ class APIManager:
             return self._get_total_count
         elif self.top_retrieved_data:
             return self._get_top_retrieved_data
-        elif self.page is not None:
+        elif self.pages is not None:
             return self._get_all_pages
         else:
             return self._get_all_retrieved_data
@@ -211,10 +211,20 @@ class APIManager:
 
         all_pages = _apply_pagination()
 
-        return {
-            "select_pages": f"{self.page}",
-            self.RETURNED_DATA_KEY: all_pages
-        }
+        def _return_selected_pages():
+            if self.pages[0] == 'all':
+                return {
+                    "select_pages": f"{self.pages[0]}",
+                    self.RETURNED_DATA_KEY: all_pages
+                }
+            else:
+                selected_pages = ','.join([str(i) for i in self.pages])
+                return {
+                    "select_pages": f"{selected_pages}",
+                    self.RETURNED_DATA_KEY: [all_pages[i] for i in self.pages]
+                }
+
+        return _return_selected_pages()
 
     def _get_total_count(self) -> Dict:
         """Skipped summary."""
@@ -554,7 +564,7 @@ def index():
     total_count = request.args.get("total_count")
     top_amount = request.args.get("top_amount")
     limit = request.args.get("limit")
-    page = request.args.get("page")
+    pages = request.args.get("pages")
 
     def _check_compatibility_of_top_amount_and_total_count(
             _top_amount: Optional[str],
@@ -615,7 +625,7 @@ def index():
     params_error = \
         _check_param_compatibility(
             _check_compatibility_of_top_amount_and_total_count
-            , top_amount, total_count, page
+            , top_amount, total_count, pages
         )
 
     if params_error is not None:
@@ -624,7 +634,7 @@ def index():
     params_error = \
         _check_param_compatibility(
             _check_compatibility_of_page_limit
-            , page, limit
+            , pages, limit
         )
 
     if params_error is not None:
@@ -646,12 +656,6 @@ def index():
                str, str, str, str, bool, int, str, str]:
         if _aspects is None:
             _aspects = "all"
-
-        # if _fields is None:
-        #     _fields = "all"
-        #
-        # if _search_types is None:
-        #     _search_types = "all"
 
         if _frequency is None:
             _frequency = "day"
@@ -675,7 +679,7 @@ def index():
 
         if _page is not None:
             if isinstance(_page, str):
-                _page = int(_page)
+                _page = _page
             else:
                 raise ValueError()
         else:
@@ -714,7 +718,7 @@ def index():
         total_count,
         top_amount,
         limit,
-        page
+        pages
     ) = _convert_none_value_to_appropriate_value(crawlers,
                                                  since,
                                                  until,
@@ -724,7 +728,7 @@ def index():
                                                  frequency,
                                                  total_count,
                                                  top_amount,
-                                                 page,
+                                                 pages,
                                                  limit,
                                                  )
 
@@ -841,15 +845,17 @@ def index():
             else:
                 return args
         else:
-            return args.split(",")
+            try:
+                return [int(i) for i in args.split(",")]
+            except:
+                return args.split(",")
 
     crawlers = convert_to_common_type(crawlers, ALL_CRALWERS)
     aspects = convert_to_common_type(aspects, ALL_ASPECTS)
     since = convert_to_common_type(since, accept_all=False)
     until = convert_to_common_type(until, accept_all=False)
     frequency = convert_to_common_type(frequency, accept_all=False)
-
-    # fields = convert_to_common_type(fields, accept_all=False)
+    pages = convert_to_common_type(pages, accept_all=False)
 
     def _check_param_types(
             _crawlers: Optional[Union[str, List[str]]],
@@ -905,8 +911,9 @@ def index():
         if _top_amount is not None:
             assert isinstance(_top_amount, int), ""
 
-        if _page is not None and _page != 'all':
-            assert isinstance(_page, int), ""
+        if _page is not None and _page[0] != 'all':
+            for i in _page:
+                assert isinstance(i, int), ""
 
         if _limit is not None and _limit != 'inf':
             assert isinstance(_limit, int), ""
@@ -924,7 +931,7 @@ def index():
         frequency,
         total_count,
         top_amount,
-        page,
+        pages,
         limit
     )
 
@@ -943,7 +950,7 @@ def index():
         fields,
         total_count,
         top_amount,
-        page,
+        pages,
         limit
     )
 
