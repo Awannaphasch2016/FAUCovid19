@@ -26,12 +26,19 @@ ERROR_2 = "Expecting value: line 1 column 1 (char 0)"
 KNOWN_ERROR = [ERROR_1, ERROR_2]
 
 # Aspects keywords
+# ALL_ASPECTS = [
+#     "work_from_home",
+#     "social_distance",
+#     "lockdown",
+#     "reopen",
+#     "corona",
+# ]
 ALL_ASPECTS = [
     "work_from_home",
     "social_distance",
-    "lockdown",
-    "reopen",
     "corona",
+    "reopen",
+    "lockdown",
 ]
 LOCKDOWN_KEYWORDS = [
     "quarantine",

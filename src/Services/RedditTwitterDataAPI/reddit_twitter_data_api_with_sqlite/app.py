@@ -20,6 +20,7 @@ from flask_restful import Api
 
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
+from global_parameters import ALL_ASPECTS
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
 
@@ -33,13 +34,6 @@ api = Api(app)
 # /?crawlers=twitter&since=2020-08-07&until=2020-08-08&aspects=work_from_home,reopen
 DATEFORMAT = "%Y-%m-%d"
 
-ALL_ASPECTS = [
-    "work_from_home",
-    "social_distance",
-    "corona",
-    "reopen",
-    "lockdown",
-]
 ALL_CRALWERS = ["twitter", "reddit"]
 ALL_FREQUENCY = ["day"]
 ALL_REDDIT_SEARCH_TYPE = ["comment", "submission"]
