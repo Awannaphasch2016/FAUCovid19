@@ -7,14 +7,14 @@ import pytest
 from flask_api import status
 
 from global_parameters import ALL_ASPECTS
+from global_parameters import ALL_CRALWERS
 
 
 @pytest.mark.parametrize(
     "request_value,responds_value",
-    [
-        ("reddit", "reddit"),
-        ("twitter", "twitter"),
-    ],
+    {
+        (i,i) for i in ALL_CRALWERS
+    },
 )
 def test_crawler_parameters(
     client, request_value, responds_value,
