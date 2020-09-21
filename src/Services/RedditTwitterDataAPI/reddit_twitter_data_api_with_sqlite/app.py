@@ -18,17 +18,17 @@ from flask import request
 from flask_api import status
 from flask_restful import Api
 
+from global_parameters import ALL_ASPECTS
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
 from global_parameters import ALL_CRALWERS
-from global_parameters import ALL_ASPECTS
+from global_parameters import ALL_FREQUENCY
 from global_parameters import ALL_REDDIT_FEILDS
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_TWITTER_FEILDS
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
-from global_parameters import ALL_FREQUENCY
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -44,7 +44,6 @@ ALL_CRAWLERS_SEARCH_TYPE = {
     ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPES,
     ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPES,
 }
-
 
 all_crawler_fields = {
     ALL_CRALWERS[0]: ALL_TWITTER_FEILDS,
@@ -514,8 +513,28 @@ def index():
     limit = request.args.get("limit")
     page = request.args.get("page")
 
-    def _check_param_compatibility(
+    def _check_compatibility_of_top_amount_and_total_count(
             _top_amount: Optional[str], _total_count: Optional[str],
+    ) -> \
+            Optional[
+                Tuple[str, int]
+            ]:
+        count = 0
+        if _top_amount is not None:
+            count += 1
+        if _total_count is not None:
+            count += 1
+        if count >= 2:
+            return (
+                "Either top_amount or total_count must be provided."
+                " Not Both",
+                status.HTTP_400_BAD_REQUEST,
+            )
+        return None
+
+    def _check_param_compatibility(
+            _check_param_compatibility_func,
+            *args
     ) -> Optional[Tuple[str, int]]:
         """Skipped summary.
 
@@ -531,26 +550,14 @@ def index():
         :return: tuple of error message and error status code
         """
 
-        def _check_compatibility_of_top_amount_and_total_count() -> Optional[
-            Tuple[str, int]
-        ]:
-            count = 0
-            if _top_amount is not None:
-                count += 1
-            if _total_count is not None:
-                count += 1
-            if count >= 2:
-                return (
-                    "Either top_amount or total_count must be provided."
-                    " Not Both",
-                    status.HTTP_400_BAD_REQUEST,
-                )
-            return None
-
-        params_error = _check_compatibility_of_top_amount_and_total_count()
+        params_error = _check_param_compatibility_func(*args)
         return params_error
 
-    params_error = _check_param_compatibility(top_amount, total_count)
+    params_error = \
+        _check_param_compatibility(
+            _check_compatibility_of_top_amount_and_total_count
+            , top_amount,total_count
+        )
 
     if params_error is not None:
         return params_error
@@ -702,6 +709,7 @@ def index():
             _fields: Optional[Union[str, List[str]]],
     ) -> List[Union[str, None]]:
 
+        # if _search_types is not None:
         if _crawlers != "all" and _crawlers is not None:
             (
                 _crawlers,
