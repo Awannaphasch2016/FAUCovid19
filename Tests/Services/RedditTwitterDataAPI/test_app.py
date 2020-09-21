@@ -131,6 +131,24 @@ def test_top_amount_parameter(client):
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert x.json["top_retrieved"] == len(x.json['all_retrived_data'])
 
+@pytest.mark.test_paramete
+def test_page_parameter(client):
+    raise NotImplementedError()
+    x = client.get("/?page=100")
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+
+@pytest.mark.test_paramete
+def test_page_parameter_fail(client):
+    x = client.get("/?page=100")
+    assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
+
+@pytest.mark.test_paramete
+def test_limit_parameter(client):
+    raise NotImplementedError()
+    x = client.get("/?crawlers=reddit&limit=100")
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    # assert x.json["top_retrieved"] == len(x.json['all_retrived_data'])
+
 
 @pytest.mark.test_all_value
 class TestAllValue:

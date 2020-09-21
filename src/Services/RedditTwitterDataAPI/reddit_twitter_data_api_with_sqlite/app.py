@@ -92,6 +92,8 @@ class APIManager:
             fields,
             total_count,
             top_amount,
+            page,
+            limit
     ):
         """Skipped."""
         self.init_vars(
@@ -104,6 +106,8 @@ class APIManager:
             fields,
             total_count,
             top_amount,
+            page,
+            limit
         )
 
     def init_vars(
@@ -117,6 +121,8 @@ class APIManager:
             fields,
             total_count,
             top_amount,
+            page,
+            limit,
     ):
         """
         Prepare common data that will be used among class's methods.
@@ -164,6 +170,8 @@ class APIManager:
         self.fields = fields
         self.total_count = total_count
         self.top_retrieved_data = top_amount
+        self.page = page
+        self.limit = limit
 
     def select_returned_function(self) -> Callable:
         """Skipped summary."""
@@ -532,6 +540,19 @@ def index():
             )
         return None
 
+    def _check_compatibility_of_page_limit(
+            _page: Optional[str], _limit: Optional[str],
+    ) -> \
+            Optional[
+                Tuple[str, int]
+            ]:
+        if _page is not None and _limit is None:
+            return https_400_bad_request_template(
+                "More explicit is required: when page is specified, "
+                "limit must also be specified.",
+            )
+        return None
+
     def _check_param_compatibility(
             _check_param_compatibility_func,
             *args
@@ -557,6 +578,15 @@ def index():
         _check_param_compatibility(
             _check_compatibility_of_top_amount_and_total_count
             , top_amount, total_count
+        )
+
+    if params_error is not None:
+        return params_error
+
+    params_error = \
+        _check_param_compatibility(
+            _check_compatibility_of_page_limit
+            , page, limit
         )
 
     if params_error is not None:
@@ -859,6 +889,8 @@ def index():
         fields,
         total_count,
         top_amount,
+        page,
+        limit
     )
 
     return api_manager.select_returned_function()()
