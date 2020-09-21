@@ -99,12 +99,12 @@ def test_since_parameter(client, ):
     y = client.get("/?since=20-8-20")
     assert status.HTTP_400_BAD_REQUEST == int(y.status.split(" ")[0])
 
-# @pytest.mark.test_paramete
-# def test_since_parameter(client, ):
-#     x = client.get("/?since=2020-8-20")
-#     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-#     y = client.get("/?since=20-8-20")
-#     assert status.HTTP_400_BAD_REQUEST == int(y.status.split(" ")[0])
+@pytest.mark.test_paramete
+def test_until_parameter(client, ):
+    x = client.get("/?until=2020-8-20")
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    y = client.get("/?until=20-8-20")
+    assert status.HTTP_400_BAD_REQUEST == int(y.status.split(" ")[0])
 
 
 @pytest.mark.test_all_value
