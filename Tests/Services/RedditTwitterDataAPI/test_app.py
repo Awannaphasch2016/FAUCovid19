@@ -14,17 +14,17 @@ from global_parameters import ALL_REDDIT_FEILDS
 @pytest.mark.parametrize(
     "request_value,responds_value",
     {
-        (i,i) for i in ALL_CRALWERS
+        (i, i) for i in ALL_CRALWERS
     },
 )
 def test_crawler_parameters(
-    client, request_value, responds_value,
+        client, request_value, responds_value,
 ):
     x = client.get(f"/?crawlers={request_value}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert (
-        f"{responds_value}"
-        == x.json["all_retrived_data"][0]["crawler"]
+            f"{responds_value}"
+            == x.json["all_retrived_data"][0]["crawler"]
     )
 
 
@@ -54,6 +54,7 @@ def test_aspects_parameter(client, request_value, responds_value):
     assert f'{responds_value}' \
            == x.json["all_retrived_data"][0]['aspect']
 
+
 def test_aspects_parameter_with_all_value(client):
     concat_crawlers = ','.join(ALL_ASPECTS)
     x = client.get("/?aspects=all")
@@ -65,17 +66,34 @@ def test_aspects_parameter_with_all_value(client):
            == x.json["all_retrived_data"][0]['aspect']
 
 
-# @pytest.mark.parametrize(
-#     "request_value,responds_value",
-#     [
-#         (i, i) for i in ALL_REDDIT_FEILDS
-#     ],
-# )
-# def test_aspects_parameter(client, request_value, responds_value):
-#     x = client.get(f"/fields?={request_value}")
-#     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-#     assert f'{responds_value}' \
-#            == x.json["all_retrived_data"][0]['aspect']
+@pytest.mark.parametrize(
+    "request_value,responds_value",
+    [
+        (i, i) for i in ALL_REDDIT_FEILDS
+    ],
+)
+def test_fields_parameters(client,
+                           request_value,
+                           responds_value):
+    x = client.get(f"/fields?={request_value}")
+    assert status.HTTP_404_NOT_FOUND == int(x.status.split(" ")[0])
+
+
+@pytest.mark.parametrize(
+    "request_value,responds_value",
+    [
+        # (i, i) for i in ALL_REDDIT_FEILDS
+        ('aspect', 'aspect'),
+    ],
+)
+def test_reddit_twitter_fields_parameter(client,
+                                          request_value,
+                                          responds_value):
+    x = client.get(f"/?crawlers=reddit&fields={request_value}")
+    assert status.HTTP_200_OK == int(x.status.split(" ")[0])
+    # assert f'{responds_value}' \
+    #        == x.json["all_retrived_data"][0]['aspect']
+
 
 def test_fields_parameter_with_all_value(client):
     concat_crawlers = ','.join(ALL_ASPECTS)
