@@ -42,7 +42,8 @@ def test_aspects_parameter(client):
     lockdown = client.get("/?aspects=lockdown")
     reopen = client.get("/?aspects=reopen")
     corona = client.get("/?aspects=corona")
-    pass
+
+    assert status.HTTP_200_OK == int(work_from_home.status.split(" ")[0])
 
 
 def test_aspects_parameter_with_all_value(client):
