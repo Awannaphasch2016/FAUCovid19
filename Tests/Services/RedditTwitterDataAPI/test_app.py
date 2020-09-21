@@ -32,8 +32,6 @@ def test_crawler_parameters(
     )
 
 
-
-
 @pytest.mark.test_parameter
 @pytest.mark.parametrize(
     "request_value,responds_value",
@@ -62,8 +60,11 @@ def test_fields_parameter(client,
     x = client.get(f"/fields?={request_value}")
     assert status.HTTP_404_NOT_FOUND == int(x.status.split(" ")[0])
 
+
+@pytest.mark.test_all_value
 class TestAllValue:
-    @pytest.mark.test_all_value
+
+
     def test_crawler_parameters_with_all_value(self,
                                                client):
         concat_crawlers = ','.join(ALL_CRALWERS)
@@ -76,7 +77,6 @@ class TestAllValue:
         y = y.json["all_retrived_data"]
         assert len(y) == len(x)
 
-    @pytest.mark.test_all_value
     def test_aspects_parameter_with_all_value(self,
                                               client):
         concat_crawlers = ','.join(ALL_ASPECTS)
@@ -88,7 +88,6 @@ class TestAllValue:
         assert y.json["all_retrived_data"][0]['aspect'] \
                == x.json["all_retrived_data"][0]['aspect']
 
-    @pytest.mark.test_all_value
     def test_fields_parameter_with_all_value(self,
                                              client):
         concat_crawlers = ','.join(ALL_ASPECTS)
@@ -102,10 +101,10 @@ class TestAllValue:
 
 
 
+@pytest.mark.test_reddit_parameters
 class TestRedditParameters():
 
 
-    @pytest.mark.test_reddit_parameter
     @pytest.mark.parametrize(
         "request_value,responds_value",
         [
@@ -121,7 +120,6 @@ class TestRedditParameters():
         assert f'{responds_value}' \
                == list(x.json["all_retrived_data"][0].keys())[0]
 
-    @pytest.mark.test_reddit_parameter
     def test_reddit_fields_parameters_random_combination(self,
                                                          client):
         sampled_fields = random.sample(ALL_REDDIT_FEILDS, 5)
@@ -132,9 +130,9 @@ class TestRedditParameters():
                == ','.join(list(x.json["all_retrived_data"][0].keys()))
 
 
+@pytest.mark.test_twitter_parameters
 class TestTwitterParamter:
 
-    @pytest.mark.test_twitter_parameter
     @pytest.mark.parametrize(
         "request_value,responds_value",
         [
@@ -150,7 +148,6 @@ class TestTwitterParamter:
         assert f'{responds_value}' \
                == list(x.json["all_retrived_data"][0].keys())[0]
 
-    @pytest.mark.test_twitter_parameter
     def test_twitter_fields_parameters_random_combination(self,
                                                           client):
         sampled_fields = random.sample(ALL_TWITTER_FEILDS, 5)
