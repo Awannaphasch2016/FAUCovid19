@@ -21,7 +21,8 @@ from flask_restful import Api
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
 from global_parameters import ALL_ASPECTS
-from global_parameters import ALL_REDDIT_SEARCH_TYPE
+from global_parameters import ALL_REDDIT_SEARCH_TYPES
+from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
 
@@ -37,11 +38,10 @@ DATEFORMAT = "%Y-%m-%d"
 
 ALL_CRALWERS = ["twitter", "reddit"]
 ALL_FREQUENCY = ["day"]
-ALL_TWITTER_SEARCH_TYPE = ["data_tweet"]
 
 ALL_CRAWLERS_SEARCH_TYPE = {
-    ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPE,
-    ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPE,
+    ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPES,
+    ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPES,
 }
 
 ALL_REDDIT_FEILDS = [
@@ -507,9 +507,9 @@ def get_respond_type_when_crawler_is_all(cr):
     :return: list of crawler name
     """
     if cr == "reddit":
-        search_types = ALL_REDDIT_SEARCH_TYPE
+        search_types = ALL_REDDIT_SEARCH_TYPES
     if cr == "twitter":
-        search_types = search_types, ALL_TWITTER_SEARCH_TYPE
+        search_types = search_types, ALL_TWITTER_SEARCH_TYPES
 
     return search_types
 
@@ -664,10 +664,10 @@ def index():
                                                  )
 
     def _is_reddit_search_type(s):
-        return s in ALL_REDDIT_SEARCH_TYPE or s == "all"
+        return s in ALL_REDDIT_SEARCH_TYPES or s == "all"
 
     def _is_twitter_search_type(s):
-        return s in ALL_TWITTER_SEARCH_TYPE or s == "all"
+        return s in ALL_TWITTER_SEARCH_TYPES or s == "all"
 
     def _ensure_compatiblity_of_search_types_and_crawlers(c, st, f):
         ENSURE_KEY: List[str] = ["search_types", "fields_types"]
