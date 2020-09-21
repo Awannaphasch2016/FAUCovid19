@@ -143,8 +143,8 @@ class TestRedditParameters():
         x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&search_types"
                        f"={request_value}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-        # assert f'{responds_value}' \
-        #        == list(x.json["all_retrived_data"][0].keys())[0]
+        assert f'{responds_value}' \
+               == x.json["all_retrived_data"][0]['search_type']
 
 @pytest.mark.test_twitter_parameters
 class TestTwitterParamter:
