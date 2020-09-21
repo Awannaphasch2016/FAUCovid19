@@ -151,11 +151,11 @@ def test_limit_and_page_parameters(client):
 
 @pytest.mark.test_paramete
 def test_page_parameter_fail(client):
-    x = client.get("/?page=100")
+    x = client.get("/?pages=100")
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
     x = client.get("/?top_amount=100&pages=100")
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
-    x = client.get("/?total_count=true=100&pages=100")
+    x = client.get("/?total_count=true&pages=100")
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
 
 @pytest.mark.test_paramete

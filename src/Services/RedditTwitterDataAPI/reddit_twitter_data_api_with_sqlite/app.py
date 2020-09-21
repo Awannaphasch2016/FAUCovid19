@@ -572,7 +572,8 @@ def index():
     def _check_compatibility_of_top_amount_and_total_count(
             _top_amount: Optional[str],
             _total_count: Optional[str],
-            _page: Optional[str]
+            _page: Optional[str],
+            _limit: Optional[str]
     ) -> \
             Optional[
                 Tuple[str, int]
@@ -583,6 +584,11 @@ def index():
         if _total_count is not None:
             count += 1
         if _page is not None:
+            if _limit is None:
+                return https_400_bad_request_template(
+                    "Either top_amount or total_count must be provided."
+                    " Not Both",
+                )
             count += 1
         if count >= 2:
             return https_400_bad_request_template(
@@ -628,7 +634,7 @@ def index():
     params_error = \
         _check_param_compatibility(
             _check_compatibility_of_top_amount_and_total_count
-            , top_amount, total_count, pages
+            , top_amount, total_count, pages, limit
         )
 
     if params_error is not None:
