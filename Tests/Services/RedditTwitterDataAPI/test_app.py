@@ -149,14 +149,15 @@ def test_page_parameter_fail(client):
 @pytest.mark.test_paramete
 def test_limit_parameter(client):
     x = client.get("/?crawlers=reddit&limit=100")
-    y = client.get("/?crawlers=reddit&total_count=true")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-    assert len(x.json["pages"][0]) == 100
+    assert len(x.json["all_retrived_data"][0]) == 100
+    assert len(x.json["all_retrived_data"][-1]) <= 100
 
-    # total_amount = 0
-    # for i in x.json['pages']:
-    #     total_amount += len(i)
-    # assert total_amount == y.json['total_count']
+    y = client.get("/?crawlers=reddit&total_count=true")
+    total_amount = 0
+    for i in x.json["all_retrived_data"]:
+        total_amount += len(i)
+    assert total_amount == y.json['total_count']
 
 
 @pytest.mark.test_all_value

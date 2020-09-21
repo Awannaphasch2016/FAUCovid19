@@ -186,12 +186,34 @@ class APIManager:
 
     def _get_all_pages(self):
         """Return specified pages where each len(pages) == limit."""
-        all_retrived_data =\
-            [
-                i for i in range(len(self._get_all_retrieved_data()))[::100]
-            ]
+
+        total_retrived_data = \
+            self._get_all_retrieved_data()[self.RETURNED_DATA_KEY]
+
+        total_num_data = \
+            list(
+                range(len(total_retrived_data))
+            )
+
+        def _apply_pagination():
+            all_pages = \
+                [
+                    total_retrived_data[i:j] for i, j in
+                    zip(
+                        total_num_data[::self.limit][:-1],
+                        total_num_data[::self.limit][1:],
+                    )
+                ]
+            all_pages.append(
+                total_retrived_data[total_num_data[::self.limit][-1]:]
+            )
+            return all_pages
+
+        all_pages = _apply_pagination()
+
         return {
-            "pages": None
+            "select_pages": f"{self.page}",
+            self.RETURNED_DATA_KEY: all_pages
         }
 
     def _get_total_count(self) -> Dict:
@@ -659,7 +681,7 @@ def index():
         else:
             _page = 'all'
 
-        if _limit is None:
+        if _limit is not None:
             if isinstance(_limit, str):
                 _limit = int(_limit)
             else:
@@ -702,8 +724,8 @@ def index():
                                                  frequency,
                                                  total_count,
                                                  top_amount,
-                                                 limit,
                                                  page,
+                                                 limit,
                                                  )
 
     def _is_reddit_search_type(s):
