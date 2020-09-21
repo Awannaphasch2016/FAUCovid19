@@ -60,13 +60,14 @@ services:
         depends_on:
             - webserver
         volumes:
-            - ./dags:/usr/local/airflow/dags
+            - ./src/Services/AirflowDAGs:/usr/local/airflow/dags
             # Uncomment to include custom plugins
             # - ./plugins:/usr/local/airflow/plugins
         environment:
             - LOAD_EX=n
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
             - EXECUTOR=Celery
+#            - AIRFLOW_HOME=./src/Services/AirflowDAGs
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
@@ -79,7 +80,7 @@ services:
         depends_on:
             - scheduler
         volumes:
-            - ./dags:/usr/local/airflow/dags
+            - ./src/Services/AirflowDAGs:/usr/local/airflow/dags
             # Uncomment to include custom plugins
             # - ./plugins:/usr/local/airflow/plugins
         environment:
