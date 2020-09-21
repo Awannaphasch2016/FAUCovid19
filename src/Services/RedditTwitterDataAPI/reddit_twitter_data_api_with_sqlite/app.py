@@ -29,6 +29,7 @@ from global_parameters import ALL_TWITTER_FEILDS
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
+from src.Utilities.Errors.http_errors import https_400_bad_request_template
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -525,10 +526,9 @@ def index():
         if _total_count is not None:
             count += 1
         if count >= 2:
-            return (
+            return https_400_bad_request_template(
                 "Either top_amount or total_count must be provided."
                 " Not Both",
-                status.HTTP_400_BAD_REQUEST,
             )
         return None
 
@@ -579,8 +579,11 @@ def index():
         if _aspects is None:
             _aspects = "all"
 
-        if _fields is None:
-            _fields = "all"
+        # if _fields is None:
+        #     _fields = "all"
+        #
+        # if _search_types is None:
+        #     _search_types = "all"
 
         if _frequency is None:
             _frequency = "day"
@@ -707,9 +710,9 @@ def index():
             _crawlers: Optional[Union[str, List[str]]],
             _search_types: Optional[Union[str, List[str]]],
             _fields: Optional[Union[str, List[str]]],
-    ) -> List[Union[str, None]]:
+    ) -> Union[List[Union[str, None]],Tuple[str, int]]:
 
-        # if _search_types is not None:
+
         if _crawlers != "all" and _crawlers is not None:
             (
                 _crawlers,
@@ -721,19 +724,34 @@ def index():
                 _fields,
             )
         elif _crawlers == "all":
-            _search_types = ["all"]
-            _fields = ["all"]
-        elif _crawlers is None:
-            _crawlers = ["all"]
+            if _fields is not None:
+                return https_400_bad_request_template(
+                    "Do you forget to specified crawler_type? "
+                    "fields must always be specified with specific cralwer"
+                )
+            if _search_types is not None:
+                return https_400_bad_request_template(
+                    "Do you forget to specified crawler_type? "
+                    "search_types must always be specified with specific "
+                    "cralwer"
+                )
             _search_types = ["all"]
             _fields = ["all"]
         else:
             raise ValueError
         return [_crawlers, _search_types, _fields]
 
-    crawler, search_types, fields = _applying_all_value_condition(
+    has_error = _applying_all_value_condition(
         crawlers, search_types, fields,
     )
+    try:
+        if status.HTTP_400_BAD_REQUEST == has_error[1]:
+            return has_error
+        else:
+            crawler, search_types, fields = has_error
+    except:
+        return "ERROR is not properly caught, unknown error is returned."
+
 
     # def ensure_compatibility_of_fields_and_crawler(cr, f):
     #     if cr[0] == 'all'
