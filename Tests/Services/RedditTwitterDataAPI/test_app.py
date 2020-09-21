@@ -6,6 +6,8 @@
 import pytest
 from flask_api import status
 
+from global_parameters import ALL_ASPECTS
+
 
 @pytest.mark.parametrize(
     "request_value,responds_value",
@@ -36,14 +38,13 @@ def test_crawler_parameters_with_all_value(client):
     assert len(y) == len(x)
 
 
-# @pytest.mark.parametrize(
-#     "request_value,responds_value",
-#     [
-#         ("reddit", "reddit"),
-#         ("twitter", "twitter"),
-#     ],
-# )
-def test_aspects_parameter(client, ):
+@pytest.mark.parametrize(
+    "request_value,responds_value",
+    [
+        (i, i) for i in ALL_ASPECTS
+    ],
+)
+def test_aspects_parameter(client, request_value, responds_value):
     work_from_home = client.get("/?aspects=work_from_home")
 
     assert status.HTTP_200_OK == int(work_from_home.status.split(" ")[0])
