@@ -81,6 +81,20 @@ ALL_REDDIT_COLLECTION_NAMES: List = [
 # ALL_REDDIT_SEARCH_TYPES = ["submission", "comment"]
 ALL_REDDIT_SEARCH_TYPES = ["comment", "submission"]
 ALL_REDDIT_RESPOND_TYPES = ["data"]
+ALL_REDDIT_FEILDS = [
+    "aspect",
+    "created_utc",
+    "search_types",
+    "crawler",
+    "frequency",
+    "subreddit",
+    "link_id",
+    "parent_id",
+    "title",
+    "body",
+    "id",
+    "sentiment",
+]
 
 # MAX_AFTER = 166
 MAX_AFTER = 30
@@ -131,6 +145,16 @@ ALL_TWITTER_TAGS: List = ALL_ASPECTS
 ALL_TWITTER_COLLETION_NAMES: List = ["twitter_tweet"]
 ALL_TWITTER_SEARCH_TYPES = ["data_tweet"]
 ALL_TWITTER_RESPOND_TYPES = ["data_tweet"]
+ALL_TWITTER_FEILDS = [
+    "crawler",
+    "text",
+    "date",
+    "search_type",
+    "aspect",
+    "frequency",
+    "sentiment",
+    "id",
+]
 
-# this is new checkpoint Anak 'Wannaphaschaiyong'
-# this is not in checkpoint
+# Frequency
+ALL_FREQUENCY = ["day"]

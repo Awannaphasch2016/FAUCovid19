@@ -22,10 +22,13 @@ from flask_restful import Api
 # from global_parameters import BASE_DIR
 from global_parameters import ALL_CRALWERS
 from global_parameters import ALL_ASPECTS
+from global_parameters import ALL_REDDIT_FEILDS
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
+from global_parameters import ALL_TWITTER_FEILDS
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
+from global_parameters import ALL_FREQUENCY
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -37,37 +40,11 @@ api = Api(app)
 # /?crawlers=twitter&since=2020-08-07&until=2020-08-08&aspects=work_from_home,reopen
 DATEFORMAT = "%Y-%m-%d"
 
-ALL_FREQUENCY = ["day"]
-
 ALL_CRAWLERS_SEARCH_TYPE = {
     ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPES,
     ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPES,
 }
 
-ALL_REDDIT_FEILDS = [
-    "aspect",
-    "created_utc",
-    "search_types",
-    "crawler",
-    "frequency",
-    "subreddit",
-    "link_id",
-    "parent_id",
-    "title",
-    "body",
-    "id",
-    "sentiment",
-]
-ALL_TWITTER_FEILDS = [
-    "crawler",
-    "text",
-    "date",
-    "search_type",
-    "aspect",
-    "frequency",
-    "sentiment",
-    "id",
-]
 
 all_crawler_fields = {
     ALL_CRALWERS[0]: ALL_TWITTER_FEILDS,
