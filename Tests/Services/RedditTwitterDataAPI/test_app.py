@@ -28,9 +28,9 @@ def test_crawler_parameters(
 
 
 def test_crawler_parameters_with_all_value(client):
-    concat_crawler = ALL_CRALWERS.join(',')
+    concat_crawlers = ALL_CRALWERS.join(',')
     x = client.get("/?crawlers=all")
-    y = client.get("/?crawlers=twitter,reddit")
+    y = client.get(f"/?crawlers={concat_crawlers}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert status.HTTP_200_OK == int(y.status.split(" ")[0])
 
