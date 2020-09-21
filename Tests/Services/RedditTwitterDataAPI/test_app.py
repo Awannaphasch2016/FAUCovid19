@@ -106,7 +106,6 @@ def test_reddit_fields_parameters_random_combination(client):
 
 
 
-
 @pytest.mark.parametrize(
     "request_value,responds_value",
     [
