@@ -72,9 +72,9 @@ def test_aspects_parameter_with_all_value(client):
         (i, i) for i in ALL_REDDIT_FEILDS
     ],
 )
-def test_fields_parameters(client,
-                           request_value,
-                           responds_value):
+def test_fields_parameter(client,
+                          request_value,
+                          responds_value):
     x = client.get(f"/fields?={request_value}")
     assert status.HTTP_404_NOT_FOUND == int(x.status.split(" ")[0])
 
@@ -82,13 +82,12 @@ def test_fields_parameters(client,
 @pytest.mark.parametrize(
     "request_value,responds_value",
     [
-        # (i, i) for i in ALL_REDDIT_FEILDS
-        ('aspect', 'aspect'),
+        (i, i) for i in ALL_REDDIT_FEILDS
     ],
 )
 def test_reddit_twitter_fields_parameter(client,
-                                          request_value,
-                                          responds_value):
+                                         request_value,
+                                         responds_value):
     x = client.get(f"/?crawlers=reddit&fields={request_value}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     # assert f'{responds_value}' \

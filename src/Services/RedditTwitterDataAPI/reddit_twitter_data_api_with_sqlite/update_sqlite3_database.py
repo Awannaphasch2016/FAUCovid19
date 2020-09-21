@@ -12,24 +12,15 @@ from typing import Optional
 
 import pandas as pd
 
+from global_parameters import ALL_ASPECTS
+from global_parameters import ALL_REDDIT_SEARCH_TYPES
+from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
 
 sys.path.insert(0, str(pathlib.Path(os.getcwd()).parent.parent.parent.parent))
 
 from global_parameters import BASE_DIR  # noqa: E402
-
-ALL_ASPECTS = [
-    "work_from_home",
-    "social_distance",
-    "corona",
-    "reopen",
-    "lockdown",
-]
-ALL_CRALWERS = ["twitter", "reddit"]
-ALL_FREQUENCY = ["day"]
-ALL_REDDIT_SEARCH_TYPE = ["comment", "submission"]
-ALL_TWITTER_SEARCH_TYPE = ["data_tweet"]
 
 
 def get_all_file_path() -> List[pathlib.Path]:
@@ -65,7 +56,7 @@ def get_all_file_for_reddit(
         all_data_path,
         "reddit",
         ALL_ASPECTS,
-        ALL_REDDIT_SEARCH_TYPE,
+        ALL_REDDIT_SEARCH_TYPES,
     )
 
 
@@ -85,7 +76,7 @@ def get_all_file_for_twitter(
         all_data_path,
         "twitter",
         ALL_ASPECTS,
-        ALL_TWITTER_SEARCH_TYPE,
+        ALL_TWITTER_SEARCH_TYPES,
     )
 
 
@@ -202,9 +193,9 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
         return retrieved_data_from_a_file
 
     if crawler == "reddit":
-        all_crawler_search_type = ALL_REDDIT_SEARCH_TYPE
+        all_crawler_search_type = ALL_REDDIT_SEARCH_TYPES
     elif crawler == "twitter":
-        all_crawler_search_type = ALL_TWITTER_SEARCH_TYPE
+        all_crawler_search_type = ALL_TWITTER_SEARCH_TYPES
     else:
         raise ValueError
 

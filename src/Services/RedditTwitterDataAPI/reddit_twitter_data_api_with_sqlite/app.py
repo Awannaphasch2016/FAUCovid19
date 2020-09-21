@@ -657,8 +657,8 @@ def index():
             ENSURE_KEY[1]: is_twitter_fields,
         }
         ALL_CRALWER_ENSURE_FUNCTION: Dict = {
-            ALL_CRALWERS[0]: REDDIT_ENSURE_FUNCTION,
-            ALL_CRALWERS[1]: TWITTER_ENSURE_FUNCTION,
+            ALL_CRALWERS[0]: TWITTER_ENSURE_FUNCTION,
+            ALL_CRALWERS[1]: REDDIT_ENSURE_FUNCTION,
         }
 
         def _get_ensure_compatibility_dict(

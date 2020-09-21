@@ -84,7 +84,7 @@ ALL_REDDIT_RESPOND_TYPES = ["data"]
 ALL_REDDIT_FEILDS = [
     "aspect",
     "created_utc",
-    "search_types",
+    "search_type",
     "crawler",
     "frequency",
     "subreddit",
