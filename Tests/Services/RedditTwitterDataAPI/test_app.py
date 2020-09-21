@@ -90,8 +90,8 @@ def test_reddit_twitter_fields_parameter(client,
                                          responds_value):
     x = client.get(f"/?crawlers=reddit&fields={request_value}")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
-    # assert f'{responds_value}' \
-    #        == x.json["all_retrived_data"][0]['aspect']
+    assert f'{responds_value}' \
+           == list(x.json["all_retrived_data"][0].keys())[0]
 
 
 def test_fields_parameter_with_all_value(client):
