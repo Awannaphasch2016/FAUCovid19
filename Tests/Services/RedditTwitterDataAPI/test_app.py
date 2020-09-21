@@ -37,6 +37,8 @@ def test_crawler_parameters_with_all_value(client):
 
 
 def test_aspects_parameter(client):
+    work_from_home = client.get("/?aspects=work_from_home")
+    print(work_from_home.status)
     pass
 
 
