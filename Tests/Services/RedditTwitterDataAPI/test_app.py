@@ -13,6 +13,8 @@ from global_parameters import ALL_REDDIT_FEILDS
 from global_parameters import ALL_TWITTER_FEILDS
 
 
+
+@pytest.mark.Anak_test
 @pytest.mark.parametrize(
     "request_value,responds_value",
     {
