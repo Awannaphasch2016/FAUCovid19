@@ -6,7 +6,7 @@
 import logging
 
 # create logger
-module_logger = logging.getLogger("logger_module")
+from typing import List
 
 
 class MyLogger:
@@ -20,6 +20,22 @@ class MyLogger:
         self._init_program_logger()
         self._init_error_logger()
 
+    def _get_formatter(self) -> logging.Formatter:
+        formatter = logging.Formatter(
+            "%(levelname)s  - %(asctime)s: %(message)s"
+        )
+        return formatter
+
+    def _set_logger(self,
+                    log_handler: logging.Handler,
+                    log_level: List[int],
+                    ) -> None:
+        for i in log_level:
+            log_handler.setLevel(i)
+
+        log_handler.setFormatter(self._get_formatter())
+        self.logger.addHandler(log_handler)
+
     def _init_program_logger(self):
         self.program_logger = logging.StreamHandler()
 
@@ -27,8 +43,7 @@ class MyLogger:
         self.program_logger.setLevel(logging.WARNING)
 
         # create formatter and add it to the handlers
-        formatter1 = logging.Formatter("%(message)s")
-        self.program_logger.setFormatter(formatter1)
+        self.program_logger.setFormatter(self._get_formatter())
 
         # add the handlers to the logger
         self.logger.addHandler(self.program_logger)
@@ -37,8 +52,7 @@ class MyLogger:
         self.error_logger = logging.StreamHandler()
 
         self.program_logger.setLevel(logging.ERROR)
-        formatter1 = logging.Formatter("%(message)s")
-        self.program_logger.setFormatter(formatter1)
+        self.program_logger.setFormatter(self._get_formatter())
 
         self.logger.addHandler(self.program_logger)
 
@@ -46,11 +60,9 @@ class MyLogger:
         self.debug_logger = logging.StreamHandler()
 
         self.program_logger.setLevel(logging.DEBUG)
-        formatter1 = logging.Formatter("%(message)s")
-        self.program_logger.setFormatter(formatter1)
+        self.program_logger.setFormatter(self._get_formatter())
 
         self.logger.addHandler(self.program_logger)
-
 
 
 def some_function():
