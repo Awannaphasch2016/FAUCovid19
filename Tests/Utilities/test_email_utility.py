@@ -19,9 +19,9 @@ def test_send_email():
 
     This message is sent from Python."""
     # password = 'Terng2258'
-    # with open(password)
-    password = 'Yeeha1234'
-
+    with open(password)
+    # password = 'Yeeha1234'
+    #
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, password)

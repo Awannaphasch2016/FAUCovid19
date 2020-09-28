@@ -30,7 +30,7 @@ Examples/
 **/work_env
 **/venv
 *.db
-/credentials.py
+/credentials.*
 
 .Data/
 .vscode/
