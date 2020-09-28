@@ -1182,6 +1182,7 @@ def _get_reddit_data(
         if sentiment_value is not None:
             data_with_sentiment["sentiment"] = sentiment_value 
         else:
+            print('yes')
             exit()
         all_data_with_sentiment.append(data_with_sentiment)
 
