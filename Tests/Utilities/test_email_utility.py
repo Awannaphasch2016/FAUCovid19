@@ -7,6 +7,8 @@
 import smtplib
 import ssl
 
+from credentials import password
+
 
 def test_send_email():
     port = 465  # For SSL
@@ -18,10 +20,6 @@ def test_send_email():
     Subject: Hi there
 
     This message is sent from Python."""
-    # password = 'Terng2258'
-    with open(password)
-    # password = 'Yeeha1234'
-    #
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, password)
