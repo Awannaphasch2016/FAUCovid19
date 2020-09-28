@@ -68,12 +68,7 @@ class MyLogger:
             ]
         )
 
-        self.program_logger.setLevel(logging.DEBUG)
-        self.program_logger.setFormatter(self._get_formatter())
-
-        self.logger.addHandler(self.program_logger)
 
 
 if __name__ == '__main__':
-    print('hi')
-    pass
+    my_logger = MyLogger()
