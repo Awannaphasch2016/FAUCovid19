@@ -4,6 +4,7 @@
 """Contains time utility function."""
 
 import datetime
+from typing import Dict
 
 
 def _get_epoch_datetime_subtract_timedelta(
@@ -45,8 +46,10 @@ def _convert_timedelta_to_specified_frequency(
     else:
         raise NotImplementedError
 
-def group_respond_data_per_day():
+def group_respond_data_per_day(respond_data: Dict, date: datetime.datetime):
     pass
 
 if __name__ == "__main__":
+    date = 1601195531
+    group_respond_data_per_day(5, date)
     pass
