@@ -7,14 +7,15 @@
 import smtplib
 import ssl
 
+from credentials import email
 from credentials import password
 
 
 def test_send_email():
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
-    sender_email = "terngoodod@gmail.com"  # Enter your address
-    receiver_email = "terngoodod@gmail.com"  # Enter receiver address
+    sender_email = email
+    receiver_email = email
     # password = input("Type your password and press enter: ")
     message = """\
     Subject: Hi there
