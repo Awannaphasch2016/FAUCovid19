@@ -32,7 +32,7 @@ Examples/
 *.db
 
 .Data/
-# .vscode/
+.vscode/
 .history/
 .idea/
 .__pycache__

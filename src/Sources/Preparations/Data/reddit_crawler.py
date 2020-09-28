@@ -974,7 +974,7 @@ def run_reddit_crawler(
             total_returned_data += num_returned_data
             total_missing_data += num_missing_data
 
-            next_interval, per_day_average = reddit_crawler.after_run(
+            next_interval, per_day_averagee= reddit_crawler.after_run(
                 responds_content,
                 after,
                 max_after,
@@ -1181,7 +1181,6 @@ def _get_reddit_data(
         sentiment_value = _get_sentiment(data, add_sentiment_key)
         if sentiment_value is not None:
             data_with_sentiment["sentiment"] = sentiment_value 
-        exit()
         all_data_with_sentiment.append(data_with_sentiment)
 
     res["data"] = all_data_with_sentiment

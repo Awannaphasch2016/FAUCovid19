@@ -44,3 +44,9 @@ def _convert_timedelta_to_specified_frequency(
         return seconds
     else:
         raise NotImplementedError
+
+def group_respond_data_per_day():
+    pass
+
+if __name__ == "__main__":
+    pass
