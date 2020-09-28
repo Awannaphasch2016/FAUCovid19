@@ -59,3 +59,6 @@ def save_to_file(content: Any, saved_file: pathlib.Path) -> None:
         pickle.dump(content, f)
         print(f"saved at {f.name}")
         print()
+
+if __name__ == '__main__':
+    print('hi')

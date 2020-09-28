@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "command": "cmd",
+    "isShellCommand": true,
+    "showOutput": "always",
+    "args": [
+        "/c"
+    ],
+    "tasks": [
+        {
+            "taskName": "TCR current file",
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "args": [
+                "${config:python.pythonPath} ${file} && git add . && git commit -m `TCR` || git reset --hard "
+            ],
+            "problemMatcher": [],
+            "label": "TCR current file"
+        },
+        {
+            "taskName": "TCR with pytest",
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "args": [
+                "pytest ${file} && git add . && git commit -m `TCR` || git reset --hard "
+            ]
+        }
+    ]
+}
