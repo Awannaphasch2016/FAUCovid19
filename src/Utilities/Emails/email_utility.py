@@ -10,7 +10,18 @@ from credentials import email
 from credentials import password
 
 
-def send_email(message: str, receiver_email: str):
+def send_email(message: str, receiver_email: str) -> None:
+    """Send message to email.
+
+
+
+    Note: both receiver_email and sender_email must use gmail. This is because
+        different email services required different security protocol standard
+
+    :param message: message to be sent
+    :param receiver_email: email of a person that message will be sent to
+    """
+    log.info()
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
     sender_email = email

@@ -1,14 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""Contain all global variables."""
+
 import os
 import pathlib
 from typing import List
 
+PROJECT_NAME = "FAUCOVID19"
 BASE_DIR: pathlib.Path = pathlib.Path(
     os.path.dirname(os.path.realpath(__file__))
 )
 
 # Data
 DATA_DIR: pathlib.Path = (
-    pathlib.Path(os.path.dirname(os.path.realpath(__file__))) / "Data"
+        pathlib.Path(os.path.dirname(os.path.realpath(__file__))) / "Data"
 )
 
 # sqlite database
@@ -67,11 +73,11 @@ WORK_FROM_HOME_KEYWORDS = [
 COVID_KEYWORDS = ["covid", "corona", "sarscov2"]
 
 ALL_KEYWORDS = (
-    LOCKDOWN_KEYWORDS
-    + REOPEN_KEYWORDS
-    + SOCIAL_DISTANCE_KEYWORDS
-    + WORK_FROM_HOME_KEYWORDS
-    + COVID_KEYWORDS
+        LOCKDOWN_KEYWORDS
+        + REOPEN_KEYWORDS
+        + SOCIAL_DISTANCE_KEYWORDS
+        + WORK_FROM_HOME_KEYWORDS
+        + COVID_KEYWORDS
 )
 
 # Reddit
