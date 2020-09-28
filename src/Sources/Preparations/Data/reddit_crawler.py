@@ -980,17 +980,17 @@ def run_reddit_crawler(
                 max_after,
             )
 
-            # saved_file = get_saved_file_path(
-            #     reddit_crawler.time_since,
-            #     reddit_crawler.time_until,
-            #     path_name=BASE_DIR / f"Outputs/Data/"  # noqa: E251
-            #     f"{reddit_crawler.crawler_name}/"
-            #     f"{reddit_crawler.aspect}/"
-            #     f"{reddit_crawler.collection_name}/"
-            #     f"{reddit_crawler.search_type}/"
-            #     f"{reddit_crawler.respond_type}",
-            # )
-            # save_to_file(responds_content, saved_file)
+            saved_file = get_saved_file_path(
+                reddit_crawler.time_since,
+                reddit_crawler.time_until,
+                path_name=BASE_DIR / f"Outputs/Data/"  # noqa: E251
+                f"{reddit_crawler.crawler_name}/"
+                f"{reddit_crawler.aspect}/"
+                f"{reddit_crawler.collection_name}/"
+                f"{reddit_crawler.search_type}/"
+                f"{reddit_crawler.respond_type}",
+            )
+            save_to_file(responds_content, saved_file)
         except Exception as e:
 
             if str(e) not in KNOWN_ERROR:
@@ -1181,9 +1181,7 @@ def _get_reddit_data(
         sentiment_value = _get_sentiment(data, add_sentiment_key)
         if sentiment_value is not None:
             data_with_sentiment["sentiment"] = sentiment_value 
-        else:
-            print('yes')
-            exit()
+        exit()
         all_data_with_sentiment.append(data_with_sentiment)
 
     res["data"] = all_data_with_sentiment
