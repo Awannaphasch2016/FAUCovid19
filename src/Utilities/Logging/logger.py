@@ -30,6 +30,11 @@ class MyLogger:
                             log_handler: logging.Handler,
                             log_level: List[int],
                             ) -> None:
+        """Add Handerler to Logger
+
+        :param log_handler:
+        :param log_level: log level that hander allow to receive
+        """
         for i in log_level:
             log_handler.setLevel(i)
 
