@@ -16,7 +16,7 @@ class ControlLimit:
     def control_pushshift_limit(
         self,
         total_number_of_request: int,
-        max_per_min: int = 200,
+        max_per_min: int = 150,
     ) -> None:
         """Skipped."""
         self.end = time.time()
