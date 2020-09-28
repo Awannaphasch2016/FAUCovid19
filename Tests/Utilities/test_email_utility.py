@@ -11,15 +11,15 @@ import ssl
 def test_send_email():
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
-    sender_email = "anakwannaphaschaiyong@gmail.com"  # Enter your address
-    receiver_email = "anakwannaphaschaiyong@gmail.com"  # Enter receiver
-    # address
+    sender_email = "terngoodod@gmail.com"  # Enter your address
+    receiver_email = "terngoodod@gmail.com"  # Enter receiver address
     # password = input("Type your password and press enter: ")
     message = """\
     Subject: Hi there
 
     This message is sent from Python."""
     # password = 'Terng2258'
+    # with open(password)
     password = 'Yeeha1234'
 
     context = ssl.create_default_context()
