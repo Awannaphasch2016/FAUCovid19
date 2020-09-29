@@ -63,7 +63,6 @@ class MyLogger:
             ]
         )
 
-
     def _init_debug_logger(self):
         self.debug_logger = logging.StreamHandler()
         self._add_logger_handler(
@@ -73,6 +72,16 @@ class MyLogger:
             ]
         )
 
+
+def func_under_test():
+    my_logger = MyLogger()
+    my_logger.logger.info('hi')
+
+
+def test_baz(caplog):
+    func_under_test()
+    for record in caplog.records:
+        assert record.levelname == "CRITICAL"
 
 
 if __name__ == '__main__':
