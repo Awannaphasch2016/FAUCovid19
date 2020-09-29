@@ -1,0 +1,7 @@
+2020-09-29 01:28:20 [CRITICAL] Critical (test_logging.py:17)
+2020-09-29 01:28:20 [   DEBUG] Debug (test_logging.py:28)
+2020-09-29 01:28:20 [    INFO] Info (test_logging.py:29)
+2020-09-29 01:28:20 [   DEBUG] Attempting to acquire lock 1786917456288 on C:\Users\Anak\AppData\Local\Temp\tmpgbtx_507.lock (filelock.py:270)
+2020-09-29 01:28:20 [    INFO] Lock 1786917456288 acquired on C:\Users\Anak\AppData\Local\Temp\tmpgbtx_507.lock (filelock.py:274)
+2020-09-29 01:28:20 [   DEBUG] Attempting to release lock 1786917456288 on C:\Users\Anak\AppData\Local\Temp\tmpgbtx_507.lock (filelock.py:315)
+2020-09-29 01:28:20 [    INFO] Lock 1786917456288 released on C:\Users\Anak\AppData\Local\Temp\tmpgbtx_507.lock (filelock.py:318)

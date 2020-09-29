@@ -47,15 +47,20 @@ from src.Utilities import my_timer
 from src.Utilities.ClickLibrary.custom_commands import (
     enfore_dependency_between_date_cli_args,
 )
+from src.Utilities.Logging import MyLogger
+
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
+DEBUG_LOGGER = LOGGER.debug_logger
 
 
 def _get_running_conditions(
-    crawler_option: str,
-    collection_name: str,
-    search_type: str,
-    respond_type: str,
-    tag: Optional[str],
-    max_after: int,
+        crawler_option: str,
+        collection_name: str,
+        search_type: str,
+        respond_type: str,
+        tag: Optional[str],
+        max_after: int,
 ) -> RunningConditions:
     """
     Get common conditions (constraints) of all crawler.
@@ -99,8 +104,9 @@ def _get_running_conditions(
 
 # FIXME: this function should be removed and simply replaced by
 def run_crawler(
-    run_crawler_func: Callable,
-    crawler_condition: Union[RedditCrawlerCondition, TwitterCrawlerCondition],
+        run_crawler_func: Callable,
+        crawler_condition: Union[
+            RedditCrawlerCondition, TwitterCrawlerCondition],
 ) -> Tuple[int, int]:
     """Deprecate."""
     return run_crawler_func(crawler_condition)
@@ -226,8 +232,8 @@ def get_keywords_collections(crawler_type: str) -> Tuple[str]:
 
 
 def twitter_crawler_condition(
-    timestamp: datetime.datetime,
-    running_conditions: RunningConditions,
+        timestamp: datetime.datetime,
+        running_conditions: RunningConditions,
 ) -> TwitterCrawlerCondition:
     """
     Return constraint with specific format for twitter.
@@ -329,8 +335,8 @@ def twitter_crawler_condition(
 
 
 def reddit_crawler_condition(
-    timestamp: datetime.datetime,
-    running_conditions: RunningConditions,
+        timestamp: datetime.datetime,
+        running_conditions: RunningConditions,
 ) -> RedditCrawlerCondition:
     """Return constraint with specific format for reddit.
 
@@ -394,7 +400,7 @@ def reddit_crawler_condition(
     crawler_condition: RedditCrawlerCondition
 
     def _get_crawler_condition(
-        subreddit_collection_class: SubredditCollection,
+            subreddit_collection_class: SubredditCollection,
     ) -> RedditCrawlerCondition:
         crawler_condition = {
             "crawler_class": RedditCrawler,
@@ -470,8 +476,8 @@ def reddit_crawler_condition(
 
 
 def select_crawler_condition(
-    running_conditions: RunningConditions,
-    timestamp: datetime.datetime,
+        running_conditions: RunningConditions,
+        timestamp: datetime.datetime,
 ) -> Tuple[Callable, Union[RedditCrawlerCondition, TwitterCrawlerCondition]]:
     """Return crawler and its CrawlerCondition dictionary.
 
@@ -510,11 +516,11 @@ def select_crawler_condition(
 
 
 def get_reddit_running_conditions(
-    before_date: datetime.datetime,
-    after_date: datetime.datetime,
-    max_after: int,
-    tags: Tags,
-    crawler_option: Crawler_type,
+        before_date: datetime.datetime,
+        after_date: datetime.datetime,
+        max_after: int,
+        tags: Tags,
+        crawler_option: Crawler_type,
 ) -> Union[List, List[RunningConditionsKeyValue]]:
     """Skipped summary.
 
@@ -560,11 +566,11 @@ def get_reddit_running_conditions(
     all_running_conditions_key_value: RunningConditionsKeyValue = []
 
     for max_after, tag, collection_name, search_type, respond_type in product(
-        [max_after],
-        tags,
-        all_collection_name,
-        all_search_type,
-        all_respond_type,
+            [max_after],
+            tags,
+            all_collection_name,
+            all_search_type,
+            all_respond_type,
     ):
         tag_str = tag
 
@@ -597,11 +603,11 @@ def get_reddit_running_conditions(
 
 
 def get_twitter_running_conditions(
-    before_date: datetime.datetime,
-    after_date: datetime.datetime,
-    max_after: int,
-    tags: Tags,
-    crawler_option: Crawler_type,
+        before_date: datetime.datetime,
+        after_date: datetime.datetime,
+        max_after: int,
+        tags: Tags,
+        crawler_option: Crawler_type,
 ) -> Union[List, List[RunningConditions]]:
     """Skipped summary.
 
@@ -641,11 +647,11 @@ def get_twitter_running_conditions(
     all_running_conditions_key_value: RunningConditionsKeyValue = []
 
     for max_after, tag, collection_name, search_type, respond_type in product(
-        [max_after],
-        tags,
-        all_collection_name,
-        all_search_type,
-        all_respond_type,
+            [max_after],
+            tags,
+            all_collection_name,
+            all_search_type,
+            all_respond_type,
     ):
         tag_str = tag
 
@@ -700,11 +706,11 @@ def get_twitter_running_conditions(
 
 
 def get_crawler_running_conditions(
-    before_date: datetime.datetime,
-    after_date: datetime.datetime,
-    max_after: int,
-    tags: Tags,
-    crawler_type: Crawler_type,
+        before_date: datetime.datetime,
+        after_date: datetime.datetime,
+        max_after: int,
+        tags: Tags,
+        crawler_type: Crawler_type,
 ) -> Union[List, List[RunningConditions]]:
     """Skipped summary.
 
@@ -746,12 +752,12 @@ def get_crawler_running_conditions(
 
 
 def run_all_reddit_conditions(
-    before_date: datetime.datetime,
-    after_date: datetime.datetime,
-    max_after: int,
-    tags: Tags,
-    timestamp: datetime.datetime,
-    crawler_type: Crawler_type,
+        before_date: datetime.datetime,
+        after_date: datetime.datetime,
+        max_after: int,
+        tags: Tags,
+        timestamp: datetime.datetime,
+        crawler_type: Crawler_type,
 ):
     """
     Run all of reddit conditions.
@@ -794,7 +800,7 @@ def run_all_reddit_conditions(
     # all_running_conditions = all_reddit_running_conditions
 
     for (i, (condition_keys, running_conditions)) in enumerate(
-        all_running_conditions[1:],
+            all_running_conditions[1:],
     ):
         check_running_conditions(running_conditions)
 
@@ -849,12 +855,12 @@ def run_all_reddit_conditions(
 
 
 def run_all_twitter_conditions(
-    before_date: datetime.datetime,
-    after_date: datetime.datetime,
-    max_after: int,
-    tags: Tags,
-    timestamp: datetime.datetime,
-    crawler_type: Crawler_type,
+        before_date: datetime.datetime,
+        after_date: datetime.datetime,
+        max_after: int,
+        tags: Tags,
+        timestamp: datetime.datetime,
+        crawler_type: Crawler_type,
 ) -> None:
     """
     Run all of twitter conditions.
@@ -895,7 +901,7 @@ def run_all_twitter_conditions(
     )
 
     for (_i, (_condition_keys, running_conditions)) in enumerate(
-        all_running_conditions,
+            all_running_conditions,
     ):
         check_running_conditions(running_conditions)
 
@@ -929,11 +935,11 @@ def run_all_twitter_conditions(
 
 
 def run_all_conditions(
-    before_date: datetime.datetime,
-    after_date: datetime.datetime,
-    max_after: int,
-    tags: Tags,
-    crawler_type: Crawler_type,
+        before_date: datetime.datetime,
+        after_date: datetime.datetime,
+        max_after: int,
+        tags: Tags,
+        crawler_type: Crawler_type,
 ):
     """Run all of specified crawler conditions.
 
@@ -1018,12 +1024,12 @@ def run_all_conditions(
 )
 @my_timer
 def main(
-    select_all_conditions: bool,
-    tags: Tags,
-    max_after: int,
-    crawler_type: str,
-    before_date: datetime.datetime,
-    after_date: datetime.datetime,
+        select_all_conditions: bool,
+        tags: Tags,
+        max_after: int,
+        crawler_type: str,
+        before_date: datetime.datetime,
+        after_date: datetime.datetime,
 ) -> None:
     """Prepare input parameters and run all of specified crawler conditions.
 
