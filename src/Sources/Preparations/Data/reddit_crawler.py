@@ -4,17 +4,19 @@
 
 import datetime
 import json
-import numpy as np  # type: ignore
-import requests
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Type
+from typing import Union
+from typing import cast
+
+import numpy as np  # type: ignore
+import requests
+from tqdm import tqdm  # type: ignore
 from typing_extensions import TypedDict
 
-from Tests.check_conditions import _check_that_all_selected_fields_are_returns
-from Tests.check_conditions import check_response_keys
 from global_parameters import ALL_REDDIT_TAGS
 from global_parameters import BASE_DIR
 from global_parameters import KNOWN_ERROR
@@ -23,6 +25,7 @@ from src.Utilities import ControlLimit
 from src.Utilities import Frequency
 from src.Utilities import Json
 from src.Utilities import Query
+from src.Utilities import RedditMetadata
 from src.Utilities import RedditResponse
 from src.Utilities import RedditRunningConstraints
 from src.Utilities import SubredditCollection
@@ -35,24 +38,31 @@ from src.Utilities import get_saved_file_path
 from src.Utilities import my_timer
 from src.Utilities import only_download_full_day
 from src.Utilities import save_to_file
+from src.Utilities.CheckConditions.check_conditions import check_response_keys
+from src.Utilities.CheckConditions.check_conditions import \
+    check_that_all_selected_fields_are_returns
+from src.Utilities.Logging import MyLogger
 from src.Utilities.time_utility import (
     _convert_timedelta_to_specified_frequency,
 )
 from src.Utilities.time_utility import _get_epoch_datetime_subtract_timedelta
+
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
 
 
 class RedditCrawler:
     """This class will prepare and crawl data from reddit."""
 
     def __init__(
-        self,
-        subreddits_collection_class: SubredditCollection,
-        respond_type: str,
-        search_type: str,
-        frequency: Frequency,
-        verbose: int,
-        aspect: str,
-        max_after: int,
+            self,
+            subreddits_collection_class: SubredditCollection,
+            respond_type: str,
+            search_type: str,
+            frequency: Frequency,
+            verbose: int,
+            aspect: str,
+            max_after: int,
     ):
         """Skipped summary."""
         self.crawler_name = "RedditCrawler"
@@ -67,13 +77,14 @@ class RedditCrawler:
         )
 
     def prepare_crawler(
-        self,
-        subreddits_collection_class: SubredditCollection,
-        respond_type: str,
-        search_type: str,
-        frequency: Frequency,
-        aspect: str,
-        max_after: int,
+            self,
+            subreddits_collection_class: SubredditCollection,
+            respond_type: str,
+            search_type: str,
+            frequency: Frequency,
+            aspect: Union[str, Tuple[str]],  # VALIDATE: hat is the correct
+            # Type.
+            max_after: int,
     ) -> None:
         """
         Prepare common data that will be used among class's methods.
@@ -108,10 +119,10 @@ class RedditCrawler:
         self.respond_type = respond_type
 
     def prepare_running_crawler(
-        self,
-        before: Optional[int],
-        after: int,
-        max_after: int,
+            self,
+            before: Optional[int],
+            after: int,
+            max_after: int,
     ) -> RedditRunningConstraints:
         """Skipped summary.
 
@@ -162,16 +173,16 @@ class RedditCrawler:
 
         # FIXME: fix this error
         assert (
-            self.timestamp_utc >= max_after_timestamp_utc
+                self.timestamp_utc >= max_after_timestamp_utc
         ), f"{self.timestamp_utc}, {max_after_timestamp_utc}, {after}"
 
         def replace_and_split(x):
             return x.replace(" ", "").split(",")
 
         fields = (
-            replace_and_split(common_fields)
-            + replace_and_split(subreddit_fields)
-            + replace_and_split(comment_fields)
+                replace_and_split(common_fields)
+                + replace_and_split(subreddit_fields)
+                + replace_and_split(comment_fields)
         )
         fields = ",".join(fields)
 
@@ -188,13 +199,14 @@ class RedditCrawler:
 
         if self.frequency == "day":
             self.time_since = (
-                datetime.datetime.now().date() - datetime.timedelta(days=after)
+                    datetime.datetime.now().date() - datetime.timedelta(
+                days=after)
             )
 
             if before is not None:
                 self.time_until = (
-                    datetime.datetime.now().date()
-                    - datetime.timedelta(days=before)
+                        datetime.datetime.now().date()
+                        - datetime.timedelta(days=before)
                 )
 
             else:
@@ -213,7 +225,7 @@ class RedditCrawler:
         )
 
         if self.verbose:
-            print(f" {self.current_condition_str}")
+            PROGRAM_LOGGER.info(f" {self.current_condition_str}")
 
         return running_constraints
 
@@ -267,9 +279,9 @@ class RedditCrawler:
     @my_timer
     # @signature_logger
     def get_responds(
-        self,
-        running_constraints: RedditRunningConstraints,
-    ) -> Json:
+            self,
+            running_constraints: RedditRunningConstraints,
+    ) -> RedditResponse:
         """Skipped summary.
 
         Prepare varaibles to be pass in (ANY) api and prepare output from (ANY)
@@ -289,18 +301,28 @@ class RedditCrawler:
 
         endpoint_url = self.get_url(running_constraints)
 
-        def ensure_json(res):
+        def ensure_json(res) -> RedditResponse:
+            # BUG: Logic here make no sense. why do I return None?
             # BUG: In RedditCrawler, json.loads(res.text) sometimes caused
             #  error at the first iteration (not sure why)
             # NOTE: I dont use try-except here because this may reminds you of
             #  subtle-error
             if res.text is not None:
                 res_text = res.text
-                return json.loads(res_text)  # type = json
-            else:
-                return None
+                return json.loads(res_text)  # type = RedditCrawler
+            # else:
+            #     return None
+            return res  # VALIDATE: should I return res? if not, what should
+            # I return?
 
-        res = ensure_json(requests.get(endpoint_url))
+        def send_reddit_requests_version_1():
+            return requests.get(endpoint_url)
+
+        # def send_reddit_requests_version_2():
+        #     return
+
+
+        res = ensure_json(send_reddit_requests_version_1())
         check_response_keys(res)
 
         return res
@@ -335,23 +357,28 @@ class RedditCrawler:
         avg = total / num_interval
 
         if self.verbose:
-            import pprint
+            # import pprint
+            #
+            # pp = pprint.PrettyPrinter(indent=4)
+            # pp.pprint(
+            #     f" {self.current_condition_str} "
+            #     f"||  avg_per_{self.frequency} given {num_interval}"
+            #     f" {self.frequency}s "
+            #     f"|| {avg}",
+            # )
 
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(
-                f" {self.current_condition_str} "
-                f"||  avg_per_{self.frequency} given {num_interval}"
-                f" {self.frequency}s "
-                f"|| {avg}",
-            )  # pass in variable to be pretty printedJ
+            PROGRAM_LOGGER.info(f" {self.current_condition_str} "
+                                f"||  avg_per_{self.frequency} given {num_interval}"
+                                f" {self.frequency}s "
+                                f"|| {avg}", )
 
         return avg
 
     def run(
-        self,
-        before: Optional[int],
-        after: int,
-        max_after: int,
+            self,
+            before: Optional[int],
+            after: int,
+            max_after: int,
     ) -> Tuple[Dict[str, Dict], int, int]:
         """Skipped summary.
 
@@ -382,13 +409,13 @@ class RedditCrawler:
                 0 if np.sign(missing_results) > 0 else missing_results
             )
             if self.verbose:
-                print(
+                PROGRAM_LOGGER.info(
                     f" {self.current_condition_str} "
                     f"|| total_results = {total_result} "
                     f"|| missing_result = {missing_results}",
                 )
             else:
-                print(f"missing_reulst = {missing_results}")
+                PROGRAM_LOGGER.info(f"missing_reulst = {missing_results}")
             returned_results = total_result - missing_results
         except Exception as e:
             if str(e) not in KNOWN_ERROR:
@@ -405,11 +432,11 @@ class RedditCrawler:
     @my_timer
     # @signature_logger
     def run_once(
-        self,
-        before: Optional[int],
-        after: int,
-        max_after: int,
-    ) -> Dict:
+            self,
+            before: Optional[int],
+            after: int,
+            max_after: int,
+    ) -> RedditResponse:
         """
         Crawl 1 iteration (loops) neccessary to retrieved all data.
 
@@ -449,9 +476,9 @@ class RedditCrawler:
                 raise ValueError(str(e))
 
     def adjust_after_step(
-        self,
-        per_interval_average: float,
-        max_responds_size: int,
+            self,
+            per_interval_average: float,
+            max_responds_size: int,
     ) -> int:
         """Skipped summary.
 
@@ -476,9 +503,9 @@ class RedditCrawler:
         return time_interval
 
     def get_submission_data(
-        self,
-        running_constraints: RedditRunningConstraints,
-        res: Json,
+            self,
+            running_constraints: RedditRunningConstraints,
+            res: RedditResponse,
     ) -> RedditResponse:
         """
         Get reddit (submission) data given constraint to run.
@@ -499,7 +526,7 @@ class RedditCrawler:
             res = _get_reddit_metadata(
                 res,
                 running_constraints,
-                self.aspect,
+                cast(List[str], self.aspect),
                 self.query,
             )
 
@@ -522,9 +549,9 @@ class RedditCrawler:
         return res
 
     def apply_crawling_strategy(
-        self,
-        running_constraints: RedditRunningConstraints,
-        res: Json,
+            self,
+            running_constraints: RedditRunningConstraints,
+            res: RedditResponse,
     ) -> RedditResponse:
         """Skipped summary.
 
@@ -598,9 +625,9 @@ class RedditCrawler:
         # return next_interval, per_interval_average, next_before, next_after
 
     def _get_url_endpoint_with_query_param(
-        self,
-        running_constraints: RedditRunningConstraints,
-        after_frequency: str,
+            self,
+            running_constraints: RedditRunningConstraints,
+            after_frequency: str,
     ):
         """
         Get url with query as parameters.
@@ -622,7 +649,7 @@ class RedditCrawler:
         fields = running_constraints["fields"]
 
         all_subreddits: str = ",".join(self.collection["subreddit"])
-        all_queries: str = "|".join(self.collection["query"])
+        all_queries: str = "|".join(cast(List[str], self.collection["query"]))
 
         endpoint_url = (
             f"https://api.pushshift.io/reddit/"
@@ -640,9 +667,9 @@ class RedditCrawler:
         return endpoint_url
 
     def _get_url_endpoint_without_query_param(
-        self,
-        running_constraints: RedditRunningConstraints,
-        after_frequency: str,
+            self,
+            running_constraints: RedditRunningConstraints,
+            after_frequency: str,
     ) -> Url:
         """
         Get url without query as parameters.
@@ -679,10 +706,10 @@ class RedditCrawler:
         return endpoint_url
 
     def _update_interval_before_after(
-        self,
-        after: int,
-        max_after_with_specified_frequency: int,
-        next_interval: int,
+            self,
+            after: int,
+            max_after_with_specified_frequency: int,
+            next_interval: int,
     ) -> Tuple:
         """
         Update frequency interval for 'before' and 'after' variable.
@@ -707,14 +734,14 @@ class RedditCrawler:
         next_after: int = (
             max_after_with_specified_frequency
             if next_before + next_interval
-            >= max_after_with_specified_frequency
+               >= max_after_with_specified_frequency
             else next_before + next_interval
         )  # type: ignore
 
         # next_interval: int = next_before - next_after
-        next_interval: int = next_after - next_before
+        next_interval_: int = next_after - next_before
 
-        return next_before, next_after, next_interval
+        return next_before, next_after, next_interval_
 
 
 class RedditCrawlerCondition(TypedDict):
@@ -728,7 +755,7 @@ class RedditCrawlerCondition(TypedDict):
     search_type: str
     frequency: str
     verbose: bool
-    aspect: Optional[str]
+    # aspect: Optional[str]
     max_after: int
 
 
@@ -736,8 +763,8 @@ class RedditCrawlerCondition(TypedDict):
 #     the same prepared varaibles, check conditions, run crawlers and saved
 #     respond data.
 def run_reddit_crawler(
-    reddit_crawler_condition: RedditCrawlerCondition,
-) -> List[int]:
+        reddit_crawler_condition: RedditCrawlerCondition,
+) -> Tuple[int, int]:
     """Skipped summay.
 
     :type reddit_crawler_condition: RedditCrawlerCondition
@@ -780,14 +807,18 @@ def run_reddit_crawler(
     max_after_epoch_datetime_date = max_after_epoch_datetime.date()
 
     def _select_optimize_frequency(
-        before: Optional[int] = None,
-        after: int = 100,
-    ):
-        print(
+            before: Optional[int] = None,
+            after: int = 100,
+    ) -> Tuple[int, Frequency]:
+        PROGRAM_LOGGER.info(
             "selecting optimized frequency length among: day, hour, minute,"
             " second ",
         )
-        sorted_frequency_rank = ["day", "hour", "minute", "second"]
+        # sorted_frequency_rank = ["day", "hour", "minute", "second"]
+        sorted_frequency_rank: List[Frequency] = ["day",
+                                                  "hour",
+                                                  "minute",
+                                                  "second"]
 
         def _count_num_missing_value(res: Json) -> int:
             num_missing_val = res["metadata"]["total_results"] - len(
@@ -798,7 +829,7 @@ def run_reddit_crawler(
         condition = True
 
         while condition:
-            frequency = sorted_frequency_rank[0]
+            frequency: Frequency = sorted_frequency_rank[0]
 
             reddit_crawler = crawler_class(
                 subreddits_collection_class=subreddits_collection_class,
@@ -818,7 +849,7 @@ def run_reddit_crawler(
 
             if len(responds_content["data"]) > 0:
                 if (
-                    _count_num_missing_value(responds_content) > 0
+                        _count_num_missing_value(responds_content) > 0
                 ):  # if next_interval
                     # (predicted_interval) still have too many respon
                     next_interval, per_day_average = reddit_crawler.after_run(
@@ -831,12 +862,11 @@ def run_reddit_crawler(
                         # there are too many responds per day
                         sorted_frequency_rank = sorted_frequency_rank[1:]
 
-                        print(
+                        PROGRAM_LOGGER.info(
                             f" || adjust frequency from "
                             f'{reddit_crawler_condition["frequency"]} to'
-                            f" {sorted_frequency_rank[0]}",
+                            f" {sorted_frequency_rank[0]} \n",
                         )
-                        print()
 
                         reddit_crawler_condition[
                             "frequency"
@@ -848,14 +878,13 @@ def run_reddit_crawler(
 
                         assert after <= max_after, ""
 
-                        print(
+                        PROGRAM_LOGGER.info(
                             f" Given frequency = {frequency} "
                             f"|| adjust initial_interval(after) "
                             f"from "
                             f'{reddit_crawler_condition["initial_interval"]} '
-                            f"to {after}",
+                            f"to {after} \n",
                         )
-                        print()
 
                         reddit_crawler_condition["initial_interval"] = after
 
@@ -878,12 +907,11 @@ def run_reddit_crawler(
 
                     reddit_crawler_condition["initial_interval"] = after
                     reddit_crawler_condition["frequency"] = frequency
-                    print(
+                    PROGRAM_LOGGER.info(
                         f"Given frequency = {frequency} "
                         f"|| after is set to "
-                        f"{reddit_crawler_condition['initial_interval']}",
+                        f"{reddit_crawler_condition['initial_interval']} \n",
                     )
-                    print()
 
                     return after, frequency
             else:
@@ -891,6 +919,10 @@ def run_reddit_crawler(
                     raise ValueError("responses are empty")
                 else:
                     raise NotImplementedError
+        else:
+            raise NotImplementedError("This line shouldn't be reached. I"
+                                      "added this line to bypass mypy false "
+                                      "positive.")
 
     # VALIDATE: I validated it, but it may missed something, so this is left
     #  here for future debugging
@@ -974,7 +1006,7 @@ def run_reddit_crawler(
             total_returned_data += num_returned_data
             total_missing_data += num_missing_data
 
-            next_interval, per_day_averagee= reddit_crawler.after_run(
+            next_interval, per_day_averagee = reddit_crawler.after_run(
                 responds_content,
                 after,
                 max_after,
@@ -984,11 +1016,11 @@ def run_reddit_crawler(
                 reddit_crawler.time_since,
                 reddit_crawler.time_until,
                 path_name=BASE_DIR / f"Outputs/Data/"  # noqa: E251
-                f"{reddit_crawler.crawler_name}/"
-                f"{reddit_crawler.aspect}/"
-                f"{reddit_crawler.collection_name}/"
-                f"{reddit_crawler.search_type}/"
-                f"{reddit_crawler.respond_type}",
+                                     f"{reddit_crawler.crawler_name}/"
+                                     f"{reddit_crawler.aspect}/"
+                                     f"{reddit_crawler.collection_name}/"
+                                     f"{reddit_crawler.search_type}/"
+                                     f"{reddit_crawler.respond_type}",
             )
             save_to_file(responds_content, saved_file)
         except Exception as e:
@@ -998,7 +1030,7 @@ def run_reddit_crawler(
                     f"unknown error occur in {run_reddit_crawler.__name__} ",
                 )
             else:
-                print("responds are empty")
+                PROGRAM_LOGGER.error("responds are empty")
                 next_interval = after  # reintialize next-interval to be last
                 # calculated per_day_average
 
@@ -1035,12 +1067,11 @@ def run_reddit_crawler(
 
         assert after <= max_after_with_specified_frequency, ""
 
-    print(
+    PROGRAM_LOGGER.info(
         f"|| total returned data = {total_returned_data} "
         f"|| total_missing_data = {total_missing_data}",
     )
-    print(" >>>> finished crawling data <<<<")
-    print()
+    PROGRAM_LOGGER.info(" >>>> finished crawling data <<<< \n")
     return total_returned_data, total_missing_data
 
 
@@ -1050,11 +1081,11 @@ def run_reddit_crawler(
 # FIXME: this function should be method of TwitterCrawler class.
 #     (Is there any reason not to?)
 def _get_reddit_metadata(
-    res: Json,
-    running_constraints: RedditRunningConstraints,
-    aspect: Tags,
-    query: Query,
-) -> Json:
+        res: RedditResponse,
+        running_constraints: RedditRunningConstraints,
+        aspect: Tags,
+        query: Query,
+) -> RedditResponse:
     """Prepare 'metadata' key in respond data to have an appropriate format.
 
     :type respond_type: str
@@ -1076,7 +1107,7 @@ def _get_reddit_metadata(
     :rtype: Json
     :return: respond data with appropriate 'metadata' key format
     """
-    metadata = {}
+    metadata: RedditMetadata = {}
     metadata["running_constraints"] = running_constraints
 
     keys = [
@@ -1090,9 +1121,10 @@ def _get_reddit_metadata(
         "subreddit",
     ]
 
+
     # filter out fields that we don't want
     for key in keys:
-        metadata[key] = res["metadata"][key]
+        metadata[key] = res["metadata"][key]  # type: ignore
 
     res["metadata"] = metadata
 
@@ -1107,12 +1139,12 @@ def _get_reddit_metadata(
 #     any reason not to?)
 @my_timer
 def _get_reddit_data(
-    res: Json,
-    running_constraints: RedditRunningConstraints,
-    crawler_class: RedditCrawler,
-    # add_sentiment_key=True,
-    add_sentiment_key=False,
-) -> Json:
+        res: RedditResponse,
+        running_constraints: RedditRunningConstraints,
+        crawler_class: RedditCrawler,
+        # add_sentiment_key=True,
+        # add_sentiment_key=False,
+) -> RedditResponse:
     """Prepare 'data' key in respond data to have an appropriate format.
 
     :type respond_type: str
@@ -1132,7 +1164,7 @@ def _get_reddit_data(
     def _check_responds_consistency():
         if len(res["data"]) > 0:
             for i in range(len(res["data"])):
-                _check_that_all_selected_fields_are_returns(
+                check_that_all_selected_fields_are_returns(
                     running_constraints,
                     res,
                     i,
@@ -1144,8 +1176,21 @@ def _get_reddit_data(
             raise Warning("responds are empty")
 
     # @my_timer
-    def _get_sentiment(x, _add_sentiment_key: bool) -> float:
-        if not _add_sentiment_key:
+    def _get_sentiment(x,
+                       # _add_sentiment_key: bool
+                       ) -> float:
+        """Skipped.
+
+
+        BUG: _add_sentiment_key cause error when update and sentiment key
+          has value = None
+
+        :param x:
+        :return:
+        """
+
+        # if not _add_sentiment_key:
+        if True:
             return None
 
         text: Optional[str]
@@ -1173,14 +1218,15 @@ def _get_reddit_data(
         else:
             raise ValueError(str(e))
 
-    from tqdm import tqdm
-
     all_data_with_sentiment = []
     for data in tqdm(res["data"]):
         data_with_sentiment = data
-        sentiment_value = _get_sentiment(data, add_sentiment_key)
+        sentiment_value = _get_sentiment(
+            data,
+            # add_sentiment_key,
+        )
         if sentiment_value is not None:
-            data_with_sentiment["sentiment"] = sentiment_value 
+            data_with_sentiment["sentiment"] = sentiment_value
         all_data_with_sentiment.append(data_with_sentiment)
 
     res["data"] = all_data_with_sentiment
@@ -1192,3 +1238,6 @@ def _get_reddit_aggs(res: Json) -> None:
     """Skipped."""
     raise NotImplementedError
 
+
+if __name__ == '__main__':
+    print('hi')

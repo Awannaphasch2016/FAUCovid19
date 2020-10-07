@@ -26,4 +26,4 @@ if __name__ == '__main__':
         y: int
 
 
-    Point(3)  # -> Point(x=3, y=1)
+    Point(3, 3)  # -> Point(x=3, y=1)

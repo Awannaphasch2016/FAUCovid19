@@ -6,6 +6,11 @@
 import nltk  # type: ignore
 from textblob import TextBlob  # type: ignore
 
+from src.Utilities.Logging import MyLogger
+
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
+
 
 # OPTIMIZE: speed to this process ( takes way too long in comparison to
 #  request)
@@ -21,7 +26,7 @@ def get_sentiment(text: str) -> float:
     try:
         text_blob = TextBlob(text)
     except Exception as e:
-        print(e)
+        PROGRAM_LOGGER.error(e)
         nltk.download("punkt")
         text_blob = TextBlob(text)
 

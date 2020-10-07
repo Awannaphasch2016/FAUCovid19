@@ -6,9 +6,12 @@
 import smtplib
 import ssl
 
-from credentials import email
-from credentials import password
+from credentials import EMAIL
+from credentials import EMAIL_PASSWORD
+from src.Utilities.Logging import MyLogger
 
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
 
 def send_email(message: str, receiver_email: str) -> None:
     """Send message to email.
@@ -21,12 +24,12 @@ def send_email(message: str, receiver_email: str) -> None:
     :param message: message to be sent
     :param receiver_email: email of a person that message will be sent to
     """
-    log.info()
+    PROGRAM_LOGGER.info(f"Sending email to {receiver_email}")
     port = 465  # For SSL
     smtp_server = "smtp.gmail.com"
-    sender_email = email
+    sender_email = EMAIL
     context = ssl.create_default_context()
 
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
+        server.login(sender_email, EMAIL_PASSWORD)
         server.sendmail(sender_email, receiver_email, message)

@@ -8,15 +8,19 @@ import sqlite3
 import sys
 from typing import Dict
 from typing import List
+from typing import NoReturn
 from typing import Optional
 
-import pandas as pd
+import pandas as pd  # type: ignore
 
 from global_parameters import ALL_ASPECTS
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
-from global_parameters import TWITTER_DATABASE
+from src.Utilities import MyLogger
+
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
 
 sys.path.insert(0, str(pathlib.Path(os.getcwd()).parent.parent.parent.parent))
 
@@ -41,7 +45,7 @@ def get_all_file_path() -> List[pathlib.Path]:
 
 
 def get_all_file_for_reddit(
-    all_data_path: List[pathlib.Path],
+        all_data_path: List[pathlib.Path],
 ) -> Optional[List[pathlib.Path]]:  # noqa: E125
     """
     Return list of file path contained reddit output date.
@@ -61,7 +65,7 @@ def get_all_file_for_reddit(
 
 
 def get_all_file_for_twitter(
-    all_data_path: List[pathlib.Path],
+        all_data_path: List[pathlib.Path],
 ) -> Optional[List[pathlib.Path]]:  # noqa: E125
     """
     Return list of file path contained twitter output data.
@@ -81,10 +85,10 @@ def get_all_file_for_twitter(
 
 
 def get_all_file_for_crawler(
-    all_data_path: List[pathlib.Path],
-    crawler: str,
-    aspect: List[str],
-    search_types: List[str],
+        all_data_path: List[pathlib.Path],
+        crawler: str,
+        aspect: List[str],
+        search_types: List[str],
 ) -> Optional[List[pathlib.Path]]:
     """Skipped summary.
 
@@ -117,7 +121,7 @@ def get_all_file_for_crawler(
                 # if x in ['comment']:
                 if x in search_types and y in aspect:
                     for (dirpath1, _dirnames1, filenames1) in os.walk(
-                        pathlib.Path(dirpath),
+                            pathlib.Path(dirpath),
                     ):
                         for file in filenames1:
                             all_reddit_files.append(
@@ -135,7 +139,7 @@ def get_all_file_for_crawler(
                 # if x in ['comment']:
                 if x in search_types and y in aspect:
                     for (dirpath1, _dirnames1, filenames1) in os.walk(
-                        pathlib.Path(dirpath),
+                            pathlib.Path(dirpath),
                     ):
                         for file in filenames1:
                             all_twitter_files.append(
@@ -184,6 +188,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
     :rtype: Dict
     :return: dict of all returned data from specified crawler's database
     """
+
     # all_data_from_a_file
     def _get_all_data_from_a_file(file):
         import pickle
@@ -228,8 +233,10 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
             )
 
     def _convert_to_output_format() -> Dict:
+        selected_data_keys: List[str] = []
+        selected_metadata_keys: List[str]
         if crawler == "reddit":
-            selected_data_keys: List[str] = [
+            selected_data_keys = [
                 "body",
                 "title",
                 "created_utc",
@@ -240,7 +247,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                 "parent_id",
                 "sentiment",
             ]
-            selected_metadata_keys: List[str] = ["frequency", "aspect"]
+            selected_metadata_keys = ["frequency", "aspect"]
 
             all_reddit_retrieved_data = []
 
@@ -269,7 +276,7 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
                 #     {**each_reddit_data, **each_reddit_metadata,
                 #      **j['data']})
 
-            def check_if_aspect_has_no_duplicate(tmp: Dict) -> Dict:
+            def check_if_aspect_has_no_duplicate(tmp: List[Dict]) -> Dict:
                 tmp_df = pd.DataFrame(tmp)
                 tmp_dict: Dict = {}
                 tmp_dict = tmp_df.drop_duplicates(
@@ -279,14 +286,15 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
 
             # all_reddit_retrieved_data_df = pd.DataFrame(
             #     all_reddit_retrieved_data)
-            all_reddit_retrieved_data: Dict = check_if_aspect_has_no_duplicate(
+            all_reddit_retrieved_data_: Dict = \
+                check_if_aspect_has_no_duplicate(
                 all_reddit_retrieved_data,
             )
             # all_reddit_retrieved_data = all_reddit_retrieved_data_df.to_dict(
             #     'record')
 
             return_data_no_dubplicate: Dict = {
-                "reddit": all_reddit_retrieved_data,
+                "reddit": all_reddit_retrieved_data_,
             }
 
             return return_data_no_dubplicate
@@ -295,8 +303,8 @@ def get_all_data_from_files(all_files: Dict, crawler: str) -> Dict:
             #     all_reddit_retrieved_data)
 
         elif crawler == "twitter":
-            selected_data_keys: List[str] = ["text", "id", "date", "sentiment"]
-            selected_metadata_keys: List[str] = ["frequency", "aspect"]
+            selected_data_keys = ["text", "id", "date", "sentiment"]
+            selected_metadata_keys = ["frequency", "aspect"]
 
             all_twitter_retrieved_data = []
 
@@ -346,6 +354,9 @@ class SocialMediaDatabase:
 
     def __init__(self, dbfile_path: str, data: Dict):
         """Skipped summary."""
+
+        self.count = 0
+        dbfile_path = dbfile_path.replace('\\', '/')
         dbfile = dbfile_path.split("/")[-1]
 
         self.conn = self._create_connection(dbfile_path)
@@ -400,7 +411,7 @@ class SocialMediaDatabase:
         except ValueError as e:
             raise ValueError(e)
 
-    def _create_table_reddit(self) -> str:
+    def _create_table_reddit(self) -> None:
         """Run query to create reddit schema in twitter database."""
         query = """ CREATE TABLE IF NOT EXISTS reddit (
                                     crawler STRING
@@ -463,7 +474,7 @@ class SocialMediaDatabase:
             new_val = []
             new_col = []
             for i, (v, k) in enumerate(
-                zip(value_to_be_inserted, columns_to_be_inserted),
+                    zip(value_to_be_inserted, columns_to_be_inserted),
             ):
                 if not isinstance(v, str):
                     if v is None:
@@ -523,7 +534,7 @@ class SocialMediaDatabase:
             new_val = []
             new_col = []
             for i, (v, k) in enumerate(
-                zip(value_to_be_inserted, columns_to_be_inserted),
+                    zip(value_to_be_inserted, columns_to_be_inserted),
             ):
                 if not isinstance(v, str):
                     if v is None:
@@ -555,11 +566,11 @@ class SocialMediaDatabase:
             columns_to_be_inserted,
         ) = _convert_value_to_correct_type()
 
-        columns_to_be_inserted = ",".join(columns_to_be_inserted)
-        value_to_be_inserted = ",".join(value_to_be_inserted)
+        columns_to_be_inserted_ = ",".join(columns_to_be_inserted)
+        value_to_be_inserted_ = ",".join(value_to_be_inserted)
 
-        return f"""INSERT INTO twitter ({columns_to_be_inserted})
-        VALUES({value_to_be_inserted});
+        return f"""INSERT INTO twitter ({columns_to_be_inserted_})
+        VALUES({value_to_be_inserted_});
         """
 
     def _insert_reddit_data_to_database(self, reddit_query: str):
@@ -596,9 +607,24 @@ class SocialMediaDatabase:
             # all_reddit_retrieved_data.append(
             #     {**each_reddit_data, **each_reddit_metadata, **j['data']})
             kwargs = {**kwargs, "crawler": crawler}
-            self._insert_reddit_data_to_database(
-                self._reddit_insert_query(**kwargs),
-            )
+            try:
+                self._insert_reddit_data_to_database(
+                    self._reddit_insert_query(**kwargs),
+                )
+            except sqlite3.OperationalError as e:
+                # BUG: value of setinment in 1 of all the data response
+                #  is `nan`. Not sure why that is the case, but as of now,
+                #  there is only 1 data response. so I just skipped them
+                self.count += 1
+                PROGRAM_LOGGER.error(
+                    f'There is error occurs in '
+                    f'{self._insert_data_to_database.__name__}'
+                    f' : error is `{e}`')
+                PROGRAM_LOGGER.error(f"There are {self.count} faulty data "
+                                     f"response.")
+            except Exception as e:
+                raise e
+
         elif crawler == "twitter":
             self._insert_twitter_data_to_database(
                 self._twitter_insert_query(**kwargs),
@@ -624,9 +650,9 @@ if __name__ == "__main__":
     all_data = get_all_data_from_files(all_files, "reddit")
     SocialMediaDatabase(REDDIT_DATABASE, all_data)
 
-    all_data_path = get_all_file_path()
-    all_files = get_all_file(all_data_path, "twitter")
-    all_data = get_all_data_from_files(all_files, "twitter")
-    SocialMediaDatabase(TWITTER_DATABASE, all_data)
+    # all_data_path = get_all_file_path()
+    # all_files = get_all_file(all_data_path, "twitter")
+    # all_data = get_all_data_from_files(all_files, "twitter")
+    # SocialMediaDatabase(TWITTER_DATABASE, all_data)
 
-    print("complete running..")
+    PROGRAM_LOGGER.info("complete running..")

@@ -9,11 +9,11 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Union
+from typing import cast
 
 import click
 
-from Tests.check_conditions import _check_reddit_tags_value
-from Tests.check_conditions import check_running_conditions
+from global_parameters import ALL_CRALWERS
 from global_parameters import ALL_REDDIT_COLLECTION_NAMES
 from global_parameters import ALL_REDDIT_RESPOND_TYPES
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
@@ -44,6 +44,10 @@ from src.Utilities import SubredditCollection
 from src.Utilities import Tags
 from src.Utilities import TwitterCollection
 from src.Utilities import my_timer
+from src.Utilities.CheckConditions.check_conditions import \
+    check_crawler_tags_value
+from src.Utilities.CheckConditions.check_conditions import \
+    check_running_conditions
 from src.Utilities.ClickLibrary.custom_commands import (
     enfore_dependency_between_date_cli_args,
 )
@@ -51,7 +55,6 @@ from src.Utilities.Logging import MyLogger
 
 LOGGER = MyLogger()
 PROGRAM_LOGGER = LOGGER.program_logger
-DEBUG_LOGGER = LOGGER.debug_logger
 
 
 def _get_running_conditions(
@@ -59,7 +62,7 @@ def _get_running_conditions(
         collection_name: str,
         search_type: str,
         respond_type: str,
-        tag: Optional[str],
+        tag: str,
         max_after: int,
 ) -> RunningConditions:
     """
@@ -102,7 +105,6 @@ def _get_running_conditions(
     return running_conditions_dict
 
 
-# FIXME: this function should be removed and simply replaced by
 def run_crawler(
         run_crawler_func: Callable,
         crawler_condition: Union[
@@ -112,7 +114,7 @@ def run_crawler(
     return run_crawler_func(crawler_condition)
 
 
-def get_keywords_collections(crawler_type: str) -> Tuple[str]:
+def get_keywords_collections(crawler_type: str) -> List[List[str]]:
     """Skipped summary.
 
     Return aspects and list of keywords (query) for each aspects with respect
@@ -196,7 +198,7 @@ def get_keywords_collections(crawler_type: str) -> Tuple[str]:
             "wyoming",
         ]
 
-        return (
+        return [
             General,
             Country,
             Region,
@@ -206,7 +208,7 @@ def get_keywords_collections(crawler_type: str) -> Tuple[str]:
             work_from_home_keywords,
             covid_keywords,
             reopen_keywords,
-        )  # noqa: E127
+        ]  # noqa: E127
 
     elif crawler_type == "twitter":
         # coronavirus, #coronavirusoutbreak, #coronavirusPandemic, #covid19,
@@ -221,14 +223,16 @@ def get_keywords_collections(crawler_type: str) -> Tuple[str]:
             "#ihavecorona",
         ]
 
-        return (
+        return [
             hashtags,
             covid_keywords,
             work_from_home_keywords,
             social_distance_keywords,
             lockdown_keywords,
             reopen_keywords,
-        )  # noqa: E127
+        ]  # noqa: E127
+    else:
+        raise ValueError(f"Currently only support {ALL_CRALWERS}")
 
 
 def twitter_crawler_condition(
@@ -295,7 +299,11 @@ def twitter_crawler_condition(
 
     if collection_name == "twitter_tweet":
         twitter_crawler_collection: TwitterCollection = {
-            "collection": {"aspect": tag, "query": tag_words},
+            "collection":
+                {
+                    "aspect": cast(str, tag),
+                    "query": tag_words
+                },
             "name": collection_name,
         }
 
@@ -399,10 +407,21 @@ def reddit_crawler_condition(
 
     crawler_condition: RedditCrawlerCondition
 
+    # crawler_class: Type[RedditCrawler]
+    # collection_class: SubredditCollection
+    # initial_interval: int
+    # request_timestamp: datetime.datetime
+    # respond_type: str
+    # search_type: str
+    # frequency: str
+    # verbose: bool
+    # aspect: Optional[str]
+    # max_after: int
+
     def _get_crawler_condition(
             subreddit_collection_class: SubredditCollection,
     ) -> RedditCrawlerCondition:
-        crawler_condition = {
+        crawler_condition: RedditCrawlerCondition = {
             "crawler_class": RedditCrawler,
             "collection_class": subreddit_collection_class,
             "initial_interval": initial_day_interval,  # 100
@@ -455,7 +474,7 @@ def reddit_crawler_condition(
     elif collection_name == "corona_states_with_tag":
 
         assert tag is not None
-        tag_words = tag
+        tag_words = cast(List[str], tag)
         # tag_words = tag_words if tag is not None else ALL_KEYWORDS
 
         subreddit_collection_class = {
@@ -515,6 +534,19 @@ def select_crawler_condition(
         )
 
 
+def _get_tag_value(tags: Tags,
+                   all_crawler_tags: List[str],
+                   ) -> Tags:
+    if tags is not None:
+        check_crawler_tags_value(tags, all_crawler_tags)
+        if len(tags) == 1 and tags[0] == "all":
+            return all_crawler_tags
+        else:
+            return tags
+    else:
+        return [tags]
+
+
 def get_reddit_running_conditions(
         before_date: datetime.datetime,
         after_date: datetime.datetime,
@@ -541,19 +573,24 @@ def get_reddit_running_conditions(
         reddit crawler
     """
 
-    def _get_tag_value(tags: Tags) -> Tags:
-        if tags is not None:
-            _check_reddit_tags_value(tags)
-
-            if len(tags) == 1 and tags[0] == "all":
-                return ALL_REDDIT_TAGS
-            else:
-                return tags
-        else:
-            return [tags]
+    # def _get_tag_value(tags: Tags) -> Tags:
+    #     if tags is not None:
+    #         check_reddit_tags_value(tags)
+    #
+    #         if len(tags) == 1 and tags[0] == "all":
+    #             return ALL_REDDIT_TAGS
+    #         else:
+    #             return tags
+    #     else:
+    #         return [tags]
 
     # --conditions
-    tags = _get_tag_value(tags)
+    # tags = _get_tag_value(tags)
+
+    tags = _get_tag_value(
+        tags,
+        ALL_REDDIT_TAGS,
+    )
 
     all_collection_name = (
         ALL_REDDIT_COLLECTION_NAMES
@@ -567,14 +604,14 @@ def get_reddit_running_conditions(
 
     for max_after, tag, collection_name, search_type, respond_type in product(
             [max_after],
-            tags,
+            cast(List[str], tags),
             all_collection_name,
             all_search_type,
             all_respond_type,
     ):
         tag_str = tag
 
-        condition_keys: List[Optional[str], int] = [
+        condition_keys: List[Union[Optional[str], int]] = [
             max_after,
             tag_str,
             collection_name,
@@ -628,17 +665,20 @@ def get_twitter_running_conditions(
         twitter crawler
     """
 
-    def _get_tag_value(tags: Tags) -> Tags:
-        if tags is not None:
-            _check_reddit_tags_value(tags)
-            if len(tags) == 1 and tags[0] == "all":
-                return ALL_TWITTER_TAGS
-            else:
-                return tags
-        else:
-            return [tags]
+    # def _get_tag_value(tags: Tags) -> Tags:
+    #     if tags is not None:
+    #         check_crawler_tags_value(tags)
+    #         if len(tags) == 1 and tags[0] == "all":
+    #             return ALL_TWITTER_TAGS
+    #         else:
+    #             return tags
+    #     else:
+    #         return [tags]
 
-    tags = _get_tag_value(tags)
+    tags = _get_tag_value(
+        tags,
+        ALL_TWITTER_TAGS,
+    )
 
     all_collection_name = ALL_TWITTER_COLLETION_NAMES
     all_search_type = ALL_TWITTER_SEARCH_TYPES
@@ -648,14 +688,14 @@ def get_twitter_running_conditions(
 
     for max_after, tag, collection_name, search_type, respond_type in product(
             [max_after],
-            tags,
+            cast(List[str], tags),
             all_collection_name,
             all_search_type,
             all_respond_type,
     ):
         tag_str = tag
 
-        condition_keys: List[Optional[str], int] = [
+        condition_keys: List[Union[Optional[str], int]] = [
             max_after,
             tag_str,
             collection_name,
@@ -815,40 +855,39 @@ def run_all_reddit_conditions(
             ) = run_crawler(run_crawler_func, crawler_condition)
             total_returned_data += total_returned_data_per_run
             total_missing_data += total_missing_data_per_run
-            print()
         except Exception as e:
             if str(e) not in KNOWN_ERROR:
-                print(str(e))
+                PROGRAM_LOGGER.error(str(e))
                 raise NotImplementedError(
                     f"unknown error occur in {run_all_conditions.__name__} ",
                 )
 
             else:
-                print(f"!!!! The following error occurs = {str(e)} !!!")
+                PROGRAM_LOGGER.error(
+                    f"!!!! The following error occurs = {str(e)} !!!")
                 condition_keys_str: str = ",".join(map(str, condition_keys))
 
                 if i == len(all_running_conditions) - 1:
-                    print(
+                    PROGRAM_LOGGER.error(
                         f" || skip the the current condition "
                         f"= ({condition_keys_str}) "
                         f"==> No more running conditions to run "
-                        f"==> exiting {run_all_conditions.__name__}()",
+                        f"==> exiting {run_all_conditions.__name__}() \n",
                     )
-                    print()
                 else:
-                    next_condition_keys = all_running_conditions[i + 1][0]
+                    next_condition_keys \
+                        = all_running_conditions[i + 1][0]  # type: ignore
                     next_condition_keys_str: str = ",".join(
                         map(str, next_condition_keys),
                     )
-                    print(
+                    PROGRAM_LOGGER.error(
                         f" || skip the the current condition = "
                         f"({condition_keys_str}) "
                         f"==> start next running condition "
-                        f"= {next_condition_keys_str} ",
+                        f"= {next_condition_keys_str} \n",
                     )
-                    print()
     #
-    print(
+    PROGRAM_LOGGER.info(
         f" || total_returned_data = {total_returned_data} "
         f"|| total_missing_data = {total_missing_data}",
     )
@@ -911,13 +950,16 @@ def run_all_twitter_conditions(
         )
 
         try:
-
-            total_returned_data_per_run = run_crawler(
+            (
+                total_returned_data_per_run,
+                total_missing_data_per_run
+            ) = run_crawler(
                 run_crawler_func,
                 crawler_condition,
             )
+
             total_returned_data += total_returned_data_per_run
-            print()
+
         except Exception as e:
             if str(e) not in KNOWN_ERROR:
 
@@ -926,12 +968,13 @@ def run_all_twitter_conditions(
                 )
 
             else:
-                print(
+                PROGRAM_LOGGER.error(
                     f"!!!! The following error occurs = {str(e)} in "
                     f"{run_all_conditions.__name__}!!!",
-                )
+            )
 
-    print(f" || total_returned_data = {total_returned_data}")
+
+    PROGRAM_LOGGER.info(f" || total_returned_data = {total_returned_data}")
 
 
 def run_all_conditions(
@@ -966,7 +1009,14 @@ def run_all_conditions(
 
     """
     timestamp = datetime.datetime.now()
-    print(f">>> start running all {crawler_type} conditions... <<<")
+    # print(f">>> start running all {crawler_type} conditions... <<<")
+    PROGRAM_LOGGER.info(
+        f">>> start running all {crawler_type} conditions... <<<")
+    PROGRAM_LOGGER.info(
+        f"next things ")
+    PROGRAM_LOGGER.info(
+        f"the next things")
+
     if crawler_type == "reddit":
         run_all_reddit_conditions(
             before_date,
@@ -1007,10 +1057,13 @@ def run_all_conditions(
 
 
 @click.command(cls=enfore_dependency_between_date_cli_args())
-@click.option("--select_all_conditions/--select_one_condition", default=False)
+@click.argument("tags", nargs=-1, type=click.STRING)
+@click.option(
+    "--select_all_conditions/--select_one_condition",
+    default=False)
 # NOTE: default is set to tuple() when multiple=True, regardless of default
 #   set to None
-@click.option("--tags", multiple=True, type=click.STRING)
+# @click.option("--tags", multiple=True, type=click.STRING)
 @click.option("--max_after", type=int)
 @click.option(
     "--before_date",
@@ -1022,14 +1075,16 @@ def run_all_conditions(
     "--crawler_type",
     type=click.Choice(["reddit", "twitter", "all"]),
 )
+@click.option("--dry_run/--no_dry_run", default=False)
 @my_timer
 def main(
-        select_all_conditions: bool,
         tags: Tags,
+        select_all_conditions: bool,
         max_after: int,
         crawler_type: str,
         before_date: datetime.datetime,
         after_date: datetime.datetime,
+        dry_run: bool,
 ) -> None:
     """Prepare input parameters and run all of specified crawler conditions.
 
@@ -1055,19 +1110,41 @@ def main(
     :param crawler_type: crawler name
 
     """
-    tags = None if len(tags) == 0 else tags
-    if select_all_conditions:
-        run_all_conditions(
-            before_date,
-            after_date,
-            max_after,
-            tags,
-            crawler_type,
+    if dry_run:
+        click.echo(
+            f"We have passed in the following input args\n"
+            f"\tselect_all_conditions = {select_all_conditions}\n"
+            f"\ttags = {tags}\n"
+            f"\tmax_after = {max_after}\n"
+            f"\tcrawler_type = {crawler_type}\n"
+            f"\tbefore_date = {before_date}\n"
+            f"\tafter_date = {after_date}"
         )
     else:
-        raise NotImplementedError
 
-    print(">>>> exit program <<<<<")
+        if isinstance(tags, tuple):
+            tags = list(tags)
+        elif isinstance(tags, List):
+            pass
+        else:
+            raise TypeError
+
+        assert len(tags) > 0
+
+
+        # tags = None if len(tags) == 0 else tags
+        if select_all_conditions:
+            run_all_conditions(
+                before_date,
+                after_date,
+                max_after,
+                tags,
+                crawler_type,
+            )
+        else:
+            raise NotImplementedError
+
+    PROGRAM_LOGGER.info(">>>> exit program <<<<<")
 
 
 if __name__ == "__main__":

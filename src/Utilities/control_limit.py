@@ -4,6 +4,12 @@
 
 import time
 
+from src.Utilities.Logging import MyLogger
+
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
+DEBUG_LOGGER = LOGGER.debug_logger
+
 
 class ControlLimit:
     """Skipped."""
@@ -14,9 +20,9 @@ class ControlLimit:
         self.end = None
 
     def control_pushshift_limit(
-        self,
-        total_number_of_request: int,
-        max_per_min: int = 150,
+            self,
+            total_number_of_request: int,
+            max_per_min: int = 150,
     ) -> None:
         """Skipped."""
         self.end = time.time()
@@ -25,18 +31,18 @@ class ControlLimit:
         number_of_request_per_second = total_number_of_request / interval
         if number_of_request_per_second > max_per_second:
             sleep_length = (
-                int(
-                    (number_of_request_per_second - max_per_second)
-                    / max_per_second,
-                )
-                + 1
+                    int(
+                        (number_of_request_per_second - max_per_second)
+                        / max_per_second,
+                    )
+                    + 1
             )
-            print(
+            PROGRAM_LOGGER.info(
                 "request per second is too high "
                 f"|| paused request for {sleep_length} second",
             )
             time.sleep(sleep_length)
         else:
-            print(
+            PROGRAM_LOGGER.info(
                 "request per second is acceptable || no need to pause request",
             )

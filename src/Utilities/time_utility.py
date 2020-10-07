@@ -47,15 +47,15 @@ def _convert_timedelta_to_specified_frequency(
         raise NotImplementedError
 
 
-def group_respond_data_per_day(respond_data: Dict, date: datetime.datetime):
-    pass
+# def group_respond_data_per_day(respond_data: Dict, date: datetime.datetime):
+#     pass
 
 
 if __name__ == "__main__":
-    date = 1601195531
-    respond_date = {
-        "aggs": None,
-        "data": []
-    }
-    group_respond_data_per_day(5, date)
     pass
+#     date = 1601195531
+#     respond_date: Dict = {
+#         "aggs": None,
+#         "data": []
+#     }
+#     group_respond_data_per_day(5, date)

@@ -8,9 +8,10 @@ import os
 import pathlib
 import pickle
 from typing import Any
+from typing import cast
 
 
-def get_full_datetime_str(timestamp: datetime.datetime) -> str:
+def get_full_datetime_str(timestamp: datetime.date) -> str:
     """Convert timestamp into an acceptable format.
 
     :type timestamp: datetime.datetime
@@ -19,31 +20,31 @@ def get_full_datetime_str(timestamp: datetime.datetime) -> str:
     :rtype: str
     :return: date string with replaced 'space', ':', '.' as '-'
     """
-    timestamp = str(timestamp).replace(" ", "-")
-    timestamp = str(timestamp).replace(":", "-")
-    timestamp = str(timestamp).replace(".", "-")
+    timestamp_: str = str(timestamp).replace(" ", "-")
+    timestamp_ = str(timestamp_).replace(":", "-")
+    timestamp_ = str(timestamp_).replace(".", "-")
 
-    return timestamp
+    return timestamp_
 
 
 def get_saved_file_path(
-    time_since: datetime.datetime,
-    date_since: datetime.datetime,
+    time_since: datetime.date,
+    date_since: datetime.date,
     path_name: pathlib.Path,
 ) -> pathlib.Path:
     """Get saved file path.
 
-    :param time_since:
-    :param date_since:
+    :param time_since_:
+    :param date_since_:
     :param path_name:
     :return:
     """
-    time_since = get_full_datetime_str(time_since)
-    date_since = get_full_datetime_str(date_since)
+    time_since_: str  = get_full_datetime_str(time_since)
+    date_since_: str  = get_full_datetime_str(date_since)
 
     saved_file = (
         pathlib.Path(path_name)
-        / f"after_date={time_since}_to_{date_since}.pickle"
+        / f"after_date={time_since_}_to_{date_since_}.pickle"
     )
     return saved_file
 

@@ -7,6 +7,8 @@ import os
 import pathlib
 from typing import List
 
+from typing_extensions import Literal
+
 PROJECT_NAME = "FAUCOVID19"
 BASE_DIR: pathlib.Path = pathlib.Path(
     os.path.dirname(os.path.realpath(__file__))
@@ -37,7 +39,7 @@ ERROR_2 = "Expecting value: line 1 column 1 (char 0)"
 KNOWN_ERROR = [ERROR_1, ERROR_2]
 
 # Crawlers
-ALL_CRALWERS = ["twitter", "reddit"]
+ALL_CRALWERS: List[Literal["twitter", "reddit"]] = ["twitter", "reddit"]
 
 # Aspects keywords
 # ALL_ASPECTS = [
@@ -80,8 +82,10 @@ ALL_KEYWORDS = (
         + COVID_KEYWORDS
 )
 
+# crawlers' responds metadata
+METADATA_KEYS = ['data', 'aggs', 'metadata']
 # Reddit
-ALL_REDDIT_TAGS: List = ALL_ASPECTS
+ALL_REDDIT_TAGS: List[str] = ALL_ASPECTS
 
 ALL_REDDIT_COLLECTION_NAMES: List = [
     "corona_general",
@@ -146,7 +150,8 @@ ALL_TWITTER_KEYWORDS: List = [
 ]
 
 # ALL_TWITTER_HASHTAGS = None
-ALL_TWITTER_TAGS: List = ALL_ASPECTS
+ALL_TWITTER_TAGS: List[str] = ALL_ASPECTS
+
 
 # NOTE: geo realted data is not implemented yet.
 # ALL_TWITTER_COLLETION_NAMES: List = ['twitter_tweet', 'twitter_geo']
@@ -169,3 +174,5 @@ ALL_TWITTER_FEILDS = [
 
 # Frequency
 ALL_FREQUENCY = ["day"]
+
+

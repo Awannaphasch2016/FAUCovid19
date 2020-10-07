@@ -3,7 +3,6 @@
 
 """contains decorator related to time."""
 
-
 def my_timer(orig_func):
     """Log how long orig_func takes to run."""
     import time

@@ -6,15 +6,16 @@ import datetime
 import json
 import time
 from typing import Dict
+from typing import Final
 from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Type
+from typing import cast
 
 import GetOldTweets3 as got  # type: ignore
+from tqdm import tqdm  # type: ignore
 from typing_extensions import TypedDict
-
-from Tests.check_conditions import check_response_keys
 
 # from Utilities.ensure_type import ensure_json
 from global_parameters import BASE_DIR
@@ -25,7 +26,6 @@ from src.Utilities import Query
 from src.Utilities import Tags
 from src.Utilities import TwitterAggs
 from src.Utilities import TwitterCollection
-from src.Utilities import TwitterData
 from src.Utilities import TwitterMetadata
 from src.Utilities import TwitterRunningConstraints
 from src.Utilities import Url
@@ -35,22 +35,24 @@ from src.Utilities import get_saved_file_path
 from src.Utilities import my_timer
 from src.Utilities import only_download_full_day
 from src.Utilities import save_to_file
+from src.Utilities.CheckConditions.check_conditions import check_response_keys
+from src.Utilities.Logging import MyLogger
 
-
-# Json = Dict
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
 
 
 class TwitterCrawler(object):
     """This class will prepare and crawl data from twitter."""
 
     def __init__(
-        self,
-        twitter_collection_class: TwitterCollection,
-        respond_type: str,
-        search_type: str,
-        frequency: Frequency,
-        #  aspect: str,
-        verbose: int,
+            self,
+            twitter_collection_class: TwitterCollection,
+            respond_type: str,
+            search_type: str,
+            frequency: Frequency,
+            #  aspect: str,
+            verbose: int,
     ):
         """Skipped."""
         self.crawler_name = "TwitterCrawler"
@@ -64,12 +66,12 @@ class TwitterCrawler(object):
         )
 
     def prepare_crawler(
-        self,
-        twitter_collection_class: TwitterCollection,
-        respond_type: str,
-        search_type: str,
-        frequency: Frequency,
-        # aspect: str,
+            self,
+            twitter_collection_class: TwitterCollection,
+            respond_type: str,
+            search_type: str,
+            frequency: Frequency,
+            # aspect: str,
     ):
         """Prepare common data that will be used among class's methods.
 
@@ -99,17 +101,17 @@ class TwitterCrawler(object):
         self.query = self.collection["query"]
 
     def get_geo_data(
-        self,
-        running_constraints: TwitterRunningConstraints,
-        res: Json,
+            self,
+            running_constraints: TwitterRunningConstraints,
+            res: Json,
     ) -> Dict:
         """Skipped."""
         raise NotImplementedError
 
     def get_tweet_data(
-        self,
-        running_constraints: TwitterRunningConstraints,
-        res: Json,
+            self,
+            running_constraints: TwitterRunningConstraints,
+            res: Json,
     ) -> Json:
         """Get tweet data.
 
@@ -138,9 +140,9 @@ class TwitterCrawler(object):
         return res
 
     def apply_crawling_strategy(
-        self,
-        running_constraints: TwitterRunningConstraints,
-        res: Optional[Json],
+            self,
+            running_constraints: TwitterRunningConstraints,
+            res: Json,
     ) -> Dict:
         """Skipped summary.
 
@@ -176,8 +178,8 @@ class TwitterCrawler(object):
     @my_timer
     # @signature_logger
     def get_responds(
-        self,
-        running_constraints: TwitterRunningConstraints,
+            self,
+            running_constraints: TwitterRunningConstraints,
     ) -> Optional[Json]:
         """Skipped summary.
 
@@ -216,20 +218,20 @@ class TwitterCrawler(object):
         if size is None:
             tweetCriteria = (
                 got.manager.TweetCriteria()
-                .setQuerySearch(query)
-                .setSince(date_since)
-                .setUntil(date_until)
-                .setLang("en")
+                    .setQuerySearch(query)
+                    .setSince(date_since)
+                    .setUntil(date_until)
+                    .setLang("en")
             )
 
         else:
             tweetCriteria = (
                 got.manager.TweetCriteria()
-                .setQuerySearch(query)
-                .setSince(date_since)
-                .setUntil(date_until)
-                .setMaxTweets(size)
-                .setLang("en")
+                    .setQuerySearch(query)
+                    .setSince(date_since)
+                    .setUntil(date_until)
+                    .setMaxTweets(size)
+                    .setLang("en")
             )
 
         s = time.time()
@@ -242,9 +244,9 @@ class TwitterCrawler(object):
         return res
 
     def run(
-        self,
-        before: Optional[int],
-        after: int,
+            self,
+            before: Optional[int],
+            after: int,
     ) -> Optional[Tuple[Dict[str, Dict], int]]:
         """Skipped summary.
 
@@ -268,11 +270,11 @@ class TwitterCrawler(object):
             responds_content = self.run_once(before, after)
 
             if responds_content is None:
-                return
+                return None
             else:
                 total_result = responds_content["metadata"]["total_results"]
                 if self.verbose:
-                    print(
+                    PROGRAM_LOGGER.info(
                         f" {self.current_condition_str} "
                         f"|| total_results = {total_result}",
                     )
@@ -291,7 +293,7 @@ class TwitterCrawler(object):
 
         except Exception as e:
             if str(e) != "responds are empty":
-                print(e)
+                PROGRAM_LOGGER.info(e)
                 raise NotImplementedError(
                     f"exception occur in {self.run.__name__}",
                 )
@@ -320,7 +322,7 @@ class TwitterCrawler(object):
 
         res = self.get_responds(running_constraints)
         if res is None:
-            return
+            return None
         else:
             reponds_content = self.apply_crawling_strategy(
                 running_constraints,
@@ -339,9 +341,9 @@ class TwitterCrawler(object):
         pass
 
     def prepare_running_crawler(
-        self,
-        before: int,
-        after: int,
+            self,
+            before: int,
+            after: int,
     ) -> TwitterRunningConstraints:
         """Prepare dict constraints for crawling data for each iteration.
 
@@ -370,12 +372,12 @@ class TwitterCrawler(object):
 
         if self.frequency == "day":
             self.time_since = (
-                datetime.datetime.now().date()  # noqa: E126
-                - datetime.timedelta(days=after)
+                    datetime.datetime.now().date()  # noqa: E126
+                    - datetime.timedelta(days=after)
             )
             self.time_until = (
-                datetime.datetime.now().date()  # noqa: E126
-                - datetime.timedelta(days=before)
+                    datetime.datetime.now().date()  # noqa: E126
+                    - datetime.timedelta(days=before)
             )
         else:
             raise NotImplementedError
@@ -392,7 +394,7 @@ class TwitterCrawler(object):
         )
 
         if self.verbose:
-            print(f" {self.current_condition_str}")
+            PROGRAM_LOGGER.info(f" {self.current_condition_str}")
 
         return running_constraints
 
@@ -413,14 +415,15 @@ class TwitterCrawlerCondition(TypedDict):
     request_timestamp: datetime.datetime
     respond_type: str
     search_type: str
-    frequency: str
-    aspect: Optional[str]
+    frequency: Frequency
+    # aspect: Optional[str]
     max_after: int
+    tag: List[str]
 
 
 def run_twitter_crawler(
-    twitter_crawler_condition: TwitterCrawlerCondition,
-) -> List[int]:
+        twitter_crawler_condition: TwitterCrawlerCondition,
+) -> int:
     """
 
     Prepare varaibles, check conditions, run crawlers and saved respond data.
@@ -434,9 +437,9 @@ def run_twitter_crawler(
     """
 
     def print_twitter_cralwer_condition():
-        print("twitter_crawler_condition = ")
+        PROGRAM_LOGGER.info("twitter_crawler_condition = ")
         for i, j in twitter_crawler_condition.items():
-            print(f"    {i}: {j}")
+            PROGRAM_LOGGER.info(f"    {i}: {j}")
 
     print_twitter_cralwer_condition()
 
@@ -450,7 +453,7 @@ def run_twitter_crawler(
     # request_timestamp = twitter_crawler_condition['request_timestamp']
     respond_type = twitter_crawler_condition["respond_type"]
     search_type = twitter_crawler_condition["search_type"]
-    frequency = twitter_crawler_condition["frequency"]
+    frequency: Frequency = twitter_crawler_condition["frequency"]
     max_after = twitter_crawler_condition["max_after"]
     # aspect = twitter_crawler_condition['collection_class']['collection'][
     #     'aspect']
@@ -476,7 +479,7 @@ def run_twitter_crawler(
             verbose=True,
         )
 
-        print(f" || day interval = {interval}")
+        PROGRAM_LOGGER.info(f" || day interval = {interval}")
 
         try:
 
@@ -493,23 +496,23 @@ def run_twitter_crawler(
                     twitter_crawler.time_since,
                     twitter_crawler.time_until,
                     path_name=BASE_DIR / f"Outputs/Data"  # noqa: E251
-                    f"/{twitter_crawler.crawler_name}"
-                    f"/{twitter_crawler.aspect}"
-                    f"/{twitter_crawler.collection_name}"
-                    f"/{twitter_crawler.search_type}"
-                    f"/{twitter_crawler.respond_type}",
+                                         f"/{twitter_crawler.crawler_name}"
+                                         f"/{twitter_crawler.aspect}"
+                                         f"/{twitter_crawler.collection_name}"
+                                         f"/{twitter_crawler.search_type}"
+                                         f"/{twitter_crawler.respond_type}",
                 )
                 save_to_file(responds_content, saved_file)
-                print("")
+                PROGRAM_LOGGER.info("")
         except Exception as e:
             if str(e) != "responds are empty":
-                print(e)
+                PROGRAM_LOGGER.error(e)
                 raise NotImplementedError(
                     f"unknown error occur in {run_twitter_crawler.__name__} ",
                 )
-    print(f"|| total returned data = {total_returned_data}")
-    print(" >>>> finished crawling data <<<<")
-    print()
+    PROGRAM_LOGGER.info(f"|| total returned data = {total_returned_data}")
+    PROGRAM_LOGGER.info(" >>>> finished crawling data <<<<\n")
+
     return total_returned_data
 
 
@@ -518,7 +521,7 @@ def run_twitter_crawler(
 # =====================
 
 
-class doc_count_per_frequency(TypedDict):
+class doc_count_per_frequency(TypedDict, total=False):
     """Skipped."""
 
     doc_count: int
@@ -534,9 +537,9 @@ class aggs_dict(TypedDict):
 # FIXME: this function should be method of TwitterCrawler class.
 #     (Is there any reason not to?)
 def _get_twitter_data(
-    res: Json,
-    running_constraints: TwitterRunningConstraints,
-    crawler_instance: TwitterCrawler,
+        res: Json,
+        running_constraints: TwitterRunningConstraints,
+        crawler_instance: TwitterCrawler,
 ) -> Json:
     """
     Prepare 'data' key in respond data to have an appropriate format.
@@ -558,16 +561,17 @@ def _get_twitter_data(
     def convert_tweets_to_dict(x):
         return vars(x)
 
-    def ensure_json(res: Dict) -> Json:
+    def ensure_json(res: Json) -> Json:
         r = json.dumps(res)
         loaded_r = json.loads(r)
         return loaded_r
 
-    res_data: List[TwitterData]
-    res_data = []
+    res_data: List[Json] = []
     for tweet in res:
         res = convert_tweets_to_dict(tweet)
-        res["date"] = ensure_epoch_datetime(res["date"])
+        res["date"] = ensure_epoch_datetime(
+            cast(datetime.datetime, res["date"])
+        )
         res = ensure_json(res)
         res_data.append(res)
 
@@ -601,8 +605,6 @@ def _get_twitter_data(
 
     check_responses_consistency(res_data_dict)
 
-    from tqdm import tqdm
-
     all_data_with_sentiment = []
     for data in tqdm(res_data_dict["data"]):
         data_with_sentiment = data
@@ -618,9 +620,9 @@ def _get_twitter_data(
 # FIXME: this function should be method of TwitterCrawler class. (Is there
 #    any reason not to?)
 def _get_twitter_aggs(
-    res: Json,
-    running_constraints: TwitterRunningConstraints,
-    crawler_instance: TwitterCrawler,
+        res: Json,
+        running_constraints: TwitterRunningConstraints,
+        crawler_instance: TwitterCrawler,
 ) -> Json:
     """Prepare 'aggs' key in respond data to have an appropriate format.
 
@@ -644,7 +646,7 @@ def _get_twitter_aggs(
         def aggs_doc_count_per_frequency() -> doc_count_per_frequency:
             x: Dict[str, int]
             counter = {}
-            doc_count_dict = {}
+            doc_count_dict: doc_count_per_frequency = {}
 
             def get_date_datetime_from_epoch_datetime(x):
                 return datetime.datetime.fromtimestamp(x).date()
@@ -687,11 +689,11 @@ def _get_twitter_aggs(
 # FIXME: this function should be method of TwitterCrawler class. (Is there
 #   any reason not to?)
 def _get_twitter_metadata(
-    res: Json,
-    running_constraints: TwitterRunningConstraints,
-    crawler_instance: TwitterCrawler,
-    aspect: Tags,
-    query: Query,
+        res: Json,  # VALIDATE: what is the correct type
+        running_constraints: TwitterRunningConstraints,
+        crawler_instance: TwitterCrawler,
+        aspect: Tags,
+        query: Query,
 ) -> Json:
     """Prepare 'metadata' key in respond data to have an appropriate format.
 
@@ -739,19 +741,20 @@ def _get_twitter_metadata(
         "query",
     ]
 
+
     def create_metadata() -> TwitterMetadata:
-        x = {
+        x: TwitterMetadata = {
             "running_constraints": running_constraints,
             "after": after,
             "before": before,
             "aggs": list(res["aggs"].keys()),
             "execution_time_milliseconds": crawler_instance.total_request_time_in_milli_second,
             "frequency": crawler_instance.frequency,
-            "size": size,
+            "size": cast(int,size),
             "sort": sort,
             "search_words": crawler_instance.collection,
             "total_results": len(res["data"]),
-            "fields": fields,
+            "fields": cast(List[str], fields),
             "aspect": aspect,
             "query": query,
             "results_returned": None,
@@ -764,7 +767,7 @@ def _get_twitter_metadata(
         return x
 
     if "metadata" not in res:
-        aggs_dict: TwitterAggs
+        # aggs_dict: TwitterAggs
         res["metadata"] = create_metadata()
 
         return res
@@ -776,3 +779,6 @@ def _get_twitter_metadata(
         for i in keys:
             if i not in res["metadata"]:
                 raise ValueError("")
+
+        raise NotImplementedError('This line should be reached. I just '
+                                  'added to by pass mypy false positive.')

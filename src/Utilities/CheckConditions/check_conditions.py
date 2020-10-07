@@ -2,46 +2,55 @@
 
 """check code in """
 
-from collections.abc import Iterable
 from typing import List
+from typing import Type
 from typing import Union
-
 # from Sources.Preparations.Data.RedditCrawler import RedditCrawler
 # from Sources.Preparations.Data.TwitterCrawler import TwitterCrawler
-from src.Utilities import Json
-from src.Utilities import RedditRunningConstraints
-from src.Utilities import RunningConditions
+from typing import cast
 
-# from Utilities.declared_typing import RunningConstraints
-from src.Utilities import Tags
-from src.Utilities import TwitterRunningConstraints
+from global_parameters import ALL_CRALWERS
 from global_parameters import ALL_REDDIT_COLLECTION_NAMES
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_REDDIT_TAGS
 from global_parameters import ALL_TWITTER_COLLETION_NAMES
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
+from global_parameters import ALL_TWITTER_TAGS
+from src.Utilities import Json
+from src.Utilities import RedditResponse
+from src.Utilities import RedditRunningConstraints
+from src.Utilities import RunningConditions
+# from Utilities.declared_typing import RunningConstraints
+from src.Utilities import Tags
+from src.Utilities import TwitterRunningConstraints
 
 
-def _check_reddit_tags_value(tags: Tags) -> None:
-    if isinstance(tags, Iterable):
+def check_crawler_tags_value(
+        tags: Tags,
+        all_crawler_tags: List[str],
+) -> None:
+    # VALIDATE: I have to test that tags is LIST or Tuple type not Iterable
+    # if isinstance(tags, Iterable):
+    if isinstance(tags, list):
 
         if len(tags) == 1 and tags[0] == "all":
             return
-        elif len(tags) == 1 and tags[0] is None:
-            return
+        # elif len(tags) == 1 and tags[0] is None:
+        elif len(tags) == 1 and tags[0] is None:  # NOTE: no longer support
+            raise ValueError('No longer support tags = None.')
 
         for i in tags:
-            if i not in ALL_REDDIT_TAGS or i in "all":
+            if i not in all_crawler_tags or i in "all":
                 all_tags = ",".join(tags)
                 raise ValueError(
                     f"one of the following tags are not supported {all_tags}"
                 )
         return
     else:
-        raise NotImplementedError("")
+        raise ValueError("tags must have Tuple[str]")
 
 
-def check_response_keys(res: Json):
+def check_response_keys(res: Union[RedditResponse, Json]):
     assert "metadata" in res, ""
     assert "data" in res, ""
     assert "aggs" in res, ""
@@ -57,36 +66,39 @@ def check_running_conditions(running_conditions: RunningConditions) -> None:
         if i not in running_conditions:
             raise ValueError("")
 
-        if running_conditions["crawler_option"] not in ["reddit", "twitter"]:
+        if running_conditions["crawler_option"] not in ALL_CRALWERS:
             raise ValueError("crawler_option are not availble")
         else:
 
-            if running_conditions["crawler_option"] == "reddit":
+            # crawler_option = reddit
+            if running_conditions["crawler_option"] == ALL_CRALWERS[1]:
                 if (
-                    running_conditions["collection_name"]
-                    not in ALL_REDDIT_COLLECTION_NAMES
+                        running_conditions["collection_name"]
+                        not in ALL_REDDIT_COLLECTION_NAMES
                 ):
                     raise ValueError("collection_name are not availble")
 
                 if (
-                    running_conditions["search_type"]
-                    not in ALL_REDDIT_SEARCH_TYPES
+                        running_conditions["search_type"]
+                        not in ALL_REDDIT_SEARCH_TYPES
                 ):
                     raise ValueError("search_type are not abailble")
 
                 if running_conditions["respond_type"] not in ["data"]:
                     raise ValueError("respond_type are not availble")
 
-            elif running_conditions["crawler_option"] == "twitter":
+
+            # crawler_option = twitter
+            elif running_conditions["crawler_option"] == ALL_CRALWERS[0]:
                 if (
-                    running_conditions["collection_name"]
-                    not in ALL_TWITTER_COLLETION_NAMES
+                        running_conditions["collection_name"]
+                        not in ALL_TWITTER_COLLETION_NAMES
                 ):
                     raise ValueError("collection_name are not availble")
 
                 if (
-                    running_conditions["search_type"]
-                    not in ALL_TWITTER_SEARCH_TYPES
+                        running_conditions["search_type"]
+                        not in ALL_TWITTER_SEARCH_TYPES
                 ):
                     raise ValueError("search_type are not abailble")
 
@@ -97,21 +109,21 @@ def check_running_conditions(running_conditions: RunningConditions) -> None:
                     raise ValueError("respond_type are not availble")
 
 
-def _check_that_all_selected_fields_are_returns(
-    running_constraints: Union[
-        RedditRunningConstraints, TwitterRunningConstraints
-    ],
-    res: Json,
-    ind: int,
-    current_condition_str: str,
-    verbose: int,
+def check_that_all_selected_fields_are_returns(
+        running_constraints: Union[
+            RedditRunningConstraints, TwitterRunningConstraints
+        ],
+        res: Json,
+        ind: int,
+        current_condition_str: str,
+        verbose: int,
 ):
     # before = running_constraints['before']
     # after = running_constraints['after']
-    fields = running_constraints["fields"]
+    fields = cast(str, running_constraints["fields"])
 
     current_condition_str_with_ind = (
-        current_condition_str + f" || ind = {ind} ||"
+            current_condition_str + f" || ind = {ind} ||"
     )
     res_data = res["data"][ind]
     len_res_data_key = len(list(res_data.keys()))
@@ -136,9 +148,9 @@ def _check_that_all_selected_fields_are_returns(
             )
 
         def add_missing_keys(
-            incorrect_fields: List,
-            all_missing_keys: str,
-            incorrect_fields_error: str,
+                incorrect_fields: List,
+                all_missing_keys: str,
+                incorrect_fields_error: str,
         ):
             if verbose:
                 print(

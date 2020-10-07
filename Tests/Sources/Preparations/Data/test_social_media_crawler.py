@@ -1,6 +1,3 @@
-import pytest
-
-
 # @pytest.mark.unit
 # def test_main(input1, input2):
 #     def _check_main_arg_condition(_max_after,
@@ -8,35 +5,40 @@ import pytest
 #                                   _after_date):
 #         pass
 #     _check_main_arg_condition(max_after, before_date, after_date)
-
-
+import pytest
 from click.testing import CliRunner
 
-
-import click
-import sys
-
-
-@click.command()
-@click.option("--opt")
-@click.argument("arg")
-def hello(arg, opt):
-    """A Simple program"""
-    click.echo("Opt: {}  Arg: {}".format(opt, arg))
+from src.Sources.Preparations.Data.social_media_crawler import \
+    main
+from src.Sources.Preparations.Data.social_media_crawler import \
+    run_all_conditions
 
 
-def test_hello_world():
 
+@pytest.mark.test_social_media_crawler
+def test_social_media_crawler_input_arguments():
+    # NOTE: This is a happy path testing serve no purpose but to show that
+    #  testing  click is possible.
     runner = CliRunner()
-    result = runner.invoke(hello, ["--opt", "An Option", "An Arg"])
+    result = runner.invoke(main,
+                           [
+                               "all",  # this is value of argument `tag`
+                               "--select_all_conditions",
+                               "--max_after",
+                               "15",
+                               "--crawler_type",
+                               "reddit",
+                               "--dry_run"
+                           ]
+                           )
     assert result.exit_code == 0
-    assert result.output == "Opt: An Option  Arg: An Arg\n"
+    assert result.output == (
+        f"We have passed in the following input args\n"
+        f"\tselect_all_conditions = True\n"
+        f"\ttags = ('all',)\n"
+        f"\tmax_after = 15\n"
+        f"\tcrawler_type = reddit\n"
+        f"\tbefore_date = None\n"
+        f"\tafter_date = None\n"
+    )
 
-    result = runner.invoke(hello, ["An Arg"])
-    assert result.exit_code == 0
-    assert result.output == "Opt: None  Arg: An Arg\n"
-
-
-if __name__ == "__main__":
-    # hello(sys.argv[1:])
-    test_hello_world()

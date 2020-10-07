@@ -2,11 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """Contains custom click.command."""
+from typing import Any
+from typing import Callable
+from typing import TypeVar
+from typing import cast
 
-import click
+import click  # type: ignore
 
+T = TypeVar('T', bound=Callable[..., Any])
 
-def enfore_dependency_between_date_cli_args() -> click.Command:
+def enfore_dependency_between_date_cli_args() -> T:
     """
 
     Enforce dependency between max_after and after_date&before_date.
@@ -31,4 +36,4 @@ def enfore_dependency_between_date_cli_args() -> click.Command:
                 )
             super(CommandOptionRequiredClass, self).invoke(ctx)
 
-    return CommandOptionRequiredClass
+    return cast(T, CommandOptionRequiredClass)

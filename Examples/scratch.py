@@ -1,50 +1,70 @@
-import logging
+# def example(n):
+#     i = 1
+#     while i <= n:
+#         yield i
+#         i += 1
 #
-# log = logging.getLogger('hello')
-# log.setLevel(logging.DEBUG)
+# print("hello")
 #
-# # # Create a file handler to store the logs
-# file_handler = logging.FileHandler('test.log')
-# log.addHandler(file_handler)
+# print("goodbye")
 #
-# # # Send output to terminal
-# stream_handler = logging.StreamHandler()
-# log.addHandler(stream_handler)
-#
-# log.debug('debug log')
+# if __name__ == '__main__':
+#     for i in [1,2,3,4]:
+#         example(i)
 
-# logging.basicConfig()
-# log = logging.getLogger('hello')
-# log.setLevel(logging.DEBUG)
-# print(log.getEffectiveLevel())
-# log.debug('debug log')
-# log.critical('critical log')
+def example(n):
+    i = 1
+    while i <= n:
+        yield [1,2,3]
+        i += 1
 
-import logging
-import sys
+def test(x):
+    # con = []
+    # for i in example(x):
+    #     yield i
+    return example(x)
 
-# Initialize Logger and set Level to DEBUG
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-# logger.setLevel(logging.CRITICAL)
+def test1(x):
+    # con = []
+    # for i in example(x):
+    #     yield i
+    return test(x)
 
-# Initialize a Handler to print to stdout
-handler = logging.StreamHandler(sys.stdout)
+def test2(x):
+    # con = []
+    # for i in example(x):
+    #     yield i
+    return test1(x)
+def test3(x):
+    # con = []
+    # for i in example(x):
+    #     yield i
+    return test2(x)
+def test4(x):
+    # con = []
+    # for i in example(x):
+    #     yield i
+    return test3(x)
+def test5(x):
+    # con = []
+    # for i in example(x):
+    #     yield i
+    # print(next(test4(x)))
+    # exit()
+    return test4(x)
 
-# Format Handler output
-logFormatter = logging.Formatter(
-    "%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p"
-)
-handler.setFormatter(logFormatter)
+print("hello")
 
-# Set Handler Level to DEBUG
-handler.setLevel(logging.DEBUG)
-logger.addHandler(handler)
+# print(example(3)) # can't debug
+# print(test(3))
+print(next(test5(3)))
+# print([i for i in test5(3)])
+# print([i for i in test2(3)])
+# print([i for i in test(3)])
+# x = [i for i in test(3)]
+# print([i for i in example(3)])
 
+# for n in example(3):
+#     print(n)
 
-logger.debug('Debug Info')
-logger.info('info Info')
-logger.critical('critical Info')
-print(logger.level)
-# >>> 09/19/2020 09:01:00 PM Debug Info
-
+print("goodbye")

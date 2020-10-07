@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Declare all types that will be used in different modules."""
-
+import datetime
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
+from typing import Union
 
 from typing_extensions import Literal
 from typing_extensions import TypedDict
@@ -16,8 +18,9 @@ Url = str
 RedditAggs = Dict
 TwitterAggs = Dict
 
-Json = Dict
-Tags = Optional[Tuple[str]]
+Json = Dict[str, Any]
+# Tags = Optional[Union[List[str], str, List[None]]]
+Tags = Union[List[str], str]
 Query = Optional[List[str]]
 Crawler_type = str
 
@@ -26,7 +29,8 @@ Crawler_type = str
 # y = json.loads(r)
 # Json = type(y)
 
-Frequency = Literal["day"]
+# Frequency = Literal["day"]
+Frequency = Literal["day", "hour", "minute", "second"]
 Sort = Literal["asc", "desc"]
 epoch_datetime = int
 
@@ -34,7 +38,7 @@ epoch_datetime = int
 class TwitterCollectionkey(TypedDict):
     """Skipped."""
 
-    aspect: List[str]
+    aspect: Tags
     query: Query
 
 
@@ -50,6 +54,7 @@ class SubredditCollectionKey(TypedDict):
 
     subreddit: List[str]
     query: Query
+    aspect: Any  # VALIDATE: what is the type of aspect?
 
 
 class SubredditCollection(TypedDict):
@@ -68,7 +73,7 @@ class RedditRunningConstraints(TypedDict):
     size: int
     metadata: str
     sort: Sort
-    # fields: str
+    fields: Optional[str]
 
 
 class TwitterRunningConstraints(TypedDict):
@@ -80,7 +85,7 @@ class TwitterRunningConstraints(TypedDict):
     size: Optional[int]  # None = all
     metadata: str
     sort: Sort
-    fields: Optional[str]  # None = all
+    fields: Optional[Union[str, List[str]]]  # None = all
 
 
 class RunningConditions(TypedDict):
@@ -91,14 +96,20 @@ class RunningConditions(TypedDict):
     respond_type: str
     search_type: str
     sort: Sort
-    tag: Optional[str]
+    # tag: Optional[str]
+    tag: Tags
     max_after: int
 
 
-RunningConditionsKeyValue = List[Tuple[List[str], RunningConditions]]
+RunningConditionsKeyValue = List[
+    Tuple[
+        List[Union[str, None, int]],
+        RunningConditions,
+    ],
+]
 
 
-class RedditMetadata(TypedDict):
+class RedditMetadata(TypedDict, total=False):
     """Skipped."""
 
     running_constraints: RedditRunningConstraints
@@ -115,24 +126,31 @@ class RedditMetadata(TypedDict):
     subreddit: List[str]
     total_results: int
     fields: List[str]
+    aspect: Tags
+    query: Query
 
 
 class TwitterMetadata(TypedDict):
     """Skipped."""
 
     running_constraints: TwitterRunningConstraints
-    after: str
-    aggs: List[str]
-    before: Optional[str]
+    # after: str  # VALIDATE: is after str or int?
+    after: int  # VALIDATE: is after str or int?
+    aggs: Any  # VALIDATE: what is the correct type?
+    before: Optional[int]
     execution_time_milliseconds: float
     frequency: Frequency
-    results_returned: int
+    results_returned: Optional[int]  # VALIDATE: what is the correct type?
     size: int
     sort: Sort
-    timed_out: bool
-    search_words: List[str]
+    timed_out: Optional[bool]  # VALIDATE: what is the correct type?
+    # search_words: List[str]
+    search_words: TwitterCollectionkey  # VALIDATE: what is the correct type?
     total_results: int
     fields: List[str]
+    aspect: Tags
+    query: Query
+    index: Any
 
 
 class RedditData(TypedDict):
@@ -194,6 +212,7 @@ class TwitterData(TypedDict):
     geo: str
     full_link: Url  # to full_linh
     retrieved_on: epoch_datetime
+    date: Union[datetime.datetime, epoch_datetime]
 
     # Added later
     sentiment_polarity: float
@@ -203,7 +222,8 @@ class RedditResponse(TypedDict):
     """Skipped."""
 
     data: List[RedditData]
-    metadata: List[RedditMetadata]
+    # metadata: List[RedditMetadata]
+    metadata: RedditMetadata  # VALIDATE: what is the correct type?
     aggs: List[RedditAggs]
 
 

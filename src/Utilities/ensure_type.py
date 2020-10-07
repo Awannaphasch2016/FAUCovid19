@@ -5,18 +5,28 @@
 import datetime
 from typing import Optional
 from typing import Tuple
+from typing import Union
+
+from typing_extensions import NoReturn
 
 from src.Utilities import Frequency
+from src.Utilities import MyLogger
 from src.Utilities.time_utility import (
     _convert_timedelta_to_specified_frequency,
 )
 
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
+DEBUG_LOGGER = LOGGER.debug_logger
+
+
 
 def only_download_full_day(
-    frequency: str,
-    before: Optional[int],
-    after: int,
-) -> Optional[Tuple[str, str]]:
+        frequency: str,
+        before: Optional[int],
+        after: int,
+# ) -> Union[NoReturn, None]:
+) -> None:
     """Ensure that full day of data can be collected before download.
 
     :type frequency:
@@ -33,10 +43,10 @@ def only_download_full_day(
     """
     if frequency == "day":
 
-        def is_full_day(before: int, after: int):
+        def is_full_day(before: Optional[int], after: int) -> bool:
             """Exclude data from today aka datetime.datetime.now().day ."""
             if before == 0:
-                print(
+                PROGRAM_LOGGER.info(
                     "!!! exclude data from today aka "
                     "datetime.datetime.now().day => to make sure that only "
                     "full day of data will be loaded !!!",

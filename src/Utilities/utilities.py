@@ -5,7 +5,7 @@
 from typing import Optional
 from typing import Union
 
-from flask_api import status
+from flask_api import status  # type: ignore
 
 from src.Utilities.DeclaredTyping.other_typing import ErrorWithMssage
 

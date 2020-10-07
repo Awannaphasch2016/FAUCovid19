@@ -13,3 +13,4 @@ from .ensure_type import ensure_epoch_datetime
 from .ensure_type import only_download_full_day
 from .saver import *
 from .time_utility import *
+from .Logging import MyLogger

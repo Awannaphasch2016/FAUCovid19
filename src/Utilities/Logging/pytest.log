@@ -1,8 +1,0 @@
-2020-09-29 01:15:09 [CRITICAL] critical Info (logger.py:58)
-2020-09-29 01:15:09 [   DEBUG] Debug Info (logger.py:68)
-2020-09-29 01:15:09 [    INFO] info Info (logger.py:69)
-2020-09-29 01:15:09 [CRITICAL] critical Info (logger.py:70)
-2020-09-29 01:15:09 [   DEBUG] Attempting to acquire lock 3015632045056 on C:\Users\Anak\AppData\Local\Temp\tmp5nm24zlj.lock (filelock.py:270)
-2020-09-29 01:15:09 [    INFO] Lock 3015632045056 acquired on C:\Users\Anak\AppData\Local\Temp\tmp5nm24zlj.lock (filelock.py:274)
-2020-09-29 01:15:09 [   DEBUG] Attempting to release lock 3015632045056 on C:\Users\Anak\AppData\Local\Temp\tmp5nm24zlj.lock (filelock.py:315)
-2020-09-29 01:15:09 [    INFO] Lock 3015632045056 released on C:\Users\Anak\AppData\Local\Temp\tmp5nm24zlj.lock (filelock.py:318)

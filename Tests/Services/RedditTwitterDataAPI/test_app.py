@@ -16,7 +16,7 @@ from global_parameters import ALL_TWITTER_FEILDS
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
 
 
-@pytest.mark.test_parameter
+@pytest.mark.test_request_parameter
 @pytest.mark.parametrize(
     "request_value,responds_value",
     {
@@ -34,7 +34,7 @@ def test_crawler_parameters(
     )
 
 
-@pytest.mark.test_parameter
+@pytest.mark.test_request_parameter
 @pytest.mark.parametrize(
     "request_value,responds_value",
     [
@@ -50,7 +50,7 @@ def test_aspects_parameter(client, request_value, responds_value):
            == x.json["all_retrived_data"][0]['aspect']
 
 
-@pytest.mark.test_parameter
+@pytest.mark.test_request_parameter
 @pytest.mark.parametrize(
     "request_value,responds_value",
     [
@@ -64,7 +64,7 @@ def test_fields_parameter_faile(client,
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
 
 
-@pytest.mark.test_parameter
+@pytest.mark.test_request_parameter
 @pytest.mark.parametrize(
     "request_value,responds_value",
     [
@@ -78,7 +78,7 @@ def test_search_types_parameter_fail(client,
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
 
 
-@pytest.mark.test_parameter
+@pytest.mark.test_request_parameter
 @pytest.mark.parametrize(
     "request_value,responds_value",
     [
@@ -93,30 +93,30 @@ def test_frequency_parameter(client,
     assert x.json["all_retrived_data"][0]['frequency'] == f'{responds_value}'
 
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_since_parameter(client):
     x = client.get("/?since=2020-8-20")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
 
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_since_parameter_faile(client):
     y = client.get("/?since=20-8-20")
     assert status.HTTP_400_BAD_REQUEST == int(y.status.split(" ")[0])
 
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_until_parameter(client):
     x = client.get("/?until=2020-8-20")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
 
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_until_parameter_fail(client):
     y = client.get("/?until=20-8-20")
     assert status.HTTP_400_BAD_REQUEST == int(y.status.split(" ")[0])
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_total_count_parameter(client):
     x = client.get("/?crawlers=reddit&total_count=true")
     y = client.get("/?crawlers=reddit")
@@ -125,13 +125,13 @@ def test_total_count_parameter(client):
     assert x.json["total_count"] == len(y.json['all_retrived_data'])
 
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_top_amount_parameter(client):
     x = client.get("/?top_amount=100")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
     assert x.json["top_retrieved"] == len(x.json['all_retrived_data'])
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_limit_and_page_parameters(client):
     limit = 100
 
@@ -149,7 +149,7 @@ def test_limit_and_page_parameters(client):
     assert num_y_data == z.json['total_count']
 
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_page_parameter_fail(client):
     x = client.get("/?pages=100")
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
@@ -158,7 +158,7 @@ def test_page_parameter_fail(client):
     x = client.get("/?total_count=true&pages=100")
     assert status.HTTP_400_BAD_REQUEST == int(x.status.split(" ")[0])
 
-@pytest.mark.test_paramete
+@pytest.mark.test_request_parameter
 def test_limit_parameter(client):
     x = client.get("/?crawlers=reddit&limit=100")
     assert status.HTTP_200_OK == int(x.status.split(" ")[0])
@@ -173,7 +173,7 @@ def test_limit_parameter(client):
 
 
 
-@pytest.mark.test_all_value
+@pytest.mark.test_requests_with_all_value
 class TestAllValue:
 
     def test_crawler_parameters_with_all_value(self,
@@ -208,7 +208,7 @@ class TestAllValue:
         assert status.HTTP_400_BAD_REQUEST == int(y.status.split(" ")[0])
 
 
-@pytest.mark.test_reddit_parameters
+@pytest.mark.test_requests_with_reddit_parameters
 class TestRedditParameters():
 
     @pytest.mark.parametrize(
@@ -252,7 +252,7 @@ class TestRedditParameters():
                == x.json["all_retrived_data"][0]['search_type']
 
 
-@pytest.mark.test_twitter_parameters
+@pytest.mark.test_requests_with_twitter_parameters
 class TestTwitterParamter:
 
     @pytest.mark.parametrize(

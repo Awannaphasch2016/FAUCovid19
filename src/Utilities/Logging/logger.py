@@ -17,16 +17,23 @@ class MyLogger:
         self.program_logger = self._init_program_logger()
         self.debug_logger = self._init_debug_logger()
 
+    def _logging_log_multiple_time(self, logger):
+        if len(logger.handlers) >= 1:
+            logger.handlers = [logger.handlers[0]]
+        return logger
+
     def _init_program_logger(self):
         self._program_logger_name = 'program logger'
         logger = logging.getLogger(self._program_logger_name)
         logger.setLevel(logging.INFO)
-
         handler = logging.StreamHandler(sys.stdout)
 
         handler.setFormatter(self._logFormatter)
 
         logger.addHandler(handler)
+
+        logger = self._logging_log_multiple_time(logger)
+
         return logger
 
     def _init_debug_logger(self):
@@ -39,14 +46,16 @@ class MyLogger:
         handler.setFormatter(self._logFormatter)
 
         # Set Handler Level to DEBUG
-        handler.setLevel(logging.DEBUG)
         logger.addHandler(handler)
+
+        logger = self._logging_log_multiple_time(logger)
 
         return logger
 
+
 if __name__ == '__main__':
     my_logger = MyLogger()
-    logger = my_logger.program_logger
+    logger = my_logger.debug_logger
     logger.debug('Debug')
     logger.info('Info')
     logger.critical('Critical')

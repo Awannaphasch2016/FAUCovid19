@@ -12,10 +12,11 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Union
+from typing import cast
 
 from flask import Flask
 from flask import request
-from flask_restful import Api
+from flask_restful import Api  # type: ignore
 
 from global_parameters import ALL_ASPECTS
 # Create an instance of Flask
@@ -28,8 +29,12 @@ from global_parameters import ALL_TWITTER_FEILDS
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
 from global_parameters import REDDIT_DATABASE
 from global_parameters import TWITTER_DATABASE
+from src.Utilities import MyLogger
 from src.Utilities.Errors.http_errors import https_400_bad_request_template
 from src.Utilities.utilities import return_error_template
+
+LOGGER = MyLogger()
+PROGRAM_LOGGER = LOGGER.program_logger
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -256,7 +261,7 @@ class APIManager:
          :return: returned all stored cralwed data of selected crawlers
 
         """
-        returned_data = {}
+        returned_data: Dict[str, List[Dict]] = {}
 
         def _get_query(crawler, all_crawler_search_type, all_crawler_fields):
             after_date_query = ""
@@ -328,8 +333,6 @@ class APIManager:
             else:
                 frequency_query = ""
 
-            print()
-
             return (
                     f"select {fields_query} from {crawler} where "
                     + " and ".join(all_query)
@@ -367,7 +370,7 @@ class APIManager:
             return all_crawler_data_from_database
 
         for asp, crawler in product(self.aspects, self.crawlers):
-            all_reddit_data = _get_all_retrived_data(asp, crawler)
+            all_reddit_data: List[Dict] = _get_all_retrived_data(asp, crawler)
 
             returned_data.setdefault(self.RETURNED_DATA_KEY, []).extend(
                 all_reddit_data,
@@ -403,10 +406,8 @@ class APIManager:
         ), path_to_database
 
         # print(path_to_database)
-        print(path_to_database)
         conn = sqlite3.connect(path_to_database)
         cur = conn.cursor()
-        print(query)
         cur.execute(query)
 
         def unroll_all_variable_in_fields():
@@ -463,7 +464,7 @@ def is_date(date_string):
     try:
         return True
     except ValueError as e:
-        print(
+        PROGRAM_LOGGER.error(
             "This is the incorrect date string format. It should be %Y-%m-%d "
             "for example 12-25-2018",
         )
@@ -661,8 +662,18 @@ def index():
             _top_amount: Optional[str],
             _page: Optional[str],
             _limit: Optional[str],
-    ) -> Tuple[Union[List, str], Optional[str], Optional[str],
-               str, str, str, str, bool, int, str, str]:
+    ) -> Tuple[Union[List, str],
+               Optional[str],
+               Optional[str],
+               Union[str, List[str]],
+               Any,
+               Optional[Union[str, List[str]]],
+               Union[str, List[str]],
+               bool,
+               Optional[int],
+               str,
+               Union[str,int]]:
+    # ) -> Any:
         if _aspects is None:
             _aspects = "all"
 
@@ -680,11 +691,14 @@ def index():
             else:
                 raise ValueError()
 
+        _top_amount_: Optional[int]
         if _top_amount is not None:
             if isinstance(_top_amount, str):
-                _top_amount = int(_top_amount)
+                _top_amount_ = int(_top_amount)
             else:
                 raise ValueError()
+        else:
+            _top_amount_ = None
 
         if _page is not None:
             if isinstance(_page, str):
@@ -694,13 +708,17 @@ def index():
         else:
             _page = 'all'
 
+        _limit_: Union[int,str]
         if _limit is not None:
             if isinstance(_limit, str):
-                _limit = int(_limit)
+                _limit_ = int(_limit)
             else:
                 raise ValueError()
         else:
-            _limit = 'inf'
+            _limit_ = 'inf'
+
+        # Tuple[Union[List, str], Optional[str], Optional[str],
+        # str, str, str, str, bool, int, int, str]:
 
         return (
             _crawlers,
@@ -711,10 +729,23 @@ def index():
             _fields,
             _frequency,
             _total_count,
-            _top_amount,
-            _limit,
+            _top_amount_,
             _page,
+            _limit_,
         )
+        # return (
+        #     _crawlers,
+        #     _since,
+        #     _until,
+        #     _aspects,
+        #     _search_types,
+        #     _fields,
+        #     _frequency,
+        #     _total_count,
+        #     _top_amount_,
+        #     _limit_,
+        #     _page,
+        # )
 
     (
         crawlers,
@@ -726,8 +757,8 @@ def index():
         frequency,
         total_count,
         top_amount,
+        pages,
         limit,
-        pages
     ) = _convert_none_value_to_appropriate_value(crawlers,
                                                  since,
                                                  until,
@@ -801,7 +832,7 @@ def index():
             _crawlers: Optional[Union[str, List[str]]],
             _search_types: Optional[Union[str, List[str]]],
             _fields: Optional[Union[str, List[str]]],
-    ) -> Union[List[Union[str, None]], Tuple[str, int]]:
+    ) -> Union[List[Union[str, List[str],None]], Tuple[str, int]]:
 
         if _crawlers != "all" and _crawlers is not None:
             (
@@ -868,11 +899,11 @@ def index():
 
     def _check_param_types(
             _crawlers: Optional[Union[str, List[str]]],
-            _since: Optional[Union[str, List[str]]],
-            _until: Optional[Union[str, List[str]]],
-            _aspects: Optional[Union[str, List[str]]],
+            _since: List[Optional[str]],
+            _until: List[Optional[str]],
+            _aspects: List[str],
             _search_types: Any,
-            _frequency: Optional[Union[str, List[str]]],
+            _frequency: List[str],
             _total_count: bool,
             _top_amount: int,
             _page: str,
@@ -898,6 +929,7 @@ def index():
         else:
             since_datetime = _since
 
+        _until =  cast(List[str], _until)
         if _until[0] is not None or _until[0] == "all":
             # assert is_date(_until[0]) and len(_until) == 1
 
