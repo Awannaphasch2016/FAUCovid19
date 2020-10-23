@@ -9,6 +9,8 @@ from typing import List
 
 from typing_extensions import Literal
 
+from src.Utilities import Sort
+
 PROJECT_NAME = "FAUCOVID19"
 BASE_DIR: pathlib.Path = pathlib.Path(
     os.path.dirname(os.path.realpath(__file__))
@@ -38,8 +40,11 @@ ERROR_1 = "responds are empty"
 ERROR_2 = "Expecting value: line 1 column 1 (char 0)"
 KNOWN_ERROR = [ERROR_1, ERROR_2]
 
+# BUG: for some reason CRAWLERS_NAME cannot be imported
+CRAWLERS_NAME = Literal["twitter", "reddit"]
+
 # Crawlers
-ALL_CRALWERS: List[Literal["twitter", "reddit"]] = ["twitter", "reddit"]
+ALL_CRAWLERS: List[Literal["twitter", "reddit"]] = ["twitter", "reddit"]
 
 # Aspects keywords
 # ALL_ASPECTS = [
@@ -66,11 +71,12 @@ LOCKDOWN_KEYWORDS = [
 REOPEN_KEYWORDS = ["reopening", "reopen"]
 SOCIAL_DISTANCE_KEYWORDS = ["social distance", "social distancing"]
 WORK_FROM_HOME_KEYWORDS = [
+    "distance learning",
+    "work online",
     "remote work",
     "workonline",
-    "work online" "remote work",
-    "online learning",
-    "distance learning",
+    # "remote work",
+    # "online learning",
 ]
 COVID_KEYWORDS = ["covid", "corona", "sarscov2"]
 
@@ -83,7 +89,7 @@ ALL_KEYWORDS = (
 )
 
 # crawlers' responds metadata
-METADATA_KEYS = ['data', 'aggs', 'metadata']
+RESPONSE_KEYS = ['data', 'aggs', 'metadata']
 # Reddit
 ALL_REDDIT_TAGS: List[str] = ALL_ASPECTS
 
@@ -113,6 +119,7 @@ ALL_REDDIT_FEILDS = [
 
 # MAX_AFTER = 166
 MAX_AFTER = 30
+REDDIT_SORT: List[Sort] = ['asc','desc']
 
 # NOTE: Twitter
 #  >Keywords are copied from 'Tracking Social Media Discourse About the COVID-19 Pandemic: Developement of a Public Coronavirus  Twitter Dataset' github:
@@ -175,4 +182,5 @@ ALL_TWITTER_FEILDS = [
 # Frequency
 ALL_FREQUENCY = ["day"]
 
-
+if __name__ == '__main__':
+    print('hi')

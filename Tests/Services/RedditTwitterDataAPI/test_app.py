@@ -8,7 +8,7 @@ import pytest
 from flask_api import status
 
 from global_parameters import ALL_ASPECTS
-from global_parameters import ALL_CRALWERS
+from global_parameters import ALL_CRAWLERS
 from global_parameters import ALL_FREQUENCY
 from global_parameters import ALL_REDDIT_FEILDS
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
@@ -20,7 +20,7 @@ from global_parameters import ALL_TWITTER_SEARCH_TYPES
 @pytest.mark.parametrize(
     "request_value,responds_value",
     {
-        (i, i) for i in ALL_CRALWERS
+        (i, i) for i in ALL_CRAWLERS
     },
 )
 def test_crawler_parameters(
@@ -178,7 +178,7 @@ class TestAllValue:
 
     def test_crawler_parameters_with_all_value(self,
                                                client):
-        concat_crawlers = ','.join(ALL_CRALWERS)
+        concat_crawlers = ','.join(ALL_CRAWLERS)
         x = client.get("/?crawlers=all")
         y = client.get(f"/?crawlers={concat_crawlers}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
@@ -221,7 +221,7 @@ class TestRedditParameters():
                                      client,
                                      request_value,
                                      responds_value):
-        x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&fields={request_value}")
+        x = client.get(f"/?crawlers={ALL_CRAWLERS[1]}&fields={request_value}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
         assert f'{responds_value}' \
                == list(x.json["all_retrived_data"][0].keys())[0]
@@ -230,7 +230,7 @@ class TestRedditParameters():
                                                          client):
         sampled_fields = random.sample(ALL_REDDIT_FEILDS, 5)
         sampled_fields = ','.join(sampled_fields)
-        x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&fields={sampled_fields}")
+        x = client.get(f"/?crawlers={ALL_CRAWLERS[1]}&fields={sampled_fields}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
         assert f'{sampled_fields}' \
                == ','.join(list(x.json["all_retrived_data"][0].keys()))
@@ -245,7 +245,7 @@ class TestRedditParameters():
                                            client,
                                            request_value,
                                            responds_value):
-        x = client.get(f"/?crawlers={ALL_CRALWERS[1]}&search_types"
+        x = client.get(f"/?crawlers={ALL_CRAWLERS[1]}&search_types"
                        f"={request_value}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
         assert f'{responds_value}' \
@@ -265,7 +265,7 @@ class TestTwitterParamter:
                                       client,
                                       request_value,
                                       responds_value):
-        x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&fields={request_value}")
+        x = client.get(f"/?crawlers={ALL_CRAWLERS[0]}&fields={request_value}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
         assert f'{responds_value}' \
                == list(x.json["all_retrived_data"][0].keys())[0]
@@ -274,7 +274,7 @@ class TestTwitterParamter:
                                                           client):
         sampled_fields = random.sample(ALL_TWITTER_FEILDS, 5)
         sampled_fields = ','.join(sampled_fields)
-        x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&fields={sampled_fields}")
+        x = client.get(f"/?crawlers={ALL_CRAWLERS[0]}&fields={sampled_fields}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
         assert f'{sampled_fields}' \
                == ','.join(list(x.json["all_retrived_data"][0].keys()))
@@ -289,7 +289,7 @@ class TestTwitterParamter:
                                             client,
                                             request_value,
                                             responds_value):
-        x = client.get(f"/?crawlers={ALL_CRALWERS[0]}&search_types"
+        x = client.get(f"/?crawlers={ALL_CRAWLERS[0]}&search_types"
                        f"={request_value}")
         assert status.HTTP_200_OK == int(x.status.split(" ")[0])
         assert f'{responds_value}' \

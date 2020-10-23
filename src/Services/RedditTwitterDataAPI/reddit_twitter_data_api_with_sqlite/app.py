@@ -21,7 +21,7 @@ from flask_restful import Api  # type: ignore
 from global_parameters import ALL_ASPECTS
 # Create an instance of Flask
 # from global_parameters import BASE_DIR
-from global_parameters import ALL_CRALWERS
+from global_parameters import ALL_CRAWLERS
 from global_parameters import ALL_FREQUENCY
 from global_parameters import ALL_REDDIT_FEILDS
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
@@ -47,13 +47,13 @@ api = Api(app)
 DATEFORMAT = "%Y-%m-%d"
 
 ALL_CRAWLERS_SEARCH_TYPE = {
-    ALL_CRALWERS[0]: ALL_TWITTER_SEARCH_TYPES,
-    ALL_CRALWERS[1]: ALL_REDDIT_SEARCH_TYPES,
+    ALL_CRAWLERS[0]: ALL_TWITTER_SEARCH_TYPES,
+    ALL_CRAWLERS[1]: ALL_REDDIT_SEARCH_TYPES,
 }
 
 all_crawler_fields = {
-    ALL_CRALWERS[0]: ALL_TWITTER_FEILDS,
-    ALL_CRALWERS[1]: ALL_REDDIT_FEILDS,
+    ALL_CRAWLERS[0]: ALL_TWITTER_FEILDS,
+    ALL_CRAWLERS[1]: ALL_REDDIT_FEILDS,
 }
 
 
@@ -339,8 +339,8 @@ class APIManager:
             )
 
         social_media_database_name_path = {
-            ALL_CRALWERS[1]: REDDIT_DATABASE,
-            ALL_CRALWERS[0]: TWITTER_DATABASE,
+            ALL_CRAWLERS[1]: REDDIT_DATABASE,
+            ALL_CRAWLERS[0]: TWITTER_DATABASE,
         }
 
         def _get_all_retrived_data(_asp: str, _crawler: str) -> List[Dict]:
@@ -520,7 +520,7 @@ def is_supported_crawler(cr):
     :rtype: boolean
     :return: return true if arg is an accpeted crawler
     """
-    return cr in ALL_CRALWERS or cr is None
+    return cr in ALL_CRAWLERS or cr is None
 
 
 # def is_search_types(cr):
@@ -789,8 +789,8 @@ def index():
             ENSURE_KEY[1]: is_twitter_fields,
         }
         ALL_CRALWER_ENSURE_FUNCTION: Dict = {
-            ALL_CRALWERS[0]: TWITTER_ENSURE_FUNCTION,
-            ALL_CRALWERS[1]: REDDIT_ENSURE_FUNCTION,
+            ALL_CRAWLERS[0]: TWITTER_ENSURE_FUNCTION,
+            ALL_CRAWLERS[1]: REDDIT_ENSURE_FUNCTION,
         }
 
         def _get_ensure_compatibility_dict(
@@ -812,7 +812,7 @@ def index():
             ENSURE_KEY[1]: fields_split,
         }
 
-        if c in ALL_CRALWERS:
+        if c in ALL_CRAWLERS:
             for i in args_split[ENSURE_KEY[0]]:
                 assert _get_ensure_compatibility_dict(c, ENSURE_KEY[0])(i)
             for i in args_split[ENSURE_KEY[1]]:
@@ -820,7 +820,7 @@ def index():
             return [c], search_types_split, fields_split
         else:
             crawler_split = c.split(",")
-            if len(crawler_split) == len(ALL_CRALWERS):
+            if len(crawler_split) == len(ALL_CRAWLERS):
                 for i in crawler_split:
                     assert is_supported_crawler(i)
 
@@ -890,7 +890,7 @@ def index():
             except:
                 return args.split(",")
 
-    crawlers = convert_to_common_type(crawlers, ALL_CRALWERS)
+    crawlers = convert_to_common_type(crawlers, ALL_CRAWLERS)
     aspects = convert_to_common_type(aspects, ALL_ASPECTS)
     since = convert_to_common_type(since, accept_all=False)
     until = convert_to_common_type(until, accept_all=False)

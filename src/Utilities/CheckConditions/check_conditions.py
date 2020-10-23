@@ -9,7 +9,7 @@ from typing import Union
 # from Sources.Preparations.Data.TwitterCrawler import TwitterCrawler
 from typing import cast
 
-from global_parameters import ALL_CRALWERS
+from global_parameters import ALL_CRAWLERS
 from global_parameters import ALL_REDDIT_COLLECTION_NAMES
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_REDDIT_TAGS
@@ -47,7 +47,7 @@ def check_crawler_tags_value(
                 )
         return
     else:
-        raise ValueError("tags must have Tuple[str]")
+        raise ValueError("tags must have List[str]")
 
 
 def check_response_keys(res: Union[RedditResponse, Json]):
@@ -66,12 +66,12 @@ def check_running_conditions(running_conditions: RunningConditions) -> None:
         if i not in running_conditions:
             raise ValueError("")
 
-        if running_conditions["crawler_option"] not in ALL_CRALWERS:
+        if running_conditions["crawler_option"] not in ALL_CRAWLERS:
             raise ValueError("crawler_option are not availble")
         else:
 
             # crawler_option = reddit
-            if running_conditions["crawler_option"] == ALL_CRALWERS[1]:
+            if running_conditions["crawler_option"] == ALL_CRAWLERS[1]:
                 if (
                         running_conditions["collection_name"]
                         not in ALL_REDDIT_COLLECTION_NAMES
@@ -89,7 +89,7 @@ def check_running_conditions(running_conditions: RunningConditions) -> None:
 
 
             # crawler_option = twitter
-            elif running_conditions["crawler_option"] == ALL_CRALWERS[0]:
+            elif running_conditions["crawler_option"] == ALL_CRAWLERS[0]:
                 if (
                         running_conditions["collection_name"]
                         not in ALL_TWITTER_COLLETION_NAMES

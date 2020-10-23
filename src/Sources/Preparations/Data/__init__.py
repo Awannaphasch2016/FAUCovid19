@@ -3,4 +3,5 @@
 
 """init."""
 
-from .social_media_crawler import main
+from .social_media_crawler import *
+

@@ -13,7 +13,8 @@ from typing import cast
 
 import click
 
-from global_parameters import ALL_CRALWERS
+from Examples.scratch2 import ALL_CRALWERS
+from global_parameters import ALL_CRAWLERS
 from global_parameters import ALL_REDDIT_COLLECTION_NAMES
 from global_parameters import ALL_REDDIT_RESPOND_TYPES
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
@@ -25,6 +26,7 @@ from global_parameters import ALL_TWITTER_TAGS
 from global_parameters import COVID_KEYWORDS
 from global_parameters import KNOWN_ERROR
 from global_parameters import LOCKDOWN_KEYWORDS
+from global_parameters import REDDIT_SORT
 from global_parameters import REOPEN_KEYWORDS
 from global_parameters import SOCIAL_DISTANCE_KEYWORDS
 from global_parameters import WORK_FROM_HOME_KEYWORDS
@@ -98,7 +100,7 @@ def _get_running_conditions(
         # 'respond_type': 'data',
         "respond_type": respond_type,
         "search_type": search_type,
-        "sort": "asc",
+        "sort": REDDIT_SORT[1],
         "tag": tag,
         "max_after": max_after,
     }
@@ -232,8 +234,39 @@ def get_keywords_collections(crawler_type: str) -> List[List[str]]:
             reopen_keywords,
         ]  # noqa: E127
     else:
-        raise ValueError(f"Currently only support {ALL_CRALWERS}")
+        raise ValueError(f"Currently only support {ALL_CRAWLERS}")
 
+
+def _get_crawler_tags_words(
+        crawler: str,
+        tag: str,
+        work_from_home_keywords: List[str],
+        lockdown_keywords: List[str],
+        social_distance_keywords: List[str],
+        corona_keywords: List[str],
+        reopen_keywords: List[str],
+) -> List[str]:
+    if tag == "work_from_home":
+        tag_words = work_from_home_keywords
+    elif tag == "lockdown":
+        tag_words = lockdown_keywords
+    elif tag == "social_distance":
+        tag_words = social_distance_keywords
+    elif tag =='corona':
+        tag_words = corona_keywords
+    elif tag == "reopen":
+        if crawler == 'twitter':
+            raise NotImplementedError(
+                "make sure that reddit also implement reopen_keywords "
+                "allowing reopen for twitter"
+            )
+        tag_words = reopen_keywords
+    elif tag is None:
+        raise ValueError("you must provide tags for twitter")
+    else:
+        raise NotImplementedError(tag)
+
+    return tag_words
 
 def twitter_crawler_condition(
         timestamp: datetime.datetime,
@@ -253,7 +286,7 @@ def twitter_crawler_condition(
     :rtype: TwitterCrawlerCondition
     :return: constraint with specific format for twitter
     """
-    tag = running_conditions["tag"]
+    tag = cast(str,running_conditions["tag"])
     respond_type = running_conditions["respond_type"]
     search_type = running_conditions["search_type"]
     collection_name = running_conditions["collection_name"]
@@ -261,42 +294,52 @@ def twitter_crawler_condition(
     # crawler_option = running_conditions['crawler_option']
     max_after = running_conditions["max_after"]
 
+
     (
         hashtags,
-        corona_keywords,
+        covid_keywords,
         work_from_home_keywords,
         social_distance_keywords,
         lockdown_keywords,
-        reopen_keywords,
-    ) = get_keywords_collections("twitter")
+        reopening_keywords,
+    ) = get_keywords_collections(ALL_CRALWERS[0])
 
-    def _get_tags_words() -> List[str]:
-        if tag == "work_from_home":
-            tag_words = work_from_home_keywords
-        elif tag == "lockdown":
-            tag_words = lockdown_keywords
-        elif tag == "social_distance":
-            tag_words = social_distance_keywords
-        elif tag == "covid":
-            tag_words = corona_keywords
-        elif tag == "reopen":
-            raise NotImplementedError(
-                "make sure that reddit also implement reopen_keywords "
-                "allowing reopen for twitter",
-            )
-            tag_words = reopen_keywords
-        elif tag is None:
-            raise ValueError("you must provide tags for twitter")
-        else:
-            raise NotImplementedError(tag)
+    # DEPRECATED: move to module scope
+    # def _get_crawler_tags_words() -> List[str]:
+    #     if tag == "work_from_home":
+    #         tag_words = work_from_home_keywords
+    #     elif tag == "lockdown":
+    #         tag_words = lockdown_keywords
+    #     elif tag == "social_distance":
+    #         tag_words = social_distance_keywords
+    #     elif tag == "covid":
+    #         tag_words = corona_keywords
+    #     elif tag == "reopen":
+    #         raise NotImplementedError(
+    #             "make sure that reddit also implement reopen_keywords "
+    #             "allowing reopen for twitter"
+    #         )
+    #         tag_words = reopen_keywords
+    #     elif tag is None:
+    #         raise ValueError("you must provide tags for twitter")
+    #     else:
+    #         raise NotImplementedError(tag)
+    #
+    #     return tag_words
 
-        return tag_words
-
-    tag_words = _get_tags_words()
+    # VALIDATE: haven't test below paragraph
+    tag_words = _get_crawler_tags_words(
+        crawler=ALL_CRALWERS[0],
+        tag=tag,
+        work_from_home_keywords=work_from_home_keywords,
+        lockdown_keywords=lockdown_keywords,
+        social_distance_keywords=social_distance_keywords,
+        corona_keywords=covid_keywords,
+        reopen_keywords=reopening_keywords,
+    )
 
     day_interval: int = 1
     frequency: Frequency = "day"
-
     if collection_name == "twitter_tweet":
         twitter_crawler_collection: TwitterCollection = {
             "collection":
@@ -359,7 +402,7 @@ def reddit_crawler_condition(
     :rtype: RedditCrawlerCondition
     :return: constraint with specific format for Reddit
     """
-    tag = running_conditions["tag"]
+    tag = cast(str, running_conditions["tag"])
     respond_type = running_conditions["respond_type"]
     search_type = running_conditions["search_type"]
     collection_name = running_conditions["collection_name"]
@@ -377,33 +420,46 @@ def reddit_crawler_condition(
         work_from_home_keywords,
         covid_keywords,
         reopening_keywords,
-    ) = get_keywords_collections("reddit")
+    ) = get_keywords_collections(ALL_CRALWERS[1])
 
-    def _get_tags_words() -> List[str]:
-        if tag == "work_from_home":
-            tag_words = work_from_home_keywords
-        elif tag == "lockdown":
-            tag_words = lockdown_keywords
-        elif tag == "social_distance":
-            tag_words = social_distance_keywords
-        # elif tag == 'all':
-        #     tag_words
-        #     raise NotImplementedError(tag)
-        elif tag is None:
-            tag_words = []
-        else:
-            raise NotImplementedError(tag)
+    # DEPRECATED: move to module scope
+    # def _get_crawler_tags_words() -> List[str]:
+    #     if tag == "work_from_home":
+    #         tag_words = work_from_home_keywords
+    #     elif tag == "lockdown":
+    #         tag_words = lockdown_keywords
+    #     elif tag == "social_distance":
+    #         tag_words = social_distance_keywords
+    #     elif tag == 'reopen':
+    #         tag_words = reopening_keywords
+    #     elif tag == 'covid':
+    #         tag_words = covid_keywords
+    #     # elif tag == 'all':
+    #     #     tag_words
+    #     #     raise NotImplementedError(tag)
+    #     elif tag is None:
+    #         tag_words = []
+    #     else:
+    #         raise NotImplementedError(tag)
+    #
+    #     return tag_words
 
-        return tag_words
 
-    # OPTIMIZE: figure out how to deal 2 versio of the same thing:
-    #    eg work_from_home, work_from_home_words
+    # VALIDATE: haven't test below paragraph
+    tag_words = _get_crawler_tags_words(
+        crawler=ALL_CRALWERS[1],
+        tag=tag,
+        work_from_home_keywords=work_from_home_keywords,
+        lockdown_keywords=lockdown_keywords,
+        social_distance_keywords=social_distance_keywords,
+        corona_keywords=covid_keywords,
+        reopen_keywords=reopening_keywords,
+    )
 
-    tag_words = _get_tags_words()
     subreddit_collection_class: SubredditCollection
     # initial_day_interval = 16
     initial_day_interval = 1
-    frequency = "day"
+    frequency: Frequency = "day"
 
     crawler_condition: RedditCrawlerCondition
 
@@ -421,10 +477,11 @@ def reddit_crawler_condition(
     def _get_crawler_condition(
             subreddit_collection_class: SubredditCollection,
     ) -> RedditCrawlerCondition:
+
         crawler_condition: RedditCrawlerCondition = {
             "crawler_class": RedditCrawler,
             "collection_class": subreddit_collection_class,
-            "initial_interval": initial_day_interval,  # 100
+            "initial_interval": initial_day_interval,
             "request_timestamp": timestamp,
             "respond_type": respond_type,
             "search_type": search_type,
@@ -553,6 +610,7 @@ def get_reddit_running_conditions(
         max_after: int,
         tags: Tags,
         crawler_option: Crawler_type,
+        get_alll_running_conditions: bool = True,
 ) -> Union[List, List[RunningConditionsKeyValue]]:
     """Skipped summary.
 
@@ -573,6 +631,8 @@ def get_reddit_running_conditions(
         reddit crawler
     """
 
+
+    # DEPRECATED: move to module scope
     # def _get_tag_value(tags: Tags) -> Tags:
     #     if tags is not None:
     #         check_reddit_tags_value(tags)
@@ -592,6 +652,8 @@ def get_reddit_running_conditions(
         ALL_REDDIT_TAGS,
     )
 
+    # NOTE: I am sure if tags == None is suppported.This is worth noting for
+    #     furture code clean up
     all_collection_name = (
         ALL_REDDIT_COLLECTION_NAMES
         if tags is None
@@ -602,33 +664,41 @@ def get_reddit_running_conditions(
 
     all_running_conditions_key_value: RunningConditionsKeyValue = []
 
-    for max_after, tag, collection_name, search_type, respond_type in product(
-            [max_after],
-            cast(List[str], tags),
-            all_collection_name,
-            all_search_type,
-            all_respond_type,
-    ):
-        tag_str = tag
 
-        condition_keys: List[Union[Optional[str], int]] = [
-            max_after,
-            tag_str,
-            collection_name,
-            search_type,
-        ]
+    if get_alll_running_conditions:
+        for max_after, tag, collection_name, search_type, respond_type in product(
+                [max_after],
+                cast(List[str], tags),
+                all_collection_name,
+                all_search_type,
+                all_respond_type,
+        ):
+            tag_str = tag
 
-        running_condition: RunningConditions = _get_running_conditions(
-            crawler_option,
-            collection_name,
-            search_type,
-            respond_type,
-            tag,
-            max_after,
-        )
-        all_running_conditions_key_value.append(
-            (condition_keys, running_condition),
-        )
+            condition_keys: List[Union[Optional[str], int]] = [
+                max_after,
+                tag_str,
+                collection_name,
+                search_type,
+            ]
+
+            running_condition: RunningConditions = _get_running_conditions(
+                crawler_option,
+                collection_name,
+                search_type,
+                respond_type,
+                tag,
+                max_after,
+            )
+            all_running_conditions_key_value.append(
+                (condition_keys, running_condition),
+            )
+    else:
+        raise NotImplementedError("Note sure how much refactoring will be "
+                                  "needed. But function-wise without ability"
+                                  " to specified specific running condition,"
+                                  " the program can still perfectly function")
+
 
     # selected_running_conditions = []
     # for i in all_running_conditions_key_value:
@@ -665,6 +735,7 @@ def get_twitter_running_conditions(
         twitter crawler
     """
 
+    # DEPRECATED: move to module scope
     # def _get_tag_value(tags: Tags) -> Tags:
     #     if tags is not None:
     #         check_crawler_tags_value(tags)
@@ -859,7 +930,8 @@ def run_all_reddit_conditions(
             if str(e) not in KNOWN_ERROR:
                 PROGRAM_LOGGER.error(str(e))
                 raise NotImplementedError(
-                    f"unknown error occur in {run_all_conditions.__name__} ",
+                    f"unknown error occur in {run_all_conditions.__name__}."
+                    f"{str(e)}",
                 )
 
             else:
@@ -1111,6 +1183,7 @@ def main(
 
     """
     if dry_run:
+
         click.echo(
             f"We have passed in the following input args\n"
             f"\tselect_all_conditions = {select_all_conditions}\n"
@@ -1120,6 +1193,7 @@ def main(
             f"\tbefore_date = {before_date}\n"
             f"\tafter_date = {after_date}"
         )
+
     else:
 
         if isinstance(tags, tuple):

@@ -25,6 +25,8 @@ class ControlLimit:
             max_per_min: int = 150,
     ) -> None:
         """Skipped."""
+        raise DeprecationWarning('No longer support mannually control '
+                                 'pushshisft limit. ')
         self.end = time.time()
         max_per_second = max_per_min / 60
         interval = self.end - self.start

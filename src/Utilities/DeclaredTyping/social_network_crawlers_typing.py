@@ -74,6 +74,8 @@ class RedditRunningConstraints(TypedDict):
     metadata: str
     sort: Sort
     fields: Optional[str]
+    max_response_cache: int
+    repeat: Union[int,float]  # float type is used when repeat = float('inf')
 
 
 class TwitterRunningConstraints(TypedDict):
@@ -224,7 +226,7 @@ class RedditResponse(TypedDict):
     data: List[RedditData]
     # metadata: List[RedditMetadata]
     metadata: RedditMetadata  # VALIDATE: what is the correct type?
-    aggs: List[RedditAggs]
+    aggs: List[RedditAggs]  # VALIDATE: I don't think this is correct type.
 
 
 class TwitterResponse(TypedDict):
