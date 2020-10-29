@@ -13,7 +13,7 @@ from typing import cast
 
 import click
 
-from Examples.scratch2 import ALL_CRALWERS
+# from Examples.scratch2 import ALL_CRAWLERS
 from global_parameters import ALL_CRAWLERS
 from global_parameters import ALL_REDDIT_COLLECTION_NAMES
 from global_parameters import ALL_REDDIT_RESPOND_TYPES
@@ -302,7 +302,7 @@ def twitter_crawler_condition(
         social_distance_keywords,
         lockdown_keywords,
         reopening_keywords,
-    ) = get_keywords_collections(ALL_CRALWERS[0])
+    ) = get_keywords_collections(ALL_CRAWLERS[0])
 
     # DEPRECATED: move to module scope
     # def _get_crawler_tags_words() -> List[str]:
@@ -329,7 +329,7 @@ def twitter_crawler_condition(
 
     # VALIDATE: haven't test below paragraph
     tag_words = _get_crawler_tags_words(
-        crawler=ALL_CRALWERS[0],
+        crawler=ALL_CRAWLERS[0],
         tag=tag,
         work_from_home_keywords=work_from_home_keywords,
         lockdown_keywords=lockdown_keywords,
@@ -420,7 +420,7 @@ def reddit_crawler_condition(
         work_from_home_keywords,
         covid_keywords,
         reopening_keywords,
-    ) = get_keywords_collections(ALL_CRALWERS[1])
+    ) = get_keywords_collections(ALL_CRAWLERS[1])
 
     # DEPRECATED: move to module scope
     # def _get_crawler_tags_words() -> List[str]:
@@ -447,7 +447,7 @@ def reddit_crawler_condition(
 
     # VALIDATE: haven't test below paragraph
     tag_words = _get_crawler_tags_words(
-        crawler=ALL_CRALWERS[1],
+        crawler=ALL_CRAWLERS[1],
         tag=tag,
         work_from_home_keywords=work_from_home_keywords,
         lockdown_keywords=lockdown_keywords,
