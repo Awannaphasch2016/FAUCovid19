@@ -48,6 +48,25 @@ def get_saved_file_path(
     )
     return saved_file
 
+def get_saved_file_path_for_1_full_day(
+    date: datetime.date,
+    path_name: pathlib.Path,
+) -> pathlib.Path:
+    """Get saved file path.
+
+    :param time_since_:
+    :param date_since_:
+    :param path_name:
+    :return:
+    """
+    date: str  = get_full_datetime_str(date)
+
+    saved_file = (
+        pathlib.Path(path_name)
+        / f"date={date}.pickle"
+    )
+    return saved_file
+
 
 def save_to_file(content: Any, saved_file: pathlib.Path) -> None:
     """Save content to specified path."""

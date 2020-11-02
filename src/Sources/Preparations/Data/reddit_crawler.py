@@ -5,6 +5,7 @@
 import datetime
 import json
 import pathlib
+import time
 from typing import Dict
 from typing import Generator
 from typing import List
@@ -47,6 +48,7 @@ from src.Utilities import (
     _ensure_datetime_for_specified_frequency_not_consider_max_after,
 )
 from src.Utilities import get_saved_file_path
+from src.Utilities import get_saved_file_path_for_1_full_day
 from src.Utilities import my_timer
 from src.Utilities import only_download_full_day
 from src.Utilities import save_to_file
@@ -142,6 +144,10 @@ def get_response_data_with_psaw(
             yield cache
             cache = []
 
+    PROGRAM_LOGGER.debug(f'len(cache) =  + {len(list(cache))}')
+    # return cache
+    yield cache
+
 def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
                                     _repeat: int,
                                     _max_response_cache,
@@ -161,12 +167,10 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
         count = 0
         if _save_path is not None:
             count += 1
-        if _save_file is not None:
-            count += 1
 
         if count == 0:
             return False
-        elif count == 2:
+        elif count == 1:
             return True
         else:
             raise ValueError
@@ -242,7 +246,8 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
     len_saved_data = 0
     num_non_full_day_data = 0
     count = 0
-    repeat_end_ind = _repeat - 1
+    # repeat_end_ind = _repeat - 1
+    _repeat = _repeat
     first_full_day_data_ind = None
 
     # Note: This line allow nonlocal first_date in inner scope
@@ -250,33 +255,37 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
     cache: List[Json]
     is_terminated_before_all_caches_iteration = True
 
-    # caches = (i for i in [1])
 
+    s = time.time()
     for ind, cache in enumerate(caches):
-        # continue
+        f = time.time()
+        PROGRAM_LOGGER.info(f'time caches (generator) takes to return 1 cache = '
+                    f'{f-s} seconds.')
 
-        def _is_terminate_state(_ind: int,
-                                __repeat: int):
+        def _is_terminate_state():
+
+            nonlocal ind
+            nonlocal _repeat
             nonlocal is_terminated_before_all_caches_iteration
-            if _ind == repeat_end_ind:
+            nonlocal cache
+
+            if ind == _repeat:
                 is_terminated_before_all_caches_iteration = False
-                # print(f"terminal ind = {_ind}")
-                assert len(cache) <= _max_response_cache
 
                 return True
 
-            assert len(cache) == _max_response_cache
+            if len(cache) <= 1:
+                return True
 
             return False
 
-        # print(f"_repeat = {_repeat}")
-
-        if _is_terminate_state(ind, _repeat):
+        if _is_terminate_state():
             break
 
         if ind == 0:
             first_date: int
             first_date_full: int
+
             (first_date, first_date_full) = _get_date_func(0, cache.copy())
 
             def _is_sorted_order_correctly(_first_date_full: int):
@@ -288,6 +297,7 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
                 assert _is_sorted_order_correctly(first_date_full), \
                     "Data is sorted in 'desc' order, so first_date have " \
                     "to be more than second_date."
+
 
         # current_date: int
         # current_date_full: int
@@ -335,10 +345,6 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
                 return False
 
             if left_ind == 0:
-                # is_detected = has_full_day_data()
-                #
-                # if not is_detected:
-                #     continue
                 is_detected = has_full_day_data()
                 return is_detected
 
@@ -364,16 +370,47 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
                     total[left_ind:right_ind])
             len_saved_data += len(response['data'])
 
-            # print(f"first_full_day_data_ind = {first_full_day_data_ind}")
-            # print(f"left_ind = {left_ind}")
-            # print(f"right_ind = {right_ind}")
-            # print(f"len_saved_data = {len_saved_data}")
+
+            # if is_saved:
+            #     _save_path_ = _save_path / f"{_save_file}"
+            #     _save_path_ = \
+            #         pathlib.Path(str(_save_path_).format(ind))
+            #     save_to_file(response, _save_path_)
 
             if is_saved:
-                _save_path_ = _save_path / f"{_save_file}"
-                _save_path_ = \
-                    pathlib.Path(str(_save_path_).format(ind))
+
+                if _save_file is None:
+                    _save_file_path: pathlib.Path = \
+                        get_saved_file_path_for_1_full_day(
+                        datetime.datetime.fromtimestamp(
+                            _get_date_func(0, total_response_for_a_date)[1]
+                        ),
+                        path_name=_save_path,
+                    )
+
+
+                    # def _get_unique_file_name():
+                    #     _save_file: str = str(_save_file_path).split('/')[-1]
+                    #     _save_path: pathlib.Path =\
+                    #         pathlib.Path(
+                    #             '/'.join(str(_save_file_path).split('/')[:-1])
+                    #         )
+                    #
+                    #     file_name_suffix: int = 0
+                    #     unique_file_name = _save_file + str(file_name_suffix)
+                    #     while True:
+                    #         if pathlib.Path(
+                    #                 str(_save_path/unique_file_name)
+                    #         ).exists():
+                    #             file_name_suffix += 1
+                    #         else:
+                    #             break
+                    # _save_path_: pathlib.Path = _save_path/ unique_file_name
+
+                    _save_path_: pathlib.Path = _save_file_path
                 save_to_file(response, _save_path_)
+                PROGRAM_LOGGER.info(f'len_saved_data = {len_saved_data}')
+
             total_response_for_a_date = \
                 total[right_ind:]
             left_ind = right_ind
@@ -390,23 +427,18 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
         #   _max_response_cache, in that casue _ind == repeat_end_ind -1.
         #   However, in the case where terminal_state is executed (
         #   returned response > max_response_cache * repeat_end_ind )
-        #   ind == max_response_cache * repeat_end_ind
+        #   response <= max_response_cache * repeat_end_ind
 
         if _is_terminated_before_all_caches_iteration:
-
-            assert _ind < repeat_end_ind
-            # assert num_full_day_total > _max_response_cache * (repeat_end_ind - 1)
-            # return num_full_day_total <= _max_response_cache * repeat_end_ind
+            assert _ind < _repeat
 
         else:
 
-            assert _ind == repeat_end_ind
-            # assert num_full_day_total > _max_response_cache * (repeat_end_ind - 1)
-            # return num_full_day_total <= _max_response_cache * repeat_end_ind
+            assert _ind == _repeat
 
         assert num_full_day_total > _max_response_cache * (
-                repeat_end_ind - 1)
-        return num_full_day_total <= _max_response_cache * repeat_end_ind
+                _repeat - 1)
+        return num_full_day_total <= _max_response_cache * _repeat
 
     def is_data_saved_correctly() -> bool:
 
@@ -417,7 +449,6 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
             return len_saved_data == 0
 
     try:
-        # print(ind)
         assert _is_data_iterated_correctly(
             ind,
             _repeat,
@@ -500,11 +531,48 @@ def _return_response_data_from_psaw(caches: Generator[List[Json], None, None],
                         leftover_total[left_ind:right_ind])
 
                 len_saved_data += len(response)
+
+                # if is_saved:
+                #     _save_path_ = _save_path / f"{_save_file}"
+                #     _save_path_ = \
+                #         pathlib.Path(str(_save_path_).format(ind))
+                #     save_to_file(response, _save_path_)
+
                 if is_saved:
-                    _save_path_ = _save_path / f"{_save_file}"
-                    _save_path_ = \
-                        pathlib.Path(str(_save_path_).format(ind))
+
+                    if _save_file is None:
+                        _save_file_path: pathlib.Path = \
+                            get_saved_file_path_for_1_full_day(
+                                datetime.datetime.fromtimestamp(
+                                    _get_date_func(0,
+                                                   total_response_for_a_date)[
+                                        1]
+                                ),
+                                path_name=_save_path,
+                            )
+
+                        # def _get_unique_file_name():
+                        #     _save_file: str = str(_save_file_path).split('/')[-1]
+                        #     _save_path: pathlib.Path =\
+                        #         pathlib.Path(
+                        #             '/'.join(str(_save_file_path).split('/')[:-1])
+                        #         )
+                        #
+                        #     file_name_suffix: int = 0
+                        #     unique_file_name = _save_file + str(file_name_suffix)
+                        #     while True:
+                        #         if pathlib.Path(
+                        #                 str(_save_path/unique_file_name)
+                        #         ).exists():
+                        #             file_name_suffix += 1
+                        #         else:
+                        #             break
+                        # _save_path_: pathlib.Path = _save_path/ unique_file_name
+
+                        _save_path_: pathlib.Path = _save_file_path
                     save_to_file(response, _save_path_)
+                    PROGRAM_LOGGER.info(f'len_saved_data = {len_saved_data}')
+
                 total_response_for_a_date = \
                     leftover_total[right_ind:]
                 left_ind = right_ind
