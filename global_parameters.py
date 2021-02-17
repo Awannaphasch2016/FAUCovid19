@@ -11,6 +11,18 @@ from typing_extensions import Literal
 
 from src.Utilities import Sort
 
+#=====================
+#==Database
+#=====================
+DATABASE_TYPE: List[str] = ['sqlite', 'mysql']
+
+MYSQL_PORT = 3306
+MYSQL_HOST = "127.0.0.1"
+
+#=====================
+#==Reddit & Twitter
+#=====================
+
 PROJECT_NAME = "FAUCOVID19"
 BASE_DIR: pathlib.Path = pathlib.Path(
     os.path.dirname(os.path.realpath(__file__))
@@ -44,7 +56,8 @@ KNOWN_ERROR = [ERROR_1, ERROR_2]
 CRAWLERS_NAME = Literal["twitter", "reddit"]
 
 # Crawlers
-ALL_CRAWLERS: List[Literal["twitter", "reddit"]] = ["twitter", "reddit"]
+ALL_CRAWLERS: List[Literal["twitter", "reddit"]] =\
+    ["twitter", "reddit", "twitter_stream","reddit_stream"]
 
 # Aspects keywords
 # ALL_ASPECTS = [
@@ -117,9 +130,108 @@ ALL_REDDIT_FEILDS = [
     "sentiment",
 ]
 
+ALL_SUBREDDIT_REPRESETED_GENERAL_COVID_SUBREDDIT = ["Corona", "COVID19",
+                                                    "China_Flu",
+                                                    "coronavirus"]
+ALL_SUBREDDIT_REPRESETED_COUNTRY_SUBREDDIT = ["CoronavirusUS", "coronavirusUK"]
+ALL_SUBREDDIT_REPRESETED_REGION_COVID_SUBREDDIT = [
+    "CoronavirusMidwest",
+    "CoronavirusSouth",
+    "CoronavirusSouthEast",
+    "CoronavirusWest",
+]
+
+# --------List of USA States
+ALL_SUBREDDIT_REPRESETED_STATES_COVID_SUBREDDIT = [
+    "alabama",
+    "alaska",
+    "arizona",
+    "arkansas",
+    "california",
+    "colorado",
+    "connecticut",
+    "delaware",
+    "florida",
+    "georgia",
+    "hawaii",
+    "idaho",
+    "illinois",
+    "indiana",
+    "iowa",
+    "kansas",
+    "kentucky",
+    "louisiana",
+    "maine",
+    "maryland",
+    "massachusetts",
+    "michigan",
+    "minnesota",
+    "mississippi",
+    "missouri",
+    "montana",
+    "nebraska",
+    "nevada",
+    "newhampshire",
+    "newjersey",
+    "newmexico",
+    "newyork",
+    "northcarolina",
+    "northdakota",
+    "ohio",
+    "oklahoma",
+    "oregon",
+    "pennsylvania",
+    "rhodeisland",
+    "southcarolina",
+    "southdakota",
+    "tennessee",
+    "texas",
+    "utah",
+    "vermont",
+    "virginia",
+    "washington",
+    "westvirginia",
+    "wisconsin",
+    "wyoming",
+]
+
+REDDIT_META_DATA_KEYS = [
+    "total_results",
+    "before",
+    "after",
+    "frequency",
+    "execution_time_milliseconds",
+    "sort",
+    "fields",
+    "subreddit",
+]
+
+STREAM_COMMENTS_DATA_KEYS = [
+    'author',
+    'body',
+    'body_html',
+    'created_utc',
+    # # NOTE: for distinguished, its type if Nonetype, and I don't know how to
+    # #  check it because
+    # #  this NoneType is not the same as None
+    # 'distinguished',
+    'edited',
+    'id',
+    'is_submitter',
+    'link_id',
+    'parent_id',
+    'permalink',
+    'replies',
+    'score',
+    'stickied',
+    'submission',
+    'subreddit',
+    'subreddit_id',
+]
+
 # MAX_AFTER = 166
 MAX_AFTER = 30
-REDDIT_SORT: List[Sort] = ['asc','desc']
+REDDIT_SORT: List[Sort] = ['asc', 'desc']
 
 # NOTE: Twitter
 #  >Keywords are copied from 'Tracking Social Media Discourse About the COVID-19 Pandemic: Developement of a Public Coronavirus  Twitter Dataset' github:
@@ -145,8 +257,7 @@ ALL_TWITTER_KEYWORDS: List = [
     "lockdown",
     "shelteringinplace",
     "staysafestayhome",
-    "trumppandemic",
-    "flatten the curve",
+    "trumppandemic", "flatten the curve",
     "PPEshortage",
     "safeathome",
     "stayathome",
@@ -158,7 +269,6 @@ ALL_TWITTER_KEYWORDS: List = [
 
 # ALL_TWITTER_HASHTAGS = None
 ALL_TWITTER_TAGS: List[str] = ALL_ASPECTS
-
 
 # NOTE: geo realted data is not implemented yet.
 # ALL_TWITTER_COLLETION_NAMES: List = ['twitter_tweet', 'twitter_geo']
@@ -181,6 +291,15 @@ ALL_TWITTER_FEILDS = [
 
 # Frequency
 ALL_FREQUENCY = ["day"]
+ALL_TWITTER_COVID_HASHTAGS = [
+    "#coronavirus",
+    "#coronavirusoutbreak",
+    "#coronavirusPandemic",
+    "#covid19",
+    "#covid_19",
+    "#epitwitter",
+    "#ihavecorona",
+]
 
 if __name__ == '__main__':
     print('hi')

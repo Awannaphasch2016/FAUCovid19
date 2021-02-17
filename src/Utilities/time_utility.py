@@ -25,7 +25,6 @@ def _get_epoch_datetime_subtract_timedelta(
         raise NotImplementedError
     return after_timestamp_utc
 
-
 def _convert_timedelta_to_specified_frequency(
     duration: datetime.timedelta,
     frequency: str,

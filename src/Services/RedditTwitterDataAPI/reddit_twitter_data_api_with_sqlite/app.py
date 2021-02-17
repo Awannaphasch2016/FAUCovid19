@@ -49,11 +49,15 @@ DATEFORMAT = "%Y-%m-%d"
 ALL_CRAWLERS_SEARCH_TYPE = {
     ALL_CRAWLERS[0]: ALL_TWITTER_SEARCH_TYPES,
     ALL_CRAWLERS[1]: ALL_REDDIT_SEARCH_TYPES,
+    ALL_CRAWLERS[2]: ALL_TWITTER_SEARCH_TYPES,
+    ALL_CRAWLERS[3]: ALL_REDDIT_SEARCH_TYPES,
 }
 
 all_crawler_fields = {
     ALL_CRAWLERS[0]: ALL_TWITTER_FEILDS,
     ALL_CRAWLERS[1]: ALL_REDDIT_FEILDS,
+    ALL_CRAWLERS[2]: ALL_TWITTER_FEILDS,
+    ALL_CRAWLERS[3]: ALL_REDDIT_FEILDS,
 }
 
 
@@ -136,7 +140,8 @@ class APIManager:
         :param aspects: list of aspects
 
         :type crawlers: List of str
-        :param crawlers: list of aspects
+        :param crawlers: can be the following reddit, reddit_stream,
+            twitter, twitter_stream
 
         :type after_date: datetime.datetime
         :param after_date: date in which all aata AFTER this date should be
@@ -261,122 +266,195 @@ class APIManager:
          :return: returned all stored cralwed data of selected crawlers
 
         """
-        returned_data: Dict[str, List[Dict]] = {}
+        # returned_data: Dict[str, List[Dict]] = {}
+        #
+        # def _get_query(crawler, all_crawler_search_type, all_crawler_fields):
+        #     after_date_query = ""
+        #     before_date_query = ""
+        #
+        #     if self.after_date[0] is None and self.before_date[0] is None:
+        #         after_date_query = ""
+        #         before_date_query = ""
+        #     else:
+        #         if crawler in ["reddit", "reddit_stream"]:
+        #             date_key = " created_utc"
+        #         elif crawler == "twitter":
+        #             date_key = " date "
+        #         else:
+        #             raise ValueError()
+        #
+        #         if self.after_date[0] is not None:
+        #             after_date_created_utc = int(
+        #                 self.after_date[0].timestamp(),
+        #             )
+        #             after_date_query = f"{date_key} > {after_date_created_utc}"
+        #         if self.before_date[0] is not None:
+        #             before_date_created_utc = int(
+        #                 self.before_date[0].timestamp(),
+        #             )
+        #             before_date_query = (
+        #                 f"{date_key} <= {before_date_created_utc}"
+        #             )
+        #
+        #     if self.search_types[0] == "all":
+        #         search_types = all_crawler_search_type
+        #     else:
+        #         search_types = self.search_types
+        #
+        #     if self.fields[0] == "all":
+        #         fields_query = " * "
+        #     else:
+        #         fields_query = ",".join(self.fields)
+        #
+        #     aspect_query = f" aspect = '{asp}'"
+        #
+        #     if len(search_types) == len(all_crawler_search_type):
+        #         all_query = [aspect_query]
+        #     else:
+        #         tmp = []
+        #         for t in search_types:
+        #             tmp.append(f" search_type = '{t}' ")
+        #         tmp = " or ".join(tmp)
+        #         tmp = " ( " + tmp + " ) "
+        #         all_query = [aspect_query, tmp]
+        #
+        #     # all_reddit_data = " and ".join([aspect_query, search_types])
+        #
+        #     if len(after_date_query) > 0 and len(before_date_query) > 0:
+        #         all_query.append(after_date_query)
+        #         all_query.append(before_date_query)
+        #     elif len(after_date_query) > 0:
+        #         all_query.append(after_date_query)
+        #     elif len(before_date_query) > 0:
+        #         all_query.append(before_date_query)
+        #     elif len(before_date_query) == 0 and len(after_date_query) == 0:
+        #         pass
+        #     else:
+        #         raise ValueError
+        #
+        #     if self.frequency[0] is not None:
+        #         frequency_query = f" frequency = '{self.frequency[0]}' "
+        #         all_query.append(frequency_query)
+        #     else:
+        #         frequency_query = ""
+        #
+        #     return (
+        #             f"select {fields_query} from {crawler} where "
+        #             + " and ".join(all_query)
+        #     )
+        #
+        # social_media_database_name_path = {
+        #     ALL_CRAWLERS[1]: REDDIT_DATABASE,
+        #     ALL_CRAWLERS[0]: TWITTER_DATABASE,
+        #     ALL_CRAWLERS[2]: TWITTER_DATABASE,
+        #     ALL_CRAWLERS[3]: REDDIT_DATABASE,
+        # }
+        #
+        # def _get_all_retrived_data(_asp: str, _crawler: str) -> List[Dict]:
+        #     """Skipped summary.
+        #
+        #     :type _asp:  str
+        #     :param _asp: an aspect name
+        #
+        #     :type _crawler:  str
+        #     :param _crawler: a crawler name
+        #     """
+        #     path_to_crawler_database = social_media_database_name_path[
+        #         _crawler
+        #     ]
+        #
+        #     query = _get_query(
+        #         _crawler,
+        #         ALL_CRAWLERS_SEARCH_TYPE[_crawler],
+        #         all_crawler_fields[_crawler],
+        #     )
+        #     all_crawler_data_from_database = self._get_all_data_from_sqlite(
+        #         _crawler,
+        #         path_to_crawler_database,
+        #         query,
+        #     )
+        #
+        #     return all_crawler_data_from_database
+        #
+        # for asp, crawler in product(self.aspects, self.crawlers):
+        #     all_reddit_data: List[Dict] = _get_all_retrived_data(asp, crawler)
+        #
+        #     returned_data.setdefault(self.RETURNED_DATA_KEY, []).extend(
+        #         all_reddit_data,
+        #     )
+        #
+        # return returned_data
+        def kinesis_consumer():
+            print('you have connected to streaming endpoint')
+            import time
+            from pprint import pprint
 
-        def _get_query(crawler, all_crawler_search_type, all_crawler_fields):
-            after_date_query = ""
-            before_date_query = ""
+            import boto3
 
-            if self.after_date[0] is None and self.before_date[0] is None:
-                after_date_query = ""
-                before_date_query = ""
-            else:
-                if crawler == "reddit":
-                    date_key = " created_utc"
-                elif crawler == "twitter":
-                    date_key = " date "
-                else:
-                    raise ValueError()
+            # stream_name = 'fau_covid_stream'
+            # stream_name = 'faucovidstreamsentiment'
+            # stream_name = 'wildrydes'
+            # stream_name = 'wildrydes-summary'
+            stream_name = 'faucovidstream_input'
+            kinesis_client = boto3.client('kinesis',
+                                          region_name='us-east-2',
+                                          # enter the region
+                                          aws_access_key_id='AKIAIET5BC65M6AQN23Q',
+                                          # fill your AWS access key id
+                                          aws_secret_access_key='sC4FP3Q61k43Lk9tks4TRyidSCk3H5PtdFbvEh7q')
 
-                if self.after_date[0] is not None:
-                    after_date_created_utc = int(
-                        self.after_date[0].timestamp(),
-                    )
-                    after_date_query = f"{date_key} > {after_date_created_utc}"
-                if self.before_date[0] is not None:
-                    before_date_created_utc = int(
-                        self.before_date[0].timestamp(),
-                    )
-                    before_date_query = (
-                        f"{date_key} <= {before_date_created_utc}"
-                    )
+            # stream_name = 'transforminputtoS3'
+            # kinesis_client = boto3.client('firehose',
+            #                               region_name='us-east-2',  # enter the region
+            #                               aws_access_key_id='AKIAIET5BC65M6AQN23Q',
+            #                               # fill your AWS access key id
+            #                               aws_secret_access_key='sC4FP3Q61k43Lk9tks4TRyidSCk3H5PtdFbvEh7q')
 
-            if self.search_types[0] == "all":
-                search_types = all_crawler_search_type
-            else:
-                search_types = self.search_types
+            response = kinesis_client.describe_stream(StreamName=stream_name)
+            shard_id = response['StreamDescription']['Shards'][0]['ShardId']
 
-            if self.fields[0] == "all":
-                fields_query = " * "
-            else:
-                fields_query = ",".join(self.fields)
+            # shard_iterator = \
+            #     kinesis_client.get_shard_iterator(StreamName=stream_name,
+            #                                       ShardId=shard_id,
+            #                                       ShardIteratorType='TRIM_HORIZON')
 
-            aspect_query = f" aspect = '{asp}'"
+            shard_iterator = \
+                kinesis_client.get_shard_iterator(StreamName=stream_name,
+                                                  ShardId=shard_id,
+                                                  ShardIteratorType='LATEST')
 
-            if len(search_types) == len(all_crawler_search_type):
-                all_query = [aspect_query]
-            else:
-                tmp = []
-                for t in search_types:
-                    tmp.append(f" search_type = '{t}' ")
-                tmp = " or ".join(tmp)
-                tmp = " ( " + tmp + " ) "
-                all_query = [aspect_query, tmp]
+            # print(shard_iterator)
 
-            # all_reddit_data = " and ".join([aspect_query, search_types])
+            my_shard_iterator = shard_iterator['ShardIterator']
 
-            if len(after_date_query) > 0 and len(before_date_query) > 0:
-                all_query.append(after_date_query)
-                all_query.append(before_date_query)
-            elif len(after_date_query) > 0:
-                all_query.append(after_date_query)
-            elif len(before_date_query) > 0:
-                all_query.append(before_date_query)
-            elif len(before_date_query) == 0 and len(after_date_query) == 0:
-                pass
-            else:
-                raise ValueError
-
-            if self.frequency[0] is not None:
-                frequency_query = f" frequency = '{self.frequency[0]}' "
-                all_query.append(frequency_query)
-            else:
-                frequency_query = ""
-
-            return (
-                    f"select {fields_query} from {crawler} where "
-                    + " and ".join(all_query)
+            record_response = kinesis_client.get_records(
+                ShardIterator=my_shard_iterator,
+                Limit=2
             )
+            pprint(response)
 
-        social_media_database_name_path = {
-            ALL_CRAWLERS[1]: REDDIT_DATABASE,
-            ALL_CRAWLERS[0]: TWITTER_DATABASE,
-        }
+            # response = kinesis_client.get_records()
 
-        def _get_all_retrived_data(_asp: str, _crawler: str) -> List[Dict]:
-            """Skipped summary.
+            # response = kinesis_client.list_shards(
+            #     StreamName=stream_name,
+            #     MaxResults=123,
+            # )
 
-            :type _asp:  str
-            :param _asp: an aspect name
+            # pprint(response)
 
-            :type _crawler:  str
-            :param _crawler: a crawler name
-            """
-            path_to_crawler_database = social_media_database_name_path[
-                _crawler
-            ]
+            print('-----------------\n\n\n\n')
+            while 'NextShardIterator' in record_response:
+                record_response = \
+                    kinesis_client.get_records(
+                        ShardIterator=record_response['NextShardIterator'],
+                        Limit=10)
+                print(f"record_response: {record_response}")
+                time.sleep(1)
 
-            query = _get_query(
-                _crawler,
-                ALL_CRAWLERS_SEARCH_TYPE[_crawler],
-                all_crawler_fields[_crawler],
-            )
-            all_crawler_data_from_database = self._get_all_data_from_sqlite(
-                _crawler,
-                path_to_crawler_database,
-                query,
-            )
+        kinesis_consumer()
 
-            return all_crawler_data_from_database
-
-        for asp, crawler in product(self.aspects, self.crawlers):
-            all_reddit_data: List[Dict] = _get_all_retrived_data(asp, crawler)
-
-            returned_data.setdefault(self.RETURNED_DATA_KEY, []).extend(
-                all_reddit_data,
-            )
-
-        return returned_data
+        # return {'something': []}
+        # return 'you have connected to streaming endpoint.' \
 
     def _get_all_data_from_sqlite(
             self,
@@ -402,8 +480,9 @@ class APIManager:
         :return:  list of dict containing all specified parameters
         """
         assert (
-                crawler == path_to_database.split("\\")[-1].split("_")[0]
+                path_to_database.split("\\")[-1].split("_")[0] in crawler
         ), path_to_database
+        PROGRAM_LOGGER.info(f"query = {query}")
 
         # print(path_to_database)
         conn = sqlite3.connect(path_to_database)
@@ -565,6 +644,7 @@ def index():
     search_types = request.args.get("search_types")
     frequency = request.args.get("frequency")
     fields = request.args.get("fields")
+
     total_count = request.args.get("total_count")
     top_amount = request.args.get("top_amount")
     limit = request.args.get("limit")
@@ -791,6 +871,8 @@ def index():
         ALL_CRALWER_ENSURE_FUNCTION: Dict = {
             ALL_CRAWLERS[0]: TWITTER_ENSURE_FUNCTION,
             ALL_CRAWLERS[1]: REDDIT_ENSURE_FUNCTION,
+            ALL_CRAWLERS[2]: TWITTER_ENSURE_FUNCTION,
+            ALL_CRAWLERS[3]: REDDIT_ENSURE_FUNCTION,
         }
 
         def _get_ensure_compatibility_dict(
@@ -999,5 +1081,6 @@ def index():
 
 
 if __name__ == "__main__":
+    """http://localhost:5000/?crawlers=reddit"""
     app.run(host="0.0.0.0", port=5000, debug=True)
     # app.run(host='127.0.0.1', port=5501, debug=True)

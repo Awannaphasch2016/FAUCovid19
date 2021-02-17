@@ -19,6 +19,10 @@ from global_parameters import ALL_REDDIT_COLLECTION_NAMES
 from global_parameters import ALL_REDDIT_RESPOND_TYPES
 from global_parameters import ALL_REDDIT_SEARCH_TYPES
 from global_parameters import ALL_REDDIT_TAGS
+from global_parameters import ALL_SUBREDDIT_REPRESETED_COUNTRY_SUBREDDIT
+from global_parameters import ALL_SUBREDDIT_REPRESETED_GENERAL_COVID_SUBREDDIT
+from global_parameters import ALL_SUBREDDIT_REPRESETED_REGION_COVID_SUBREDDIT
+from global_parameters import ALL_SUBREDDIT_REPRESETED_STATES_COVID_SUBREDDIT
 from global_parameters import ALL_TWITTER_COLLETION_NAMES
 from global_parameters import ALL_TWITTER_RESPOND_TYPES
 from global_parameters import ALL_TWITTER_SEARCH_TYPES
@@ -116,7 +120,8 @@ def run_crawler(
     return run_crawler_func(crawler_condition)
 
 
-def get_keywords_collections(crawler_type: str) -> List[List[str]]:
+def get_keywords_collections(crawler_type: str,
+                             ALL_TWITTER_COVID_HASHTAGS=None) -> List[List[str]]:
     """Skipped summary.
 
     Return aspects and list of keywords (query) for each aspects with respect
@@ -137,68 +142,14 @@ def get_keywords_collections(crawler_type: str) -> List[List[str]]:
     covid_keywords = COVID_KEYWORDS
 
     if crawler_type == "reddit":
-        General = ["Corona", "COVID19", "China_Flu", "coronavirus"]
-        Country = ["CoronavirusUS", "coronavirusUK"]
-        Region = [
-            "CoronavirusMidwest",
-            "CoronavirusSouth",
-            "CoronavirusSouthEast",
-            "CoronavirusWest",
-        ]
+
+        General = ALL_SUBREDDIT_REPRESETED_GENERAL_COVID_SUBREDDIT
+        Country = ALL_SUBREDDIT_REPRESETED_COUNTRY_SUBREDDIT
+        Region = ALL_SUBREDDIT_REPRESETED_REGION_COVID_SUBREDDIT
 
         # --------List of USA States
-        states_subreddit = [
-            "alabama",
-            "alaska",
-            "arizona",
-            "arkansas",
-            "california",
-            "colorado",
-            "connecticut",
-            "delaware",
-            "florida",
-            "georgia",
-            "hawaii",
-            "idaho",
-            "illinois",
-            "indiana",
-            "iowa",
-            "kansas",
-            "kentucky",
-            "louisiana",
-            "maine",
-            "maryland",
-            "massachusetts",
-            "michigan",
-            "minnesota",
-            "mississippi",
-            "missouri",
-            "montana",
-            "nebraska",
-            "nevada",
-            "newhampshire",
-            "newjersey",
-            "newmexico",
-            "newyork",
-            "northcarolina",
-            "northdakota",
-            "ohio",
-            "oklahoma",
-            "oregon",
-            "pennsylvania",
-            "rhodeisland",
-            "southcarolina",
-            "southdakota",
-            "tennessee",
-            "texas",
-            "utah",
-            "vermont",
-            "virginia",
-            "washington",
-            "westvirginia",
-            "wisconsin",
-            "wyoming",
-        ]
+        states_subreddit = ALL_SUBREDDIT_REPRESETED_STATES_COVID_SUBREDDIT
+
 
         return [
             General,
@@ -213,17 +164,8 @@ def get_keywords_collections(crawler_type: str) -> List[List[str]]:
         ]  # noqa: E127
 
     elif crawler_type == "twitter":
-        # coronavirus, #coronavirusoutbreak, #coronavirusPandemic, #covid19,
-        # #covid_19, #epitwitter, #ihavecorona
-        hashtags = [
-            "#coronavirus",
-            "#coronavirusoutbreak",
-            "#coronavirusPandemic",
-            "#covid19",
-            "#covid_19",
-            "#epitwitter",
-            "#ihavecorona",
-        ]
+
+        hashtags = ALL_TWITTER_COVID_HASHTAGS
 
         return [
             hashtags,

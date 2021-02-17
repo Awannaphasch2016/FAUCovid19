@@ -31,6 +31,7 @@ from credentials import REDDIT_USER_AGENT
 from global_parameters import ALL_REDDIT_TAGS
 from global_parameters import BASE_DIR
 from global_parameters import KNOWN_ERROR
+from global_parameters import REDDIT_META_DATA_KEYS
 from global_parameters import RESPONSE_KEYS
 from src import __version__
 from src.Sources.Preparations.Features.sentiment_analysis import get_sentiment
@@ -2115,19 +2116,9 @@ def _get_reddit_metadata(
     metadata: RedditMetadata = {}
     metadata["running_constraints"] = running_constraints
 
-    keys = [
-        "total_results",
-        "before",
-        "after",
-        "frequency",
-        "execution_time_milliseconds",
-        "sort",
-        "fields",
-        "subreddit",
-    ]
 
     # filter out fields that we don't want
-    for key in keys:
+    for key in REDDIT_META_DATA_KEYS:
         metadata[key] = res["metadata"][key]  # type: ignore
 
     res["metadata"] = metadata

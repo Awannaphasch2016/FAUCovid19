@@ -30,7 +30,7 @@ Crawler_type = str
 # Json = type(y)
 
 # Frequency = Literal["day"]
-Frequency = Literal["day", "hour", "minute", "second"]
+Frequency = Literal["day", "hour", "minute", "second", "stream"]
 Sort = Literal["asc", "desc"]
 epoch_datetime = int
 
